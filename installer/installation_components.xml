@@ -55,7 +55,7 @@
         <langpack iso3="kor"/>
     </locale>
     <resources>
-        <res src="$StagingArea/license.txt" id="LicencePanel.licence"/>
+        <res src="$StagingArea/LICENSE" id="LicencePanel.licence"/>
         <res src="$StagingArea/model_description.txt" id="InfoPanel.info"/>
         <res src="$StagingArea/installer/splash_screen.png" id="installer.langsel.img"/>
         <res src="$StagingArea/installer/shortcuts_Windows.xml" id="shortcutSpec.xml"/>
