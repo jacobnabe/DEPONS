@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameters>
+				<parameter name="randomSeed" displayName="randomSeed - Control of random number generator [integer value]" type="int" 
+						defaultValue="__NULL__"
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
+		/>
+				<parameter name="porpoiseCount" displayName="porpoiseCount - Number of porpoises at start of simulation [unitless]" type="int" 
+						defaultValue="10000" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
+		/>
+		<parameter name="trackedPorpoiseCount" displayName="trackedPorpoiseCount - Number of porpoises to track the xy coordinates [unitless]" type="int" 
+						defaultValue="1" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
+		/>
+		<parameter name="landscape" displayName="landscape - Simulation landscape to be used" type="string" 
+						defaultValue="NorthSea"
+						values="'NorthSea' 'DanTysk' 'Gemini' 'Homogeneous' 'UserDefined'" 
+						isReadOnly="false" />
+<!-- 		<parameter name="model" displayName="Model" type="int" 
+						defaultValue="4" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
+		/> -->
+		<parameter name="debug" displayName="debug - Code testing parameter [values 0-5]" type="int" 
+						defaultValue="0" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"/>
+		<parameter name="turbines" displayName="turbines - Wind farm construction scenario to be used" type="string" 
+						defaultValue="off"
+						values="'off' 'NorthSea_scenario1' 'NorthSea_scenario2' 'NorthSea_scenario3' 'DanTysk-construction' 'Gemini-construction' 'User-def'" 
+						isReadOnly="false" />
+<!-- 		<parameter name="mortality" displayName="Mortality" type="boolean" 
+						defaultValue="true" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$BooleanConverter"/> -->
+        <parameter name="dispersal" displayName="Large-scale movement type" type="string" 
+						defaultValue="PSM-Type2" 
+						values="'off' 'PSM-Type2' 'Undirected'" 
+						isReadOnly="false" />
+        <parameter name="tdisp" displayName="tDisp - Days of declining energy before activating dispersal [days]" type="int" 
+						defaultValue="3" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"/>
+		<parameter name="PSM_log" displayName="PSM_log - Logistic increase in random turning angle after PSM dispersal step [unitless]" type="string" 
+						defaultValue="0.6"
+						isReadOnly="false" />
+		<parameter name="PSM_dist" displayName="PSM_dist - Preferred distance to dispersal target [km]" type="string" 
+						defaultValue="N(300;100)" 
+						isReadOnly="false" />
+        <parameter name="PSM_tol" displayName="PSM_tol - Tolerance band within which the dispersal cell is selected [km]" type="double" 
+						defaultValue="5.0" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"/>
+        <parameter name="PSM_angle" displayName="PSM_angle - Maximum turning angle after each PSM dispersal step [degrees]" type="double" 
+						defaultValue="20.0" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"/>
+        <parameter name="q1" displayName="q1 - PSM Type 3 travel distance weight [unitless]" type="double" 
+						defaultValue="0.02" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"/>
+<!-- 		<parameter name="psmDistanceStddevNormal" displayName="PSM - Random Normal used with psmDistanceStddev" type="string" 
+						defaultValue="N(0;1)" 
+						isReadOnly="false" 
+		/> -->
+        <parameter name="rS" displayName="rS - Satiation memory decay rate [unitless]" type="double" 
+						defaultValue="0.04" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"/>
+        <parameter name="rR" displayName="rR - Reference memory decay rate [unitless]" type="double" 
+						defaultValue="0.04" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"/>
+        <parameter name="rU" displayName="rU - Food replenishment rate" type="double" 
+						defaultValue="0.1" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"/>
+        <parameter name="bycatchProb" displayName="bycatchProb - Annual bycatch probability [unitless]" type="double" 
+						defaultValue="0.0" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"/>
+<!-- 	    <parameter name="onDemandFood" displayName="On Demand Food Calc" type="boolean" 
+						defaultValue="false" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$BooleanConverter"/> -->
+		<parameter name="simYears" displayName="simYears - Simulation period [years]" type="int" 
+						defaultValue="50" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
+		/>
+		<!-- EB parameters commented out and hardcoded in DEPONS 1.1
+        <parameter name="EBimpact" displayName="EBimpact - Deterrence threshold for Escape Behaviour [m*400 per time step]" type="double" 
+						defaultValue="0" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
+		/>
+		<parameter name="EBmin" displayName="EBmin - Movement threshold in Escape Behaviour [m]" type="double" 
+						defaultValue="0" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
+		/>
+		<parameter name="EBstucktime" displayName="EBstucktime - Number of steps before ignoring deterrence [time steps]" type="int" 
+						defaultValue="0" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
+		/>
+		<parameter name="EBsteps" displayName="EBsteps - Steps to ignore noise when trapped [time steps]" type="int" 
+						defaultValue="0" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
+		/> -->
+		<parameter name="k" displayName="k - Inertia constant; the animal's tendency to keep moving using CRW irrespective of foraging success." type="double" 
+						defaultValue="0.001" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
+		/>
+		<parameter name="a0" displayName="a0 - Autoregressive coefficient for log10(d/100)" type="double" 
+						defaultValue="0.35" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
+		/>
+		<parameter name="a1" displayName="a1 - Coefficient of water depth on log10(d/100) [unitless]" type="double" 
+						defaultValue="0.0005" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
+		/>
+		<parameter name="a2" displayName="a2 - Coefficient of salinity on log10(d/100) [unitless]" type="double" 
+						defaultValue="-0.02" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
+		/>
+		<parameter name="b0" displayName="b0 - Autoregressive coefficient for turning angles in CRW [unitless]" type="double" 
+						defaultValue="-0.024"
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
+		/>
+		<parameter name="b1" displayName="b1 - Coefficient of water depth on turning angles in CRW [unitless]" type="double" 
+						defaultValue="-0.008" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
+		/>
+		<parameter name="b2" displayName="b2 - Coefficient of salinity on turning angles in CRW [unitless]" type="double" 
+						defaultValue="0.93" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
+		/>
+		<parameter name="b3" displayName="b3 - Intercept of turning angle in CRW [unitless]" type="double" 
+						defaultValue="-14" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
+		/>
+		<parameter name="c" displayName="c - Deterrence coefficient [unitless]" type="double" 
+						defaultValue="0.07" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
+		/>
+<!-- 		<parameter name="m" displayName="m - Limit for when turning angles stop decreasing with speed [unitless]" type="double" 
+						defaultValue="0.00001" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
+		/> -->
+        <parameter name="RT" displayName="T - Minimum received sound level for deterrence [dB]" type="double" 
+						defaultValue="152.9" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
+		/>
+        <parameter name="Psi_deter" displayName="Psi_deter - Deterrence decay constant [percent]" type="double" 
+						defaultValue="50.0" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
+		/>
+        <parameter name="ddisp" displayName="ddisp - Dispersal distance per time step [km]" type="double" 
+						defaultValue="1.05" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
+		/>
+        <parameter name="dmax_mov" displayName="dmax_mov - max movement distance" type="double" 
+						defaultValue="1.73" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
+		/>
+        <parameter name="Euse" displayName="Euse - Energy use per half-hour step in May-September" type="double" 
+						defaultValue="4.5" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
+		/>
+        <parameter name="Elact" displayName="Elact - Energy use multiplier for lactating mammals" type="double" 
+						defaultValue="1.4" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
+		/>
+        <parameter name="Ewarm" displayName="Ewarm - Energy use multiplier in warm water" type="double" 
+						defaultValue="1.3" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
+		/>
+        <parameter name="h" displayName="h - Probability of becoming pregnant" type="double" 
+						defaultValue="0.68" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
+		/>
+		<parameter name="tdeter" displayName="tdeter - Deterrence time [time steps]" type="int" 
+						defaultValue="0" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
+		/>
+        <parameter name="dmax_deter" displayName="dmax_deter - Maximum deterrence distance [km]" type="double" 
+						defaultValue="1000.0" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
+		/>
+		<parameter name="tgest" displayName="tgest - Gestation time [days]" type="int" 
+						defaultValue="300" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
+		/>
+		<parameter name="tnurs" displayName="tnurs - Nursing time [days]" type="int" 
+						defaultValue="240" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
+		/>
+        <parameter name="tmaxage" displayName="tmaxage - Maximum age [years]" type="double" 
+						defaultValue="30.0" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
+		/>
+        <parameter name="tmature" displayName="tmature - Age of maturity [years]" type="double" 
+						defaultValue="3.44" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
+		/>
+<!--         <parameter name="Umax" displayName="Umax - Maximum energy content in a food patch" type="double" 
+						defaultValue="1" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
+		/> -->
+        <parameter name="wdisp" displayName="wdisp - Minimum water depth when dispersing [m]" type="double" 
+						defaultValue="4.0" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
+		/>
+        <parameter name="wmin" displayName="wmin - Minimum water depth [m]" type="double" 
+						defaultValue="1.0" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
+		/>
+        <parameter name="beta" displayName="beta - Survival probability constant" type="double" 
+						defaultValue="0.4" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
+		/>
+		<parameter name="Umin" displayName="Umin - Minimum food level in a patch [relative unit]" type="double" 
+						defaultValue="0.001" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
+		/>
+<!-- 		<parameter name="maxDispersalDistance" displayName="Max dispersal distance (disp1+2) [0=infinite]" type="double" 
+						defaultValue="0" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
+		/> -->
+		<parameter name="wrapBorderHomo" displayName="wrapBorderHomo - Wrap border of homogeneous landscape [true/false]" type="boolean" 
+						defaultValue="true" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$BooleanConverter"
+		/>
+		<parameter name="R1" displayName="R1 - Log10 distance moved per time step [m] - N(mean;1SD)" type="string" 
+						defaultValue="N(1.25;0.15)" 
+						isReadOnly="false" 
+		/>
+		<parameter name="R2" displayName="R2 - Turning angle between steps [degrees] - N(mean;1SD)" type="string" 
+						defaultValue="N(0;4)" 
+						isReadOnly="false" 
+		/>
+<!-- 		<parameter name="R3" displayName="R3 - Relationship between turning angle and step length [unitless] - N(mean;1SD)" type="string" 
+						defaultValue="N(0;0)" 
+						isReadOnly="false" 
+		/> -->
+		<parameter name="tmating" displayName="tmating - Mating day [day of year] - N(mean;1SD)" type="string" 
+						defaultValue="N(225;20)" 
+						isReadOnly="false" 
+		/>
+		<parameter name="Einit" displayName="Einit - Initial energy level [relative unit] - N(mean;1SD)" type="string" 
+						defaultValue="N(10.0;1)" 
+						isReadOnly="false" 
+		/>
+</parameters>

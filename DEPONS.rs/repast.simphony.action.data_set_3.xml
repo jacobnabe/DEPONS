@@ -1,0 +1,48 @@
+<repast.simphony.data2.engine.DataSetDescriptor simphonyVersion="2.5.0">
+  <name>Sim stats</name>
+  <type>AGGREGATE</type>
+  <inclTick>true</inclTick>
+  <inclBatchRun>false</inclBatchRun>
+  <inclRandomSeed>false</inclRandomSeed>
+  <scheduleParams>
+    <start>1.0</start>
+    <interval>1.0</interval>
+    <priority>-Infinity</priority>
+    <pType>LAST</pType>
+    <duration>-1.0</duration>
+    <frequency>REPEAT</frequency>
+    <hashCode>-1183259324</hashCode>
+  </scheduleParams>
+  <atEnd>false</atEnd>
+  <methodDataSources class="linked-hash-map">
+    <entry>
+      <string>FoodEnergyLevel</string>
+      <repast.simphony.data2.engine.MethodDataSourceDefinition>
+        <id>FoodEnergyLevel</id>
+        <className>dk.au.bios.porpoise.FoodAgentProxy</className>
+        <methodName>getFoodEnergyLevel</methodName>
+        <aggType>SUM</aggType>
+      </repast.simphony.data2.engine.MethodDataSourceDefinition>
+    </entry>
+    <entry>
+      <string>PorpoiseEnergyLevel</string>
+      <repast.simphony.data2.engine.MethodDataSourceDefinition>
+        <id>PorpoiseEnergyLevel</id>
+        <className>dk.au.bios.porpoise.Porpoise</className>
+        <methodName>getEnergyLevel</methodName>
+        <aggType>SUM</aggType>
+      </repast.simphony.data2.engine.MethodDataSourceDefinition>
+    </entry>
+  </methodDataSources>
+  <countSources class="linked-hash-map">
+    <entry>
+      <string>PorpoiseCount</string>
+      <repast.simphony.data2.engine.CountSourceDefinition>
+        <typeName>dk.au.bios.porpoise.Porpoise</typeName>
+        <id>PorpoiseCount</id>
+      </repast.simphony.data2.engine.CountSourceDefinition>
+    </entry>
+  </countSources>
+  <customNADataSources class="linked-hash-map"/>
+  <customAggDataSources class="linked-hash-map"/>
+</repast.simphony.data2.engine.DataSetDescriptor>

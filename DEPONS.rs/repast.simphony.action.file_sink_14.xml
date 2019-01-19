@@ -1,0 +1,14 @@
+<repast.simphony.data2.engine.FileSinkDescriptor simphonyVersion="2.5.0">
+  <name>Statistics</name>
+  <dataSet>Sim stats</dataSet>
+  <delimiter>;</delimiter>
+  <format>TABULAR</format>
+  <sourceIds class="linked-hash-set">
+    <string>tick</string>
+    <string>PorpoiseCount</string>
+    <string>FoodEnergyLevel</string>
+    <string>PorpoiseEnergyLevel</string>
+  </sourceIds>
+  <fileName>Statistics.csv</fileName>
+  <addTimeStamp>true</addTimeStamp>
+</repast.simphony.data2.engine.FileSinkDescriptor>

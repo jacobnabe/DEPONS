@@ -1,0 +1,20 @@
+<repast.simphony.data2.engine.FileSinkDescriptor simphonyVersion="2.5.0">
+  <name>Random Porpoise</name>
+  <dataSet>Random Porpoise</dataSet>
+  <delimiter>;</delimiter>
+  <format>TABULAR</format>
+  <sourceIds class="linked-hash-set">
+    <string>tick</string>
+    <string>Id</string>
+    <string>UtmX</string>
+    <string>UtmY</string>
+    <string>EnergyLevel</string>
+    <string>DeterStrength</string>
+    <string>DispersalMode</string>
+    <string>PSMActive</string>
+    <string>PSMTargetUtmX</string>
+    <string>PSMTargetUtmY</string>
+  </sourceIds>
+  <fileName>RandomPorpoise.csv</fileName>
+  <addTimeStamp>true</addTimeStamp>
+</repast.simphony.data2.engine.FileSinkDescriptor>

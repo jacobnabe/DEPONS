@@ -1,0 +1,16 @@
+<repast.simphony.data2.engine.FileSinkDescriptor simphonyVersion="2.5.0">
+  <name>Dead Porpoises</name>
+  <dataSet>Dead Porpoises</dataSet>
+  <delimiter>;</delimiter>
+  <format>TABULAR</format>
+  <sourceIds class="linked-hash-set">
+    <string>tick</string>
+    <string>TickAtDeath</string>
+    <string>AgeAtDeath</string>
+    <string>CalvesBorn</string>
+    <string>CalvesWeaned</string>
+    <string>LongDistMovType</string>
+  </sourceIds>
+  <fileName>Reproduction.csv</fileName>
+  <addTimeStamp>true</addTimeStamp>
+</repast.simphony.data2.engine.FileSinkDescriptor>

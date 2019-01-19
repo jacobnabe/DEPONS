@@ -1,0 +1,63 @@
+<repast.simphony.data2.engine.DataSetDescriptor simphonyVersion="2.5.0">
+  <name>Dead Porpoises</name>
+  <type>NON_AGGREGATE</type>
+  <sourceType>dk.au.bios.porpoise.agents.misc.DeadPorpoiseReportProxy</sourceType>
+  <inclTick>true</inclTick>
+  <inclBatchRun>false</inclBatchRun>
+  <inclRandomSeed>false</inclRandomSeed>
+  <scheduleParams>
+    <start>1.0</start>
+    <interval>1.0</interval>
+    <priority>-Infinity</priority>
+    <pType>LAST</pType>
+    <duration>-1.0</duration>
+    <frequency>REPEAT</frequency>
+    <hashCode>-1437156720</hashCode>
+  </scheduleParams>
+  <atEnd>false</atEnd>
+  <methodDataSources class="linked-hash-map">
+    <entry>
+      <string>TickAtDeath</string>
+      <repast.simphony.data2.engine.MethodDataSourceDefinition>
+        <id>TickAtDeath</id>
+        <className>dk.au.bios.porpoise.agents.misc.DeadPorpoiseReportProxy</className>
+        <methodName>getTickAtDeath</methodName>
+      </repast.simphony.data2.engine.MethodDataSourceDefinition>
+    </entry>
+    <entry>
+      <string>AgeAtDeath</string>
+      <repast.simphony.data2.engine.MethodDataSourceDefinition>
+        <id>AgeAtDeath</id>
+        <className>dk.au.bios.porpoise.agents.misc.DeadPorpoiseReportProxy</className>
+        <methodName>getAgeAtDeath</methodName>
+      </repast.simphony.data2.engine.MethodDataSourceDefinition>
+    </entry>
+    <entry>
+      <string>CalvesBorn</string>
+      <repast.simphony.data2.engine.MethodDataSourceDefinition>
+        <id>CalvesBorn</id>
+        <className>dk.au.bios.porpoise.agents.misc.DeadPorpoiseReportProxy</className>
+        <methodName>getCalvesBorn</methodName>
+      </repast.simphony.data2.engine.MethodDataSourceDefinition>
+    </entry>
+    <entry>
+      <string>CalvesWeaned</string>
+      <repast.simphony.data2.engine.MethodDataSourceDefinition>
+        <id>CalvesWeaned</id>
+        <className>dk.au.bios.porpoise.agents.misc.DeadPorpoiseReportProxy</className>
+        <methodName>getCalvesWeaned</methodName>
+      </repast.simphony.data2.engine.MethodDataSourceDefinition>
+    </entry>
+    <entry>
+      <string>LongDistMovType</string>
+      <repast.simphony.data2.engine.MethodDataSourceDefinition>
+        <id>LongDistMovType</id>
+        <className>dk.au.bios.porpoise.agents.misc.DeadPorpoiseReportProxy</className>
+        <methodName>getLongDistMovType</methodName>
+      </repast.simphony.data2.engine.MethodDataSourceDefinition>
+    </entry>
+  </methodDataSources>
+  <countSources class="linked-hash-map"/>
+  <customNADataSources class="linked-hash-map"/>
+  <customAggDataSources class="linked-hash-map"/>
+</repast.simphony.data2.engine.DataSetDescriptor>
