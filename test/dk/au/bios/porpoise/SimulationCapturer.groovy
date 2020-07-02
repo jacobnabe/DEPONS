@@ -51,7 +51,7 @@ PorpoiseTestDataCapturer.includePopulationSize = true;
 // Repast initialization
 ParametersParser paramSpecParser = new ParametersParser(new File("DEPONS.rs/parameters.xml"));
 def params = paramSpecParser.getParameters()
-params.setValue("randomSeed", 1955024704); // 267022757);
+params.setValue("randomSeed", 1755024704); // 267022757);
 params.setValue("landscape", "NorthSea");
 params.setValue("turbines", "off");
 params.setValue("dispersal", "Undirected");

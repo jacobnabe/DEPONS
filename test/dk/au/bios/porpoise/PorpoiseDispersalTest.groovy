@@ -47,6 +47,7 @@ import dk.au.bios.porpoise.behavior.DispersalFactory
 import dk.au.bios.porpoise.behavior.RandomSource
 import dk.au.bios.porpoise.behavior.DispersalFactory.DispersalType
 import dk.au.bios.porpoise.landscape.CellDataTestData
+import dk.au.bios.porpoise.landscape.DataFileMetaData
 
 /**
  * Unit test for the Porpoise dispersal activation.
@@ -57,8 +58,7 @@ class PorpoiseDispersalTest extends Specification {
 	@Shared Schedule schedule;
 
 	def setup() {
-		Globals.worldWidth = 100;
-		Globals.worldHeight = 100;
+		Globals.landscapeMetaData = new DataFileMetaData(100, 100, 529473, 5972242, 400 , null);
 
 		// Repast initialization
 		this.schedule = new Schedule();

@@ -17,7 +17,7 @@
 		/>
 		<parameter name="landscape" displayName="landscape - Simulation landscape to be used" type="string" 
 						defaultValue="NorthSea"
-						values="'NorthSea' 'DanTysk' 'Gemini' 'Homogeneous' 'UserDefined'" 
+						values="'NorthSea' 'DanTysk' 'Gemini' 'Homogeneous' 'Kattegat' 'UserDefined'" 
 						isReadOnly="false" />
 <!-- 		<parameter name="model" displayName="Model" type="int" 
 						defaultValue="4" 
@@ -32,13 +32,17 @@
 						defaultValue="off"
 						values="'off' 'NorthSea_scenario1' 'NorthSea_scenario2' 'NorthSea_scenario3' 'DanTysk-construction' 'Gemini-construction' 'User-def'" 
 						isReadOnly="false" />
+  		<parameter name="ships" displayName="Ships enabled" type="boolean" 
+						defaultValue="false" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$BooleanConverter"/>
 <!-- 		<parameter name="mortality" displayName="Mortality" type="boolean" 
 						defaultValue="true" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$BooleanConverter"/> -->
         <parameter name="dispersal" displayName="Large-scale movement type" type="string" 
 						defaultValue="PSM-Type2" 
-						values="'off' 'PSM-Type2' 'Undirected'" 
+						values="'off' 'PSM-Type2' 'Undirected' 'InnerDanishWaters'" 
 						isReadOnly="false" />
         <parameter name="tdisp" displayName="tDisp - Days of declining energy before activating dispersal [days]" type="int" 
 						defaultValue="3" 
@@ -209,6 +213,16 @@
 		/>
         <parameter name="dmax_deter" displayName="dmax_deter - Maximum deterrence distance [km]" type="double" 
 						defaultValue="1000.0" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
+		/>
+        <parameter name="alpha_hat" displayName="alpha_hat - Absorption coefficient for sound" type="double" 
+						defaultValue="0.0" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
+		/>
+        <parameter name="beta_hat" displayName="beta_hat - Spreading loss factor for sound" type="double" 
+						defaultValue="20.0" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
 		/>

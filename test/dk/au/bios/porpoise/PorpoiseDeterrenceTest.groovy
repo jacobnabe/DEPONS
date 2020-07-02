@@ -45,6 +45,7 @@ import spock.lang.Specification
 import dk.au.bios.porpoise.behavior.DispersalFactory
 import dk.au.bios.porpoise.behavior.RandomSource
 import dk.au.bios.porpoise.landscape.CellDataTestData
+import dk.au.bios.porpoise.landscape.DataFileMetaData
 
 /**
  * Unit test for Porpoise agent with focus on the deterrence behaviour.
@@ -59,8 +60,7 @@ class PorpoiseDeterrenceTest extends Specification {
 	private cellData;
 
 	def setup() {
-		Globals.worldWidth = 100;
-		Globals.worldHeight = 100;
+		Globals.landscapeMetaData = new DataFileMetaData(100, 100, 529473, 5972242, 400 , null);
 
 		// Repast initialization
 		this.schedule = new Schedule();

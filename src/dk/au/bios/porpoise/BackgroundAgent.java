@@ -79,8 +79,6 @@ public class BackgroundAgent extends Agent {
 
 	public int getPointRGB(final int x, final int y) {
 		final int realY = Globals.getWorldHeight() - y - 1;
-		final boolean masked = Globals.getCellData().isPointMasked(x, realY);
-
 		final double val = Globals.getCellData().getDepth(new GridPoint(x, realY));
 		Color color;
 		if (val >= 0.0000f) {
@@ -94,18 +92,7 @@ public class BackgroundAgent extends Agent {
 			color = LAND_COLOR;
 		}
 
-		if (masked && color != LAND_COLOR) {
-			return alphaBlend(color, Color.MAGENTA, 150).getRGB();
-		} else {
-			return color.getRGB();
-		}
-	}
-
-	private Color alphaBlend(final Color c1, final Color c2, final int alpha) {
-		final int r = (c1.getRed() * alpha + c2.getRed() * (255 - alpha)) / 255;
-		final int g = (c1.getGreen() * alpha + c2.getGreen() * (255 - alpha)) / 255;
-		final int b = (c1.getBlue() * alpha + c2.getBlue() * (255 - alpha)) / 255;
-		return new Color(r, g, b);
+		return color.getRGB();
 	}
 
 	public double getGrownFood() {

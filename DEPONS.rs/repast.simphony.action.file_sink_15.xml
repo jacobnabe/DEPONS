@@ -1,4 +1,4 @@
-<repast.simphony.data2.engine.FileSinkDescriptor simphonyVersion="2.5.0">
+<repast.simphony.data2.engine.FileSinkDescriptor simphonyVersion="2.7.0">
   <name>Random Porpoise</name>
   <dataSet>Random Porpoise</dataSet>
   <delimiter>;</delimiter>

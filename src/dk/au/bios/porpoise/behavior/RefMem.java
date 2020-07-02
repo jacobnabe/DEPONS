@@ -28,6 +28,7 @@
 package dk.au.bios.porpoise.behavior;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Arrays;
 
 public final class RefMem {
@@ -113,7 +114,7 @@ public final class RefMem {
 
 	private static void roundArray(final double[] arr, final int decimals) {
 		for (int i = 0; i < arr.length; i++) {
-			arr[i] = new BigDecimal(arr[i]).setScale(4, BigDecimal.ROUND_HALF_UP).doubleValue();
+			arr[i] = new BigDecimal(arr[i]).setScale(4, RoundingMode.HALF_UP).doubleValue();
 		}
 	}
 

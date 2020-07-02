@@ -28,6 +28,8 @@
 package dk.au.bios.porpoise.ui;
 
 import java.awt.Color;
+import java.awt.Shape;
+import java.awt.geom.GeneralPath;
 
 import repast.simphony.gis.styleEditor.SimpleMarkFactory;
 import repast.simphony.visualizationOGL2D.DefaultStyleOGL2D;
@@ -52,9 +54,14 @@ public class PorpoiseStyle extends DefaultStyleOGL2D {
 	@Override
 	public VSpatial getVSpatial(final Object agent, final VSpatial spatial) {
 		if (spatial == null) {
-			final VSpatial newSpatial = shapeFactory.createShape(markFac.getMark("arrow"), true);
+			final Shape mark = markFac.getMark("arrow");
+			final GeneralPath path = new GeneralPath(mark);
+			path.closePath();
+			final VSpatial newSpatial = shapeFactory.createShape(path, true);
 
 			return newSpatial;
+//			final VSpatial newSpatial = shapeFactory.createShape(markFac.getMark("arrow"), true);
+//			return newSpatial;
 		}
 
 		return spatial;

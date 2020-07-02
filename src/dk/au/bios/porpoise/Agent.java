@@ -128,7 +128,7 @@ public class Agent {
 	 *
 	 * @param point The point to turn the agent towards.
 	 */
-	protected void facePoint(final NdPoint point) {
+	public void facePoint(final NdPoint point) {
 		if (!point.equals(getPosition())) {
 			final double[] displacement = space.getDisplacement(getPosition(), point);
 			setHeading(normHeading(Utility.angleFromDisplacement(displacement[0], displacement[1])));
@@ -202,7 +202,7 @@ public class Agent {
 	 *
 	 * @param inc The increase in the agents heading.
 	 */
-	protected void incHeading(final double inc) {
+	public void incHeading(final double inc) {
 		setHeading(normHeading(getHeading() + inc));
 	}
 

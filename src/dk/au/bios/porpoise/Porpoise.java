@@ -786,7 +786,7 @@ public class Porpoise extends Agent {
 
 		final GridPoint pointAhead = Agent.ndPointToGridPoint(getPointAhead(presMov));
 
-		if (Globals.getCellData().getDepth(pointAhead) < 0 || Globals.getCellData().isPointMasked(pointAhead)) {
+		if (Globals.getCellData().getDepth(pointAhead) < 0) {
 			// Globals.replayPrint("porp-check-depth enough-water-ahead false . depth-list " depth-list " depth-path "
 			// depth-path);
 			ReplayHelper.print("porp-check-depth enough-water-ahead false . depth-list [NA NA] depth-path [NA]");
@@ -890,11 +890,10 @@ public class Porpoise extends Agent {
 
 	private boolean isPointGood(final GridPoint p, final double minDepth, final boolean allowEqual) {
 		if (allowEqual) {
-			return Globals.getCellData().getDepth(p) >= minDepth && !Globals.getCellData().isPointMasked(p);
+			return Globals.getCellData().getDepth(p) >= minDepth;
 		} else {
-			return Globals.getCellData().getDepth(p) > minDepth && !Globals.getCellData().isPointMasked(p);
+			return Globals.getCellData().getDepth(p) > minDepth;
 		}
-
 	}
 
 	private boolean isPointGood(final GridPoint p) {
@@ -1043,8 +1042,7 @@ public class Porpoise extends Agent {
 		final Dimensions dim = this.getSpace().getDimensions();
 
 		// Only the space is initialized at this time..
-		while (Globals.getCellData().getDepth(ndPointToGridPoint(getPosition())) <= 0
-				|| Globals.getCellData().isPointMasked(ndPointToGridPoint(getPosition()))) {
+		while (Globals.getCellData().getDepth(ndPointToGridPoint(getPosition())) <= 0) {
 			this.getSpace().moveTo(this, RandomHelper.nextDoubleFromTo(0, dim.getWidth() - dim.getOrigin(0)),
 					RandomHelper.nextDoubleFromTo(0, dim.getHeight() - dim.getOrigin(1)));
 		}
@@ -1529,6 +1527,26 @@ public class Porpoise extends Agent {
 		return distance;
 	}
 
+	/**
+	 * Returns 1 if the porpoise is in dispersal 2 mode. This allows us to sum the porpoises in dispersal 2 mode easily.
+	 *
+	 * @return
+	 */
+	public int getIsInDisp1Mode()
+	{
+		return this.dispersalBehaviour.getDispersalType() == 1 ? 1 : 0;
+	}
+
+	/***
+	 * @see Porpoise.getIsInDisp1Mode
+	 *
+	 * @return
+	 */
+	public int getIsInDisp2Mode()
+	{
+		return this.dispersalBehaviour.getDispersalType() == 2 ? 1 : 0;
+	}
+	
 	/***
 	 * Returns 1 if the porpoise is in dispersal 3 mode. This allows us to sum the porpoises in dispersal 2 mode easily.
 	 *
@@ -1594,6 +1612,10 @@ public class Porpoise extends Agent {
 		sb.append("]");
 
 		return sb.toString();
+	}
+
+	public CircularBuffer<NdPoint> getPosListDaily() {
+		return posListDaily;
 	}
 
 	public boolean isEnoughWaterAhead() {

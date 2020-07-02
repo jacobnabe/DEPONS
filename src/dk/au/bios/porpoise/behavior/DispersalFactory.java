@@ -34,7 +34,7 @@ public final class DispersalFactory {
 	private static DispersalType type;
 
 	public enum DispersalType {
-		Off, PSM_Type1, PSM_Type2, PSM_Type3, PSM_Type3randdir, PSM_Type3randdist, Undirected
+		Off, PSM_Type1, PSM_Type2, PSM_Type3, PSM_Type3randdir, PSM_Type3randdist, InnerDanishWaters, Undirected
 	}
 
 	private DispersalFactory() {
@@ -52,6 +52,8 @@ public final class DispersalFactory {
 			DispersalFactory.type = DispersalType.PSM_Type3randdir;
 		} else if ("PSM-Type3-randdist".equals(typeName)) {
 			DispersalFactory.type = DispersalType.PSM_Type3randdist;
+		} else if ("InnerDanishWaters".equals(typeName)) {
+			DispersalFactory.type = DispersalType.InnerDanishWaters;
 		} else if ("Undirected".equals(typeName)) {
 			DispersalFactory.type = DispersalType.Undirected;
 		} else {
@@ -77,6 +79,8 @@ public final class DispersalFactory {
 			return new DispersalPSMType3randdir(owner);
 		case PSM_Type3randdist:
 			return new DispersalPSMType3randdist(owner);
+		case InnerDanishWaters:
+			return new InnerDanishWatersDispersal(owner);
 		case Undirected:
 			return new UndirectedDispersal(owner);
 		default:

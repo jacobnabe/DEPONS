@@ -31,8 +31,10 @@ import static org.junit.Assert.*
 import static spock.util.matcher.HamcrestMatchers.*
 import repast.simphony.space.continuous.NdPoint
 import spock.lang.Specification
+import dk.au.bios.porpoise.Globals
 import dk.au.bios.porpoise.behavior.PersistentSpatialMemory
 import dk.au.bios.porpoise.behavior.RandomSource
+import dk.au.bios.porpoise.landscape.DataFileMetaData
 
 /**
  * Unit test for the PersistentSpatialMemory.
@@ -43,6 +45,7 @@ class PersistenSpatialMemoryTest extends Specification {
 		def final expectedCell = 210;
 
 		given:
+		Globals.landscapeMetaData = new DataFileMetaData(100, 100, 529473, 5972242, 400 , null);
 		def psm = new PersistentSpatialMemory(100, 100, 10);
 
 		expect:
@@ -63,6 +66,7 @@ class PersistenSpatialMemoryTest extends Specification {
 
 	def "Record visit and obtained energy"() {
 		given:
+		Globals.landscapeMetaData = new DataFileMetaData(100, 100, 529473, 5972242, 400 , null);
 		def psm = new PersistentSpatialMemory(100, 100, 10);
 
 		when:

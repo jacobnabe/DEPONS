@@ -52,8 +52,9 @@ import dk.au.bios.porpoise.util.SimulationTime;
 public class Turbine extends Agent {
 
 	/**
-	 * Hold a sorted list of turbines to create. If this is not null, the turbines will be dynamically added and removed
-	 * from the context based on their start and end tick.
+	 * Hold a sorted list of turbines to create. If this is not null, the turbines
+	 * will be dynamically added and removed from the context based on their start
+	 * and end tick.
 	 */
 	private static LinkedList<Turbine> turbineCreateQueue;
 
@@ -81,9 +82,11 @@ public class Turbine extends Agent {
 	}
 
 	/**
-	 * Load turbines from a data file. The corresponding methods in Netlogo are turbs-import-pos and turbs-setup.
+	 * Load turbines from a data file. The corresponding methods in Netlogo are
+	 * turbs-import-pos and turbs-setup.
 	 *
-	 * @param fileName The name of the turbines file to load (excluding path and extension).
+	 * @param fileName The name of the turbines file to load (excluding path and
+	 *                 extension).
 	 * @return List of turbines read from the file.
 	 * @throws Exception Error reading the file.
 	 */
@@ -108,10 +111,10 @@ public class Turbine extends Agent {
 				int startTick = 0;
 				int endTick = Integer.MAX_VALUE;
 				if (cols.length >= 5) {
-					startTick = Integer.parseInt(cols[4]);
+					startTick = Integer.parseInt(cols[4]) - 26124;
 				}
 				if (cols.length >= 6) {
-					endTick = Integer.parseInt(cols[5]);
+					endTick = Integer.parseInt(cols[5]) - 26124;
 				}
 
 				final Turbine t = new Turbine(space, grid, name, impact, locX, locY, startTick, endTick, numTurbines);
@@ -202,7 +205,8 @@ public class Turbine extends Agent {
 		final int simTick = (int) SimulationTime.getTick();
 		if (simTick >= startTick && simTick <= endTick) {
 			// the actual distance up to which porpoises react to noise from
-			// a turbine with a specific impact (where impact = sound source level (SL), in dB).
+			// a turbine with a specific impact (where impact = sound source level (SL), in
+			// dB).
 			// this is the distance where the sound level drops below the threshold
 			final double radius = Math.pow(10, ((impact - SimulationParameters.getDeterResponseThreshold()) / 20));
 			final ContinuousWithin<Agent> affectedSpace = new ContinuousWithin<Agent>(this.getSpace(), this, radius);
@@ -213,9 +217,13 @@ public class Turbine extends Agent {
 					final double distToTurb = this.getSpace().getDistance(getPosition(), p.getPosition()) * 400;
 					if (distToTurb <= SimulationParameters.getDeterMaxDistance()) {
 						// current amount of deterring
-						// the received-level (RL) gives the amount of noise that the porpoise is exposed to
-						// at a given distance, assuming cylindrical sound spreading; RL = SL � 20Log10(dist)
-						final double currentDeterence = impact - (20 * Math.log10(distToTurb))
+						// the received-level (RL) gives the amount of noise that the porpoise is
+						// exposed to
+						// at a given distance, assuming cylindrical sound spreading; RL = SL �
+						// 20Log10(dist)
+						final double currentDeterence = impact
+								- (SimulationParameters.getBetaHat() * Math.log10(distToTurb)
+										+ (SimulationParameters.getAlphaHat() * distToTurb))
 								- SimulationParameters.getDeterResponseThreshold();
 
 						if (currentDeterence > 0) {

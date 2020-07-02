@@ -1,4 +1,4 @@
-<repast.simphony.data2.engine.DataSetDescriptor simphonyVersion="2.5.0">
+<repast.simphony.data2.engine.DataSetDescriptor simphonyVersion="2.7.0">
   <name>Dead Porpoises</name>
   <type>NON_AGGREGATE</type>
   <sourceType>dk.au.bios.porpoise.agents.misc.DeadPorpoiseReportProxy</sourceType>

@@ -27,6 +27,10 @@
 
 package dk.au.bios.porpoise;
 
+import java.io.IOException;
+
+import org.apache.log4j.Level;
+
 import dk.au.bios.porpoise.agents.misc.TrackingDisplayAgent;
 import dk.au.bios.porpoise.behavior.FastRefMemTurn;
 import dk.au.bios.porpoise.behavior.GeneratedRandomSource;
@@ -35,6 +39,7 @@ import dk.au.bios.porpoise.behavior.RefMemTurnCalculator;
 import dk.au.bios.porpoise.behavior.ReplayedRandomSource;
 import dk.au.bios.porpoise.landscape.CellData;
 import dk.au.bios.porpoise.landscape.LandscapeLoader;
+import dk.au.bios.porpoise.ships.ShipLoader;
 import dk.au.bios.porpoise.tasks.AddTrackedPorpoisesTask;
 import dk.au.bios.porpoise.tasks.CaptureTestDataTask;
 import dk.au.bios.porpoise.tasks.DailyTask;
@@ -65,11 +70,13 @@ import repast.simphony.space.grid.Grid;
 import repast.simphony.space.grid.GridBuilderParameters;
 import repast.simphony.space.grid.SimpleGridAdder;
 import repast.simphony.space.grid.WrapAroundBorders;
+import repast.simphony.ui.RSApplication;
 import repast.simphony.valueLayer.GridValueLayer;
+import simphony.util.messages.MessageEvent;
 
 /**
- * Constructs the Context for the simulation. This includes setting up the space and grid, loading the environment and
- * creating the various agents.
+ * Constructs the Context for the simulation. This includes setting up the space
+ * and grid, loading the environment and creating the various agents.
  */
 public class PorpoiseSimBuilder implements ContextBuilder<Agent> {
 
@@ -79,6 +86,16 @@ public class PorpoiseSimBuilder implements ContextBuilder<Agent> {
 
 		final Parameters params = RunEnvironment.getInstance().getParameters();
 		SimulationParameters.initialize(params);
+
+		Globals.setSimYears(params.getInteger("simYears"));
+		if (Globals.getSimYears() == null && RunEnvironment.getInstance().isBatch()) {
+			// If batch and parameter simYears is missing, then default to 30 years
+			Globals.setSimYears(30);			
+		}
+		if (Globals.getSimYears() != null) {
+			final int numSimSteps = (Globals.getSimYears() * 360 * 48) - 1;
+			RunEnvironment.getInstance().endAt(numSimSteps);
+		} 
 
 		PorpoiseTestDataCapturer.capture(params);
 
@@ -98,14 +115,25 @@ public class PorpoiseSimBuilder implements ContextBuilder<Agent> {
 		// Reset the counter for the porpoise id generator.
 		Porpoise.PORPOISE_ID.set(0);
 
-		final boolean onDemandFood = false; // Hardcoded value - (Boolean)params.getValue("onDemandFood");
-
 		Globals.setCellData(null); // This releases the previous CellData allowing it to be garbage collected
-		final String landscape = SimulationParameters.getLandscape();
-		final LandscapeLoader dataLoader = new LandscapeLoader();
-		dataLoader.initLandscape("data/" + landscape);
-		final CellData cellData = dataLoader.load(landscape, onDemandFood);
-		Globals.setCellData(cellData);
+		final String landscape;
+		if (SimulationParameters.isHomogenous()) {
+			landscape = SimulationParameters.LANDSCAPE_HOMOGENOUS_NAME;
+		} else {
+			landscape = SimulationParameters.getLandscape();
+		}
+		final CellData cellData;
+		try {
+			final LandscapeLoader dataLoader = new LandscapeLoader(landscape);
+			cellData = dataLoader.load();
+			Globals.setCellData(cellData);
+		} catch (IOException e) {
+			if (RSApplication.getRSApplicationInstance() != null) {
+				RSApplication.getRSApplicationInstance().getErrorLog().addError(new MessageEvent(this, Level.FATAL, "Error loading landscape data"));
+				RSApplication.getRSApplicationInstance().getErrorLog().show();
+			}
+			throw new RuntimeException(e);
+		}
 
 		RefMem.initMemLists(params.getDouble("rS"), params.getDouble("rR"));
 
@@ -120,7 +148,18 @@ public class PorpoiseSimBuilder implements ContextBuilder<Agent> {
 
 		addTrackedPorpoises(context, space, grid);
 
-		addShips();
+		if (SimulationParameters.isShipsEnabled()) {
+			ShipLoader loader = new ShipLoader();
+			try {
+				loader.load(context, space, grid, landscape);
+			} catch (Exception e) {
+				if (RSApplication.getRSApplicationInstance() != null) {
+					RSApplication.getRSApplicationInstance().getErrorLog().addError(new MessageEvent(this, Level.FATAL, "Error loading ship data"));
+					RSApplication.getRSApplicationInstance().getErrorLog().show();
+				}
+				throw new RuntimeException(e);
+			}
+		}
 
 		addTurbines(context, space, grid);
 
@@ -133,22 +172,10 @@ public class PorpoiseSimBuilder implements ContextBuilder<Agent> {
 		addVisualAgents(context, space, grid, cellData);
 		addBlocks(cellData.getBlock(), space, grid, context);
 
-		Globals.setSimYears(params.getInteger("simYears"));
-		if (Globals.getSimYears() != null) {
-			final int numSimSteps = Globals.getSimYears() * 360 * 48;
-			RunEnvironment.getInstance().endAt(numSimSteps);
-		} else {
-			// The batch always needs an end criteria (only time defined)
-			if (RunEnvironment.getInstance().isBatch()) {
-				Globals.setSimYears(30);
-				final int numSimSteps = 30 * 360 * 48;
-				RunEnvironment.getInstance().endAt(numSimSteps);
-			}
-		}
-
 		/*
-		 * Parameter removed, should be hardcoded to false if (params.getBoolean("showFoodPatch")) {
-		 * addFoodPatches(cellData, context, space, grid); }
+		 * Parameter removed, should be hardcoded to false if
+		 * (params.getBoolean("showFoodPatch")) { addFoodPatches(cellData, context,
+		 * space, grid); }
 		 */
 
 		return context;
@@ -175,27 +202,13 @@ public class PorpoiseSimBuilder implements ContextBuilder<Agent> {
 		final Grid<Agent> grid = gridFactory.createGrid("grid", context,
 				new GridBuilderParameters<Agent>(new repast.simphony.space.grid.BouncyBorders(),
 						new SimpleGridAdder<Agent>(), true, Globals.getWorldWidth(), Globals.getWorldHeight()));
-		// Grid<Agent> grid = gridFactory.createGrid("grid", context, new GridBuilderParameters<Agent>(new
-		// repast.simphony.space.grid.WrapAroundBorders(), new SimpleGridAdder<Agent>(), true, Globals.WORLD_WIDTH,
+		// Grid<Agent> grid = gridFactory.createGrid("grid", context, new
+		// GridBuilderParameters<Agent>(new
+		// repast.simphony.space.grid.WrapAroundBorders(), new SimpleGridAdder<Agent>(),
+		// true, Globals.WORLD_WIDTH,
 		// Globals.WORLD_HEIGHT));
 
 		return grid;
-	}
-
-	private void addShips() {
-		/*
-		 * Parameter removed, should always be false if ((Boolean)params.getValue("ships")) { try { addShips(context,
-		 * space, grid, "Aarhus-Odden.txt", new NdPoint[] {new NdPoint(119, 633), new NdPoint(157, 605), new
-		 * NdPoint(197, 597), new NdPoint(288, 584)}); addShips(context, space, grid, "Great-Belt.txt", new NdPoint[]
-		 * {new NdPoint(288.66, 999), new NdPoint(366.56, 804.34), new NdPoint(210.04, 539.42), new NdPoint(205.78,
-		 * 489.69), new NdPoint(249.14, 404.9), new NdPoint(259.2, 369.07), new NdPoint(249.49, 308.61), new
-		 * NdPoint(225.86, 263.82), new NdPoint(228.83, 227.3), new NdPoint(377.59, 154.1), new NdPoint(438.14, 156.74),
-		 * new NdPoint(445.4, 168), new NdPoint(524.38, 261.43), new NdPoint(599, 315.93)}); addShips(context, space,
-		 * grid, "Kattegat-Sound.txt", new NdPoint[] {new NdPoint(288.66, 999), new NdPoint(366.56, 804.34), new
-		 * NdPoint(401.52, 678.13), new NdPoint(478, 628), new NdPoint(487.77, 620.61), new NdPoint(508.29, 575), new
-		 * NdPoint(542.26, 500.6), new NdPoint(506.3, 407.47), new NdPoint(599, 315.93)}); } catch (IOException e) {
-		 * throw new RuntimeException(e); } }
-		 */
 	}
 
 	private void addPorpoises(final Context<Agent> context, final ContinuousSpace<Agent> space, final Grid<Agent> grid,
@@ -204,15 +217,15 @@ public class PorpoiseSimBuilder implements ContextBuilder<Agent> {
 		final RefMemTurnCalculator refMemTurn = new FastRefMemTurn(); // : new OriginalRefMemTurn();
 
 		final int[] ageDistribution = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-				1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-				1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-				2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-				3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5,
-				5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 8, 8, 8, 8, 8,
-				8, 8, 8, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 10, 10, 10, 10, 10, 10, 11, 11, 11, 11, 11, 12, 12, 12,
-				12, 12, 12, 12, 13, 13, 13, 13, 14, 14, 14, 14, 15, 15, 15, 15, 18, 18, 19, 19, 21, 22 };
+				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+				1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+				1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+				2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+				3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
+				5, 5, 5, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 8, 8, 8, 8, 8, 8, 8, 8, 9, 9, 9, 9,
+				9, 9, 9, 9, 9, 9, 9, 9, 10, 10, 10, 10, 10, 10, 11, 11, 11, 11, 11, 12, 12, 12, 12, 12, 12, 12, 13, 13,
+				13, 13, 14, 14, 14, 14, 15, 15, 15, 15, 18, 18, 19, 19, 21, 22 };
 
 		final int numPorpoises = SimulationParameters.getPorpoiseCount();
 		for (int i = 0; i < numPorpoises; i++) {
@@ -256,7 +269,8 @@ public class PorpoiseSimBuilder implements ContextBuilder<Agent> {
 	}
 
 	/**
-	 * Add helper agents to display visual. Only added in the RunEnvironment is not batch.
+	 * Add helper agents to display visual. Only added in the RunEnvironment is not
+	 * batch.
 	 */
 	private void addVisualAgents(final Context<Agent> context, final ContinuousSpace<Agent> space,
 			final Grid<Agent> grid, final CellData cellData) {
@@ -273,7 +287,8 @@ public class PorpoiseSimBuilder implements ContextBuilder<Agent> {
 			context.add(tda);
 			tda.initialize();
 
-			// CellDataDistToCoastAgent cdd2ca = new CellDataDistToCoastAgent(space, grid, cellData);
+			// CellDataDistToCoastAgent cdd2ca = new CellDataDistToCoastAgent(space, grid,
+			// cellData);
 			// context.add(cdd2ca);
 			// cdd2ca.initialize();
 		}
@@ -287,7 +302,8 @@ public class PorpoiseSimBuilder implements ContextBuilder<Agent> {
 		final ScheduleParameters foodParams = ScheduleParameters.createRepeating(48, 48, AgentPriority.FOOD);
 
 		final IAction deadPorpoisesTask = new DeadPorpoisesReportProxyCleanupTask(context);
-		final ScheduleParameters deadPorpoisesParams = ScheduleParameters.createRepeating(0, 1, AgentPriority.FIRST_EVERY_TICK);
+		final ScheduleParameters deadPorpoisesParams = ScheduleParameters.createRepeating(0, 1,
+				AgentPriority.FIRST_EVERY_TICK);
 		schedule.schedule(deadPorpoisesParams, deadPorpoisesTask);
 
 		// Special tick#1 daily-tasks
@@ -315,9 +331,7 @@ public class PorpoiseSimBuilder implements ContextBuilder<Agent> {
 		schedule.schedule(yearlyParamsDay1, yearlyTask);
 		schedule.schedule(yearlyParams, yearlyTask);
 
-		if (!cellData.isOnDemandFoodUpdate()) {
-			schedule.schedule(foodParams, new FoodTask());
-		}
+		schedule.schedule(foodParams, new FoodTask());
 
 		if (PorpoiseTestDataCapturer.capture) {
 			schedule.schedule(ScheduleParameters.createRepeating(0, 1, ScheduleParameters.LAST_PRIORITY),
@@ -332,8 +346,9 @@ public class PorpoiseSimBuilder implements ContextBuilder<Agent> {
 	}
 
 	/**
-	 * Adds the required block dummy agents to the model. They are only there to enable the text sinks to use them for
-	 * dumping the numnber of porpoises in them.
+	 * Adds the required block dummy agents to the model. They are only there to
+	 * enable the text sinks to use them for dumping the numnber of porpoises in
+	 * them.
 	 */
 	private void addBlocks(final int[][] blocks, final ContinuousSpace<Agent> space, final Grid<Agent> grid,
 			final Context<Agent> context) {
@@ -356,73 +371,72 @@ public class PorpoiseSimBuilder implements ContextBuilder<Agent> {
 	}
 
 	/*
-	 * private void addShips(Context<Agent> context, ContinuousSpace<Agent> space, Grid<Agent> grid, String file,
-	 * NdPoint[] route) throws IOException { FileReader freader = new FileReader("data/Ships/" + file); BufferedReader
-	 * reader = new BufferedReader(freader);
-	 *
-	 * // First line is header reader.readLine();
-	 *
-	 * String line; while ((line = reader.readLine()) != null) { String[] parts = line.split("\t");
-	 *
-	 * String id = parts[0]; double speed = Double.parseDouble(parts[1]); double impact = Double.parseDouble(parts[2]);
-	 *
-	 * Ship s = new Ship(space, grid, route, impact, speed, id); context.add(s); s.initialize(); }
-	 *
-	 * reader.close(); }
-	 *
-	 * private void queueTask(String intervalText, ISchedule schedule, IAction action) { if
-	 * (!intervalText.equals("off")) { int interval; if (intervalText.equals("step")) { interval = 1; } else if
-	 * (intervalText.equals("daily")) { interval = 24 * 2; } else if (intervalText.equals("monthly")) { interval = 24 *
-	 * 2 * 30; } else if (intervalText.equals("yearly")) { interval = 24 * 2 * 30 * 360; } else if
-	 * (intervalText.equals("one-porp")) { throw new java.lang.NoSuchMethodError("Not implemented"); } else { throw new
+	 * private void queueTask(String intervalText, ISchedule schedule, IAction
+	 * action) { if (!intervalText.equals("off")) { int interval; if
+	 * (intervalText.equals("step")) { interval = 1; } else if
+	 * (intervalText.equals("daily")) { interval = 24 * 2; } else if
+	 * (intervalText.equals("monthly")) { interval = 24 * 2 * 30; } else if
+	 * (intervalText.equals("yearly")) { interval = 24 * 2 * 30 * 360; } else if
+	 * (intervalText.equals("one-porp")) { throw new
+	 * java.lang.NoSuchMethodError("Not implemented"); } else { throw new
 	 * RuntimeException("Unknown interval : " + intervalText); }
-	 *
-	 * ScheduleParameters scheduleParam = ScheduleParameters.createRepeating(0, interval,
-	 * ScheduleParameters.LAST_PRIORITY); schedule.schedule(scheduleParam, action); } }
-	 *
-	 * // Utility to convert bathy file in case depth is negative. Uses -9999 as no value. private void
-	 * convertBathy(String f) { try { BufferedWriter out = new BufferedWriter(new FileWriter("c:/temp/out.txt"));
-	 *
-	 * FileReader freader = new FileReader(f); BufferedReader reader = new BufferedReader(freader);
-	 *
-	 * for (int i = 0; i < 6; i++) { out.write(reader.readLine()); out.write('\n'); }
-	 *
-	 * int y = 0; String line; while ((line = reader.readLine()) != null) { String[] points = line.split(" "); for (int
-	 * x = 0; x < points.length; x++) { int i = Integer.parseInt(points[x]);
-	 *
-	 * if (i == -9999) { out.write(Integer.toString(i)); } else { out.write(Integer.toString(i * -1)); }
-	 *
-	 * if (x + 1 < points.length) { out.write(' '); } else { out.write('\n'); } } y++; }
-	 *
-	 * reader.close(); freader.close(); out.close(); } catch (Exception e) { e.printStackTrace(); } }
-	 *
-	 * private void createFile(String file, int columns, int rows, String s) { try { BufferedWriter out = new
-	 * BufferedWriter(new FileWriter(file));
-	 *
-	 * for (int row = 0; row < rows; row++) { for (int column = 0; column < columns; column++) { out.write(s);
-	 * out.write(' '); } out.write('\n'); }
-	 *
+	 * 
+	 * ScheduleParameters scheduleParam = ScheduleParameters.createRepeating(0,
+	 * interval, ScheduleParameters.LAST_PRIORITY); schedule.schedule(scheduleParam,
+	 * action); } }
+	 * 
+	 * // Utility to convert bathy file in case depth is negative. Uses -9999 as no
+	 * value. private void convertBathy(String f) { try { BufferedWriter out = new
+	 * BufferedWriter(new FileWriter("c:/temp/out.txt"));
+	 * 
+	 * FileReader freader = new FileReader(f); BufferedReader reader = new
+	 * BufferedReader(freader);
+	 * 
+	 * for (int i = 0; i < 6; i++) { out.write(reader.readLine()); out.write('\n');
+	 * }
+	 * 
+	 * int y = 0; String line; while ((line = reader.readLine()) != null) { String[]
+	 * points = line.split(" "); for (int x = 0; x < points.length; x++) { int i =
+	 * Integer.parseInt(points[x]);
+	 * 
+	 * if (i == -9999) { out.write(Integer.toString(i)); } else {
+	 * out.write(Integer.toString(i * -1)); }
+	 * 
+	 * if (x + 1 < points.length) { out.write(' '); } else { out.write('\n'); } }
+	 * y++; }
+	 * 
+	 * reader.close(); freader.close(); out.close(); } catch (Exception e) {
+	 * e.printStackTrace(); } }
+	 * 
+	 * private void createFile(String file, int columns, int rows, String s) { try {
+	 * BufferedWriter out = new BufferedWriter(new FileWriter(file));
+	 * 
+	 * for (int row = 0; row < rows; row++) { for (int column = 0; column < columns;
+	 * column++) { out.write(s); out.write(' '); } out.write('\n'); }
+	 * 
 	 * out.close(); } catch (Exception e) { e.printStackTrace(); } }
-	 *
-	 * private void createFoodProbFile(String file, int columns, int rows, double prob) { try { BufferedWriter out = new
-	 * BufferedWriter(new FileWriter(file));
-	 *
-	 * for (int row = 0; row < rows; row++) { for (int column = 0; column < columns; column++) { if (((int)
-	 * Math.floor(RandomHelper.nextDoubleFromTo(0, prob))) == 1) { // Using RandomHelper here out.write('1'); } else {
-	 * out.write('0'); }
-	 *
+	 * 
+	 * private void createFoodProbFile(String file, int columns, int rows, double
+	 * prob) { try { BufferedWriter out = new BufferedWriter(new FileWriter(file));
+	 * 
+	 * for (int row = 0; row < rows; row++) { for (int column = 0; column < columns;
+	 * column++) { if (((int) Math.floor(RandomHelper.nextDoubleFromTo(0, prob))) ==
+	 * 1) { // Using RandomHelper here out.write('1'); } else { out.write('0'); }
+	 * 
 	 * out.write(' '); } out.write('\n'); }
-	 *
+	 * 
 	 * out.close(); } catch (Exception e) { e.printStackTrace(); } }
-	 *
-	 * private void addFoodPatches(CellData data, Context<Agent> context, ContinuousSpace<Agent> space, Grid<Agent>
-	 * grid) { Pair[] patches = data.getFoodProbAboveZeroPatches();
-	 *
-	 * for (Pair p : patches) { FoodPatch fp = new FoodPatch(space, grid, new GridPoint(p.first, p.second), data);
-	 * context.add(fp); fp.setPosition(new NdPoint(p.first, p.second));
-	 *
+	 * 
+	 * private void addFoodPatches(CellData data, Context<Agent> context,
+	 * ContinuousSpace<Agent> space, Grid<Agent> grid) { Pair[] patches =
+	 * data.getFoodProbAboveZeroPatches();
+	 * 
+	 * for (Pair p : patches) { FoodPatch fp = new FoodPatch(space, grid, new
+	 * GridPoint(p.first, p.second), data); context.add(fp); fp.setPosition(new
+	 * NdPoint(p.first, p.second));
+	 * 
 	 * System.out.println("Adding <" + p.first + "," + p.second + ">");
-	 *
+	 * 
 	 * } }
 	 */
 

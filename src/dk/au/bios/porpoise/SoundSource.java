@@ -37,14 +37,14 @@ import repast.simphony.space.grid.Grid;
 import dk.au.bios.porpoise.util.DebugLog;
 
 /**
- * A generic sound source agent. This has been used for the deterrence testing. It is not directly used in the DEPONS
- * model.
+ * A generic sound source agent. This has been used for the deterrence testing.
+ * It is not directly used in the DEPONS model.
  */
 public class SoundSource extends Agent {
 
 	private static AtomicLong soundSourceId = new AtomicLong();
 
-	private final double impact;
+	protected final double impact;
 
 	public SoundSource(final ContinuousSpace<Agent> space, final Grid<Agent> grid, final double impact) {
 		super(space, grid, soundSourceId.incrementAndGet());
@@ -66,11 +66,13 @@ public class SoundSource extends Agent {
 	 * Deters nearby porpoises
 	 */
 	public void deterPorpoise() {
-		// number of grid-cells where a wind turbine or ship with impact 1 (standard deterrence strength) affects a
+		// number of grid-cells where a wind turbine or ship with impact 1 (standard
+		// deterrence strength) affects a
 		// porpoise
-		final double radius = Math.pow(10, ((impact - SimulationParameters.getDeterResponseThreshold()) / 20));
+		final double radius = Math.pow(10, ((getImpact() - SimulationParameters.getDeterResponseThreshold()) / 20));
 
-		// i.e. porps <deter-dist away (although porps can hear only ships <200 away, the dist has to be larger to
+		// i.e. porps <deter-dist away (although porps can hear only ships <200 away,
+		// the dist has to be larger to
 		// account for porp jumping)
 		final ContinuousWithin<Agent> affectedSpace = new ContinuousWithin<Agent>(this.getSpace(), this, radius);
 		final Iterable<Agent> agents = affectedSpace.query();
@@ -80,8 +82,11 @@ public class SoundSource extends Agent {
 				final Porpoise p = (Porpoise) a;
 				final double distToShip = this.getSpace().getDistance(getPosition(), p.getPosition()) * 400;
 				if (distToShip <= SimulationParameters.getDeterMaxDistance()) {
-					// deterring-strength decreases linearly with distance to turbine, decreases to 0 at 400 m
-					final double currentDeterence = impact - (20 * Math.log10(distToShip))
+					// deterring-strength decreases linearly with distance to turbine, decreases to
+					// 0 at 400 m
+					final double currentDeterence = impact
+							- (SimulationParameters.getBetaHat() * Math.log10(distToShip)
+									+ (SimulationParameters.getAlphaHat() * distToShip))
 							- SimulationParameters.getDeterResponseThreshold();
 
 					if (currentDeterence > 0) {

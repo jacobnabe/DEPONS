@@ -1,4 +1,4 @@
-<repast.simphony.visualization.engine.CartesianDisplayDescriptor simphonyVersion="2.5.0">
+<repast.simphony.visualization.engine.CartesianDisplayDescriptor simphonyVersion="2.7.0">
   <name>Display with tracking</name>
   <type>2D</type>
   <styles>

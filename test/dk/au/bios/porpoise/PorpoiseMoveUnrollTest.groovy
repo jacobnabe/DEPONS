@@ -48,6 +48,7 @@ import dk.au.bios.porpoise.behavior.DispersalFactory
 import dk.au.bios.porpoise.behavior.FastRefMemTurn
 import dk.au.bios.porpoise.behavior.RandomSource
 import dk.au.bios.porpoise.landscape.CellDataTestData
+import dk.au.bios.porpoise.landscape.DataFileMetaData
 
 /**
  * Unit test for the Porpoise agent.
@@ -61,8 +62,7 @@ class PorpoiseMoveUnrollTest extends Specification {
 	@Shared RandomSource random;
 
 	def setupSpec() {
-		Globals.worldWidth = 100;
-		Globals.worldHeight = 100;
+		Globals.landscapeMetaData = new DataFileMetaData(100, 100, 529473, 5972242, 400 , null);
 		SimulationParameters.model = 4;
 	
 		random = Mock(RandomSource)

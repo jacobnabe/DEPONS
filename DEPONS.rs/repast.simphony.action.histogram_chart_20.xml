@@ -1,4 +1,4 @@
-<repast.simphony.chart2.engine.HistogramChartDescriptor simphonyVersion="2.5.0">
+<repast.simphony.chart2.engine.HistogramChartDescriptor simphonyVersion="2.7.0">
   <name>Porpoise age</name>
   <dataSet>Porpoise age</dataSet>
   <xAxisLabel>Age</xAxisLabel>

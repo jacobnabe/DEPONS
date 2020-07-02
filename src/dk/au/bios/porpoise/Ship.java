@@ -27,6 +27,7 @@
 
 package dk.au.bios.porpoise;
 
+import dk.au.bios.porpoise.util.SimulationTime;
 import repast.simphony.engine.schedule.ScheduledMethod;
 import repast.simphony.space.continuous.ContinuousSpace;
 import repast.simphony.space.continuous.NdPoint;
@@ -39,22 +40,28 @@ public class Ship extends SoundSource {
 
 	private final NdPoint[] route;
 	private int nextPoint;
-	private final double speed;
 	private boolean forward = true;
-	private final String name;
 
-	public Ship(final ContinuousSpace<Agent> space, final Grid<Agent> grid, final NdPoint[] route, final double impact,
-			final double speed, final String name) {
-		super(space, grid, impact);
+	private final dk.au.bios.porpoise.ships.Ship data;
+	private final NdPoint surveyAreaPoint;
+	
+	public Ship(final ContinuousSpace<Agent> space, final Grid<Agent> grid, final NdPoint[] route, final dk.au.bios.porpoise.ships.Ship data) {
+		super(space, grid, data.getImpact());
 		this.route = route;
-		this.speed = speed;
-		this.name = name;
+		this.data = data;
 		this.forward = false;
 		this.nextPoint = -1;
+		
+		if (data.getSurvey() != null && data.getSurvey().getPoint() != null) {
+			this.surveyAreaPoint = new NdPoint(data.getSurvey().getPoint().getX(), data.getSurvey().getPoint().getY());
+		} else {
+			this.surveyAreaPoint = null;
+		}
 	}
 
 	public void initialize() {
-		final int pastLoc = Globals.getRandomSource().pastLoc(name, route.length);
+//		final int pastLoc = Globals.getRandomSource().pastLoc(name, route.length);
+		final int pastLoc = 0;
 
 		if (pastLoc == route.length - 1) {
 			// we are at the end and will move backward
@@ -72,7 +79,11 @@ public class Ship extends SoundSource {
 
 	@ScheduledMethod(start = 0, interval = 1, priority = AgentPriority.SHIP_MOVE)
 	public void move() {
-		final double moveLength = 2.5 * this.speed / 2; // km / t to steps / 30 min
+		if (SimulationTime.getTick() < data.getStart()) {
+			return;
+		}
+
+		final double moveLength = 2.5 * this.data.getSpeed() / 2; // km / t to steps / 30 min
 
 		// approaching next location on route?
 		if (distanceXY(this.route[nextPoint]) <= moveLength) {
@@ -98,12 +109,36 @@ public class Ship extends SoundSource {
 	}
 
 	public double getSpeed() {
-		return this.speed;
+		return this.data.getSpeed();
+	}
+
+	public String getName() {
+		return data.getName();
 	}
 
 	@Override
 	public String toString() {
-		return name;
+		return data.getName();
 	}
 
+	public boolean isInSurveyArea() {
+		if (this.surveyAreaPoint != null) {
+			if (this.getSpace().getDistance(getPosition(), this.surveyAreaPoint) < this.data.getSurvey().getRadius()) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	@Override
+	public double getImpact() {
+		if (isInSurveyArea()) {
+			return this.data.getSurvey().getImpact();
+		}
+
+		return this.impact;
+	}
+
+	
 }

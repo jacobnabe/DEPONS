@@ -32,6 +32,7 @@ import org.junit.Test;
 import dk.au.bios.porpoise.Agent;
 import dk.au.bios.porpoise.Globals
 import dk.au.bios.porpoise.behavior.DispersalFactory
+import dk.au.bios.porpoise.landscape.DataFileMetaData
 import repast.simphony.context.Context;
 import repast.simphony.context.DefaultContext
 import repast.simphony.engine.environment.RunEnvironment
@@ -48,8 +49,7 @@ class DebugLogTest extends Specification {
 	@Shared Schedule schedule;
 
 	def setup() {
-		Globals.worldWidth = 100;
-		Globals.worldHeight = 100;
+		Globals.landscapeMetaData = new DataFileMetaData(100, 100, 529473, 5972242, 400 , null);
 
 		// Repast initialization
 		this.schedule = new Schedule();

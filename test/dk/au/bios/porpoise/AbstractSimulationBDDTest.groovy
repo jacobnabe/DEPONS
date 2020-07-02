@@ -49,6 +49,7 @@ import spock.lang.Specification
 import dk.au.bios.porpoise.behavior.FastRefMemTurn
 import dk.au.bios.porpoise.behavior.RandomSource
 import dk.au.bios.porpoise.landscape.CellDataTestData
+import dk.au.bios.porpoise.landscape.DataFileMetaData
 
 /**
  * Abstract base class for replayed tests. Replayed tests are simulations which are captured using the
@@ -70,8 +71,7 @@ abstract class AbstractSimulationBDDTest extends Specification {
 	private Runner testRunner;
 
 	def aNewWorld(int worldWidth, int worldHeight) {
-		Globals.worldWidth = 100;
-		Globals.worldHeight = 100;
+		Globals.landscapeMetaData = new DataFileMetaData(100, 100, 529473, 5972242, 400 , null);
 		random = Mock(RandomSource)
 		random.nextCrwAngle() >>> [0.0]
 		random.nextCrwAngleWithM() >>> [0.0]

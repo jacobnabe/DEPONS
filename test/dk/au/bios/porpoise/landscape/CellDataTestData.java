@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2019 Jacob Nabe-Nielsen <jnn@bios.au.dk>
+ * Copyright (C) 2017-2020 Jacob Nabe-Nielsen <jnn@bios.au.dk>
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
  * License version 2 and only version 2 as published by the Free Software Foundation.
@@ -27,7 +27,7 @@
 
 package dk.au.bios.porpoise.landscape;
 
-import java.util.Arrays;
+import java.util.Collections;
 
 /**
  * Unit tests for CellData.
@@ -39,47 +39,8 @@ public final class CellDataTestData {
 	}
 
 	public static CellData getCellData() throws Exception {
-		final CellData cellData = new CellData(getDistanceToCoast(), getDepth(), getBlocks(), getFoodProb(), getQuarter(),
-				getQuarter(), getQuarter(), getQuarter(), getSalinity(), false, null, false);
+		final CellData cellData = new CellData("unittest", Collections.singletonList(new UnitTestCellDataSource()));
 		return cellData;
-	}
-
-	public static double[][] getDistanceToCoast() {
-		return fillArray(10000.0);
-	}
-
-	public static double[][] getDepth() {
-		return fillArray(18.10);
-	}
-
-	public static double[][] getBlocks() {
-		return fillArray(1.0);
-	}
-
-	public static double[][] getFoodProb() {
-		return fillArray(1.0);
-	}
-
-	public static double[][] getQuarter() {
-		return fillArray(0.386);
-	}
-
-	public static double[][][] getSalinity() {
-		final double[][][] salinityMaps = new double[12][][];
-		for (int i = 1; i < 13; i++) {
-			salinityMaps[i-1] = fillArray(34.069105813295); // Value taken from Homogenous landscape
-		}
-
-		return salinityMaps;
-	}
-
-	private static double[][] fillArray(final double value) {
-		final double[][] data = new double[100][100];
-		for (final double[] ds : data) {
-			Arrays.fill(ds, value);
-		}
-
-		return data;
 	}
 
 }

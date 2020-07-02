@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2019 Jacob Nabe-Nielsen <jnn@bios.au.dk>
+ * Copyright (C) 2017-2020 Jacob Nabe-Nielsen <jnn@bios.au.dk>
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
  * License version 2 and only version 2 as published by the Free Software Foundation.
@@ -27,69 +27,44 @@
 
 package dk.au.bios.porpoise.landscape;
 
+import java.io.IOException;
 import java.util.LinkedList;
+import java.util.List;
 
-import repast.simphony.space.continuous.NdPoint;
-import repast.simphony.space.grid.GridPoint;
 import dk.au.bios.porpoise.Agent;
 import dk.au.bios.porpoise.Globals;
-import dk.au.bios.porpoise.OnDemandFoodPatch;
 import dk.au.bios.porpoise.SimulationConstants;
 import dk.au.bios.porpoise.SimulationParameters;
 import dk.au.bios.porpoise.util.Pair;
-import dk.au.bios.porpoise.util.SimulationTime;
+import repast.simphony.space.continuous.NdPoint;
+import repast.simphony.space.grid.GridPoint;
 
 /**
  * Encapsulates the data related to the simulation environment.
  */
 public class CellData {
 
-	private final boolean onDemandFood;
-	private final boolean[][] mask;
-	private final double[][] distanceToCoast;
-	private final double[][] depth;
+	private final SimpleDataFile distanceToCoast;
+	private final SimpleDataFile depth;
 	private final int[][] block;
-	private final double[][] foodProb;
+	private final SimpleDataFile foodProb;
 	private final double[][] foodValue;
 
-	private final OnDemandFoodPatch[][] foodPatch;
-
-	private final double[][] quarter1;
-	private final double[][] quarter2;
-	private final double[][] quarter3;
-	private final double[][] quarter4;
-
-	private final double[][][] salinityMaps;
-
-	/*
-	 * private double[][] blockValQuarter1; private double[][] blockValQuarter2; private double[][] blockValQuarter3;
-	 * private double[][] blockValQuarter4;
-	 */
+	private final MonthlyDataFile entropy;
+	private final MonthlyDataFile salinityMaps;
 
 	private final Pair[] foodProbAboveZeroCells;
-	private final boolean onDemandFoodUpdate;
 
-	public CellData(final double[][] distanceToCoast, final double[][] depth, final double[][] block,
-			final double[][] foodProb, final double[][] quarter1, final double[][] quarter2, final double[][] quarter3,
-			final double[][] quarter4, final double[][][] salinityMaps, final boolean onDemandFoodUpdate,
-			final boolean[][] mask, final boolean onDemandFood) {
-		this.onDemandFood = onDemandFood;
-		this.distanceToCoast = distanceToCoast;
-		this.depth = depth;
-		this.foodProb = foodProb;
-		this.onDemandFoodUpdate = onDemandFoodUpdate;
+	public CellData(final String landscape, final List<CellDataSource> sources) throws IOException {
+		this.distanceToCoast = new SimpleDataFile(landscape, LandscapeLoader.DISTTOCOAST_FILE, sources);
+		this.depth = new SimpleDataFile(landscape, LandscapeLoader.BATHY_FILE, sources);
+		this.foodProb = new SimpleDataFile(landscape, LandscapeLoader.PATCHES_FILE, sources);
+		this.entropy = new MonthlyDataFile(landscape, LandscapeLoader.PREY_FILE_PREFIX, sources);
+		this.salinityMaps = new MonthlyDataFile(landscape, LandscapeLoader.SALINITY_FILE_PREFIX, sources);
 
-		this.quarter1 = quarter1;
-		this.quarter2 = quarter2;
-		this.quarter3 = quarter3;
-		this.quarter4 = quarter4;
-		this.mask = mask;
+		this.foodValue = new double[this.foodProb.getData().length][this.foodProb.getData()[0].length];
 
-		this.salinityMaps = salinityMaps;
-
-		this.foodValue = new double[this.foodProb.length][this.foodProb[0].length];
-
-		final double[][] blockDouble = block;
+		final double[][] blockDouble = new SimpleDataFile(landscape, LandscapeLoader.BLOCKS_FILE, sources).getData();
 		this.block = new int[blockDouble.length][blockDouble[0].length];
 
 		for (int i = 0; i < this.block.length; i++) {
@@ -99,39 +74,24 @@ public class CellData {
 		}
 
 		final LinkedList<Pair> patches = new LinkedList<Pair>();
-		for (int i = 0; i < this.foodProb.length; i++) {
-			for (int j = 0; j < this.foodProb[0].length; j++) {
-				if (this.foodProb[i][j] > 0) {
+		for (int i = 0; i < this.foodProb.getData().length; i++) {
+			for (int j = 0; j < this.foodProb.getData()[0].length; j++) {
+				if (this.foodProb.getData()[i][j] > 0) {
 					patches.add(new Pair(i, j));
 				}
 			}
 		}
 
 		this.foodProbAboveZeroCells = patches.toArray(new Pair[patches.size()]);
-
-		if (onDemandFoodUpdate) {
-			foodPatch = new OnDemandFoodPatch[this.foodProb.length][this.foodProb[0].length];
-
-			for (final Pair p : patches) {
-				final double value = SimulationParameters.getMaxU() * this.quarter1[p.getFirst()][p.getSecond()]
-						/ Globals.getMeanMaxEntInCurrentQuarter();
-				foodPatch[p.getFirst()][p.getSecond()] = new OnDemandFoodPatch(new double[] {
-						this.quarter1[p.getFirst()][p.getSecond()], this.quarter2[p.getFirst()][p.getSecond()],
-						this.quarter3[p.getFirst()][p.getSecond()], this.quarter4[p.getFirst()][p.getSecond()] }, value);
-			}
-		} else {
-			foodPatch = null;
-		}
-
 	}
 
 	public double getDistanceToCoast(final int x, final int y) {
-		return distanceToCoast[x][y];
+		return distanceToCoast.getData()[x][y];
 	}
 
 	public double getDistanceToCoast(final NdPoint point) {
 		final GridPoint p = Agent.ndPointToGridPoint(point);
-		return distanceToCoast[p.getX()][p.getY()];
+		return distanceToCoast.getData()[p.getX()][p.getY()];
 	}
 
 	public double getDepth(final GridPoint point) {
@@ -140,7 +100,7 @@ public class CellData {
 
 	public double getDepth(final int x, final int y) {
 		try {
-			return depth[x][y];
+			return depth.getData()[x][y];
 		} catch (final ArrayIndexOutOfBoundsException e) {
 			// TODO: Consider handling this better, i.e. propogate the error.
 			return -9999; // 0;
@@ -152,12 +112,12 @@ public class CellData {
 	}
 
 	public double getSalinity(final GridPoint point) {
-		final int mapIndex = SimulationTime.getMonthOfYear() - 1;
-
-		final double[][] map = salinityMaps[mapIndex];
-		final double salinityValue = map[point.getX()][point.getY()];
-
-		return salinityValue;
+		try {
+			final double salinityValue = salinityMaps.getData()[point.getX()][point.getY()];
+			return salinityValue;
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	public double getSalinity(final NdPoint point) {
@@ -181,15 +141,7 @@ public class CellData {
 	}
 
 	public double getFoodLevel(final int x, final int y) {
-		if (onDemandFoodUpdate) {
-			if (foodPatch[x][y] != null) {
-				return foodPatch[x][y].getValue();
-			} else {
-				return 0.0;
-			}
-		} else {
-			return this.foodValue[x][y];
-		}
+		return this.foodValue[x][y];
 	}
 
 	public synchronized double eatFood(final GridPoint point, final double eatFraction) {
@@ -198,15 +150,11 @@ public class CellData {
 		if (food > 0.0) {
 			final double eaten = food * eatFraction;
 
-			if (onDemandFoodUpdate) {
-				this.foodPatch[point.getX()][point.getY()].eatFood(eaten);
-			} else {
-				this.foodValue[point.getX()][point.getY()] -= eaten;
+			this.foodValue[point.getX()][point.getY()] -= eaten;
 
-				// The minimum food level has a strong impact on how fast food gets back
-				if (SimulationConstants.ADD_ARTIFICIAL_FOOD && this.foodValue[point.getX()][point.getY()] < 0.01) {
-					this.foodValue[point.getX()][point.getY()] = 0.01;
-				}
+			// The minimum food level has a strong impact on how fast food gets back
+			if (SimulationConstants.ADD_ARTIFICIAL_FOOD && this.foodValue[point.getX()][point.getY()] < 0.01) {
+				this.foodValue[point.getX()][point.getY()] = 0.01;
 			}
 
 			return eaten;
@@ -216,7 +164,7 @@ public class CellData {
 	}
 
 	public double[][] getFoodProb() {
-		return this.foodProb;
+		return this.foodProb.getData();
 	}
 
 	public double getFoodProb(final NdPoint p) {
@@ -224,27 +172,11 @@ public class CellData {
 	}
 
 	public double getFoodProb(final GridPoint p) {
-		return this.foodProb[p.getX()][p.getY()];
+		return this.foodProb.getData()[p.getX()][p.getY()];
 	}
 
 	public double[][] getFoodValue() {
-		if (this.onDemandFood) {
-			throw new RuntimeException("FoodValue array may not be accessed directly when we calculate food on demand");
-		}
-
 		return this.foodValue;
-	}
-
-	public boolean isPointMasked(final GridPoint p) {
-		return isPointMasked(p.getX(), p.getY());
-	}
-
-	public boolean isPointMasked(final int x, final int y) {
-		if (mask != null) {
-			return mask[x][y];
-		} else {
-			return false;
-		}
 	}
 
 	public double getMaxEnt(final NdPoint p) {
@@ -256,18 +188,10 @@ public class CellData {
 	}
 
 	public double[][] getMaxEnt() {
-		final int quarter = SimulationTime.getQuarterOfYear();
-		switch (quarter) {
-		case 0:
-			return this.quarter1;
-		case 1:
-			return this.quarter2;
-		case 2:
-			return this.quarter3;
-		case 3:
-			return this.quarter4;
-		default:
-			throw new IndexOutOfBoundsException("SimulationTime reported unknown quarter: " + quarter);
+		try {
+			return entropy.getData();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -288,9 +212,9 @@ public class CellData {
 	public void initializeFoodPatches() {
 		final double[][] maxEnt = this.getMaxEnt();
 
-		for (int i = 0; i < foodProb.length; i++) {
-			for (int j = 0; j < foodProb[0].length; j++) {
-				if (foodProb[i][j] > 0 && maxEnt[i][j] > 0) {
+		for (int i = 0; i < foodProb.getData().length; i++) {
+			for (int j = 0; j < foodProb.getData()[0].length; j++) {
+				if (foodProb.getData()[i][j] > 0 && maxEnt[i][j] > 0) {
 					foodValue[i][j] = SimulationParameters.getMaxU() * maxEnt[i][j]
 							/ Globals.getMeanMaxEntInCurrentQuarter();
 				} else {
@@ -298,10 +222,6 @@ public class CellData {
 				}
 			}
 		}
-	}
-
-	public boolean isOnDemandFoodUpdate() {
-		return onDemandFoodUpdate;
 	}
 
 }

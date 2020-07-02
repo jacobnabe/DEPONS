@@ -41,12 +41,13 @@ public final class SimulationParameters {
 
 	private static String landscape;
 	private static String turbines;
+	private static boolean shipsEnabled;
 	private static int porpoiseCount;
 	private static int trackedPorpoiseCount;
 
 	/**
-	 * Inertia constant; the animal's tendency to keep moving using CRW irrespective of foraging success. In
-	 * parameters.xml: k
+	 * Inertia constant; the animal's tendency to keep moving using CRW irrespective
+	 * of foraging success. In parameters.xml: k
 	 */
 	private static double inertiaConst = 0.001; // A, set to 0.001 like in ms
 
@@ -76,13 +77,25 @@ public final class SimulationParameters {
 	private static double deterDecay = 50;
 
 	/**
-	 * Maximum deterrence distance. Animals that are more than this far from the noise source shold stop being deterred.
-	 * Parameter is specified in KM but stored in this variable in meters. In parameter.xml: dmax_deter
+	 * Maximum deterrence distance. Animals that are more than this far from the
+	 * noise source shold stop being deterred. Parameter is specified in KM but
+	 * stored in this variable in meters. In parameter.xml: dmax_deter
 	 */
 	private static double deterMaxDistance = 50 * 1000; // 50 KM
 
 	/**
-	 * Dispersal distance per time step [km] (J. Teilmann, unpublished satellite data). In parameters.xml: ddisp
+	 * absorption coefficient for sound. In parameter.xml: alpha_hat
+	 */
+	private static double alphaHat = 0;
+
+	/**
+	 * spreading loss factor for sound. In parameter.xml: beta_hat
+	 */
+	private static double betaHat = 20;
+
+	/**
+	 * Dispersal distance per time step [km] (J. Teilmann, unpublished satellite
+	 * data). In parameters.xml: ddisp
 	 */
 	private static double meanDispDist = 1.6;
 
@@ -92,23 +105,26 @@ public final class SimulationParameters {
 	private static double maxMov = 1.18;
 
 	/**
-	 * Energy use per half-hour step in May-September (calibrated). In parameters.xml: Euse
+	 * Energy use per half-hour step in May-September (calibrated). In
+	 * parameters.xml: Euse
 	 */
 	private static double eUsePer30Min = 4.5;
 
 	/**
-	 * Energy use multiplyer for lactating mammals (Magnus Wahlberg, unpubl. data). In parameters.xml: Elact
+	 * Energy use multiplyer for lactating mammals (Magnus Wahlberg, unpubl. data).
+	 * In parameters.xml: Elact
 	 */
 	private static double eLact = 1.4;
 
 	/**
-	 * Energy use multiplier in warm water (Lockyer et al. 2003). In parameters.xml: Ewarm
+	 * Energy use multiplier in warm water (Lockyer et al. 2003). In parameters.xml:
+	 * Ewarm
 	 */
 	private static double eWarm = 1.3;
 
 	/**
-	 * Deterrence time; number of time steps the deterrence effect lasts [time steps] (arbitrary). In parameters.xml:
-	 * tdeter
+	 * Deterrence time; number of time steps the deterrence effect lasts [time
+	 * steps] (arbitrary). In parameters.xml: tdeter
 	 */
 	private static int deterTime = 5;
 
@@ -118,13 +134,14 @@ public final class SimulationParameters {
 	private static double maxU = 1.0; // ; Maximum utility of a patch, set to 1 here
 
 	/**
-	 * Minimum water depth when dispersing [m] (visual calibration). In parameters.xml: wdisp
-	 * FIXME Seems to never to used in the code
+	 * Minimum water depth when dispersing [m] (visual calibration). In
+	 * parameters.xml: wdisp
 	 */
 	private static double minDispDepth = 4.0;
 
 	/**
-	 * Minimum water depth [m] required by porpoises (J. Tougaard, pers. obs). In parameters.xml: wmin
+	 * Minimum water depth [m] required by porpoises (J. Tougaard, pers. obs). In
+	 * parameters.xml: wmin
 	 */
 	private static double minDepth = 1.0; // Match NetLogo
 
@@ -144,7 +161,8 @@ public final class SimulationParameters {
 	private static int gestationTime = 300;
 
 	/**
-	 * Nursing time [days] (Lockyer et al., 2003; Lockyer and Kinze, 2003). In parameters.xml: tnurs
+	 * Nursing time [days] (Lockyer et al., 2003; Lockyer and Kinze, 2003). In
+	 * parameters.xml: tnurs
 	 */
 	private static int nursingTime = 240;
 
@@ -170,12 +188,14 @@ public final class SimulationParameters {
 	private static int model = 1; // model seems to be a global variable in NETLOGO
 
 	/**
-	 * Days of declining energy before activating dispersal. In parameters.xml: tdisp
+	 * Days of declining energy before activating dispersal. In parameters.xml:
+	 * tdisp
 	 */
 	private static int tDisp = 3;
 
 	/**
-	 * Food replenishment rate [unitless] (Nabe-Nielsen et al., 2013). In parameters.xml: rU
+	 * Food replenishment rate [unitless] (Nabe-Nielsen et al., 2013). In
+	 * parameters.xml: rU
 	 */
 	private static double foodGrowthRate = 0.10;
 
@@ -191,6 +211,7 @@ public final class SimulationParameters {
 		turbines = params.getString("turbines");
 		porpoiseCount = params.getInteger("porpoiseCount");
 		trackedPorpoiseCount = params.getInteger("trackedPorpoiseCount");
+		shipsEnabled = params.getBoolean("ships");
 		inertiaConst = params.getDouble("k");
 		corrLogmovLength = params.getDouble("a0");
 		corrLogmovBathy = params.getDouble("a1");
@@ -204,6 +225,8 @@ public final class SimulationParameters {
 		deterResponseThreshold = params.getDouble("RT");
 		deterDecay = params.getDouble("Psi_deter");
 		deterMaxDistance = params.getDouble("dmax_deter") * 1000; // entered in KM but stored in meters.
+		alphaHat = params.getDouble("alpha_hat");
+		betaHat = params.getDouble("beta_hat");
 		meanDispDist = params.getDouble("ddisp");
 		maxMov = params.getDouble("dmax_mov");
 		eUsePer30Min = params.getDouble("Euse");
@@ -327,6 +350,14 @@ public final class SimulationParameters {
 		return deterMaxDistance;
 	}
 
+	public static double getAlphaHat() {
+		return alphaHat;
+	}
+
+	public static double getBetaHat() {
+		return betaHat;
+	}
+
 	public static double getMeanDispDist() {
 		return meanDispDist;
 	}
@@ -417,6 +448,10 @@ public final class SimulationParameters {
 
 	public static boolean isWrapBorderHomo() {
 		return wrapBorderHomo;
+	}
+
+	public static boolean isShipsEnabled() {
+		return shipsEnabled;
 	}
 
 	public static int getModel() {

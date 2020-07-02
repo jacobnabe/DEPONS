@@ -1,4 +1,4 @@
-<repast.simphony.data2.engine.DataSetDescriptor simphonyVersion="2.5.0">
+<repast.simphony.data2.engine.DataSetDescriptor simphonyVersion="2.7.0">
   <name>PorpDispersal</name>
   <type>AGGREGATE</type>
   <inclTick>true</inclTick>
@@ -15,6 +15,42 @@
   </scheduleParams>
   <atEnd>false</atEnd>
   <methodDataSources class="linked-hash-map">
+    <entry>
+      <string>porpDisp1</string>
+      <repast.simphony.data2.engine.MethodDataSourceDefinition>
+        <id>porpDisp1</id>
+        <className>dk.au.bios.porpoise.Porpoise</className>
+        <methodName>getIsInDisp1Mode</methodName>
+        <aggType>SUM</aggType>
+      </repast.simphony.data2.engine.MethodDataSourceDefinition>
+    </entry>
+    <entry>
+      <string>porpDisp1Mean</string>
+      <repast.simphony.data2.engine.MethodDataSourceDefinition>
+        <id>porpDisp1Mean</id>
+        <className>dk.au.bios.porpoise.Porpoise</className>
+        <methodName>getIsInDisp1Mode</methodName>
+        <aggType>MEAN</aggType>
+      </repast.simphony.data2.engine.MethodDataSourceDefinition>
+    </entry>
+    <entry>
+      <string>porpDisp2</string>
+      <repast.simphony.data2.engine.MethodDataSourceDefinition>
+        <id>porpDisp2</id>
+        <className>dk.au.bios.porpoise.Porpoise</className>
+        <methodName>getIsInDisp2Mode</methodName>
+        <aggType>SUM</aggType>
+      </repast.simphony.data2.engine.MethodDataSourceDefinition>
+    </entry>
+    <entry>
+      <string>porpDisp2Mean</string>
+      <repast.simphony.data2.engine.MethodDataSourceDefinition>
+        <id>porpDisp2Mean</id>
+        <className>dk.au.bios.porpoise.Porpoise</className>
+        <methodName>getIsInDisp2Mode</methodName>
+        <aggType>MEAN</aggType>
+      </repast.simphony.data2.engine.MethodDataSourceDefinition>
+    </entry>
     <entry>
       <string>porpDisp3</string>
       <repast.simphony.data2.engine.MethodDataSourceDefinition>

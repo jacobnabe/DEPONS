@@ -100,8 +100,7 @@ public abstract class AbstractPSMDispersal implements Dispersal {
 						+ (distanceToTravel * Math.cos(targetHeadingRads)));
 				final GridPoint targetGridPoint = Agent.ndPointToGridPoint(newTargetPos);
 
-				if (Globals.getCellData().getDepth(targetGridPoint) > 0
-						&& !Globals.getCellData().isPointMasked(targetGridPoint)) {
+				if (Globals.getCellData().getDepth(targetGridPoint) > 0) {
 					if (Globals.getCellData().getMaxEnt()[targetGridPoint.getX()][targetGridPoint.getY()] > 0.0f) {
 						this.targetHeading = newTargetHeading;
 						this.targetPos = newTargetPos;

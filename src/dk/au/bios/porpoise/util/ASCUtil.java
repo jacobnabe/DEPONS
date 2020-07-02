@@ -28,10 +28,15 @@
 package dk.au.bios.porpoise.util;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+
+import dk.au.bios.porpoise.landscape.DataFileMetaData;
 
 /**
  * Utility class to load data froo ASCII (text) files.
@@ -77,6 +82,46 @@ public final class ASCUtil {
 
 		return primitive;
 	}
+
+	public static DataFileMetaData loadMetaData(InputStream in) throws IOException {
+		byte[] allBytes = readAllBytes(in);
+		String rawData = new String(allBytes, StandardCharsets.US_ASCII);
+
+		try (BufferedReader reader = new BufferedReader(new StringReader(rawData))) {
+			int ncols = optionToInteger(reader.readLine().trim());
+			int nrows = optionToInteger(reader.readLine().trim());
+			double xllcorner = optionToDouble(reader.readLine().trim());
+			double yllcorner = optionToDouble(reader.readLine().trim());
+			int cellsize = optionToInteger(reader.readLine().trim());
+
+			return new DataFileMetaData(ncols, nrows, xllcorner, yllcorner, cellsize, null); // Unknown CRS in ASC files
+		}
+	}
+
+	private static byte[] readAllBytes(InputStream in) throws IOException {
+		ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+		byte[] readBuf = new byte[8 * 1024];
+		int actRead = -1;
+		do {
+			actRead = in.read(readBuf);
+			if (actRead > 0) {
+				bOut.write(readBuf, 0, actRead);
+			}
+		} while (actRead > -1);
+
+		return bOut.toByteArray();
+	}
+
+	private static int optionToInteger(final String s) {
+		final String value = s.substring(s.lastIndexOf(" ") + 1);
+		return Integer.parseInt(value);
+	}
+
+	private static double optionToDouble(final String s) {
+		final String value = s.substring(s.lastIndexOf(" ") + 1);
+		return Double.parseDouble(value);
+	}
+
 
 	private static <T> void loadData(final T[][] array, final InputStream in, final StringParser<T> parser,
 			final boolean replaceNoDataWithNull) throws IOException {

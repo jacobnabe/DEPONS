@@ -29,8 +29,11 @@ package dk.au.bios.porpoise;
 
 import java.util.LinkedList;
 
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
+
 import dk.au.bios.porpoise.behavior.RandomSource;
 import dk.au.bios.porpoise.landscape.CellData;
+import dk.au.bios.porpoise.landscape.DataFileMetaData;
 import dk.au.bios.porpoise.util.SimulationTime;
 
 /**
@@ -63,11 +66,7 @@ public final class Globals {
 	// standardized average maxent level in each quarter
 	private static double[] meanMaxEntInQuarters = { 1, 1, 1, 1 }; // standardized average maxent level in each quarter
 
-	private static double xllCorner = 529473;
-	private static double yllCorner = 5972242;
-
-	private static int worldWidth = 1000;
-	private static int worldHeight = 600;
+	private static DataFileMetaData landscapeMetaData;
 
 	private static Integer simYears = null; // Limit simulation to number of years.
 
@@ -107,36 +106,28 @@ public final class Globals {
 		return meanMaxEntInQuarters[quarter];
 	}
 
-	public static double getXllCorner() {
-		return xllCorner;
+	public static void setLandscapeMetadata(DataFileMetaData metadata) {
+		Globals.landscapeMetaData = metadata;
 	}
 
-	public static void setXllCorner(final double xllCorner) {
-		Globals.xllCorner = xllCorner;
+	public static double getXllCorner() {
+		return Globals.landscapeMetaData.getXllcorner();
 	}
 
 	public static double getYllCorner() {
-		return yllCorner;
-	}
-
-	public static void setYllCorner(final double yllCorner) {
-		Globals.yllCorner = yllCorner;
+		return Globals.landscapeMetaData.getYllcorner();
 	}
 
 	public static int getWorldWidth() {
-		return worldWidth;
-	}
-
-	public static void setWorldWidth(final int worldWidth) {
-		Globals.worldWidth = worldWidth;
+		return Globals.landscapeMetaData.getNcols();
 	}
 
 	public static int getWorldHeight() {
-		return worldHeight;
+		return Globals.landscapeMetaData.getNrows();
 	}
 
-	public static void setWorldHeight(final int worldHeight) {
-		Globals.worldHeight = worldHeight;
+	public static CoordinateReferenceSystem getCoordinateReferenceSystem() {
+		return Globals.landscapeMetaData.getCoordinateReferenceSystem();
 	}
 
 	public static Integer getSimYears() {

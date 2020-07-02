@@ -45,8 +45,10 @@ import repast.simphony.space.grid.SimpleGridAdder
 import spock.lang.Shared
 import spock.lang.Specification
 import dk.au.bios.porpoise.behavior.DispersalFactory
+import dk.au.bios.porpoise.behavior.FastRefMemTurn
 import dk.au.bios.porpoise.behavior.RandomSource
 import dk.au.bios.porpoise.landscape.CellDataTestData
+import dk.au.bios.porpoise.landscape.DataFileMetaData
 
 /**
  * Unit test for the Porpoise agent.
@@ -57,8 +59,8 @@ class PorpoiseTest extends Specification {
 	@Shared Schedule schedule;
 
 	def setup() {
-		Globals.worldWidth = 100;
-		Globals.worldHeight = 100;
+		Globals.landscapeMetaData = new DataFileMetaData(100, 100, 529473, 5972242, 400 , null);
+		SimulationParameters.model = 1;
 
 		// Repast initialization
 		this.schedule = new Schedule();
@@ -97,7 +99,7 @@ class PorpoiseTest extends Specification {
 
 		Globals.randomSource = random
 
-		def p = new Porpoise(space, grid, context, 1, null)
+		def p = new Porpoise(space, grid, context, 1, new FastRefMemTurn())
 		context.add(p);
 		p.setPosition(new NdPoint(10.0, 10.0));
 		p.setHeading(0.0);

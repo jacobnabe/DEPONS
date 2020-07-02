@@ -5,7 +5,7 @@
 <installation version="1.0">
     <info>
       <appname>DEPONS</appname>
-	  <appversion>2.0.1</appversion>
+	  <appversion>2.1</appversion>
       <summarylogfilepath>$INSTALL_PATH/installinfo/Summary.htm</summarylogfilepath>
     </info>
     <guiprefs height="600" resizable="yes" width="800">
@@ -34,8 +34,9 @@
     </locale>
     <resources>
         <res src="$StagingArea/LICENSE" id="LicencePanel.licence"/>
+        <res src="$StagingArea/installer/hellopanel.html" id="HTMLHelloPanel.info"/>
         <res src="$StagingArea/model_description.txt" id="InfoPanel.info"/>
-        <res src="$StagingArea/installer/splash_screen.png" id="installer.langsel.img"/>
+        <res src="$StagingArea/installer/splash_screen.png" id="SPLASHPNG"/>
         <res src="$StagingArea/installer/shortcuts_Windows.xml" id="shortcutSpec.xml"/>
         <res src="$StagingArea/installer/shortcuts_Xnix.xml" id="Unix_shortcutSpec.xml"/>
    
@@ -56,7 +57,7 @@
         <panel classname="ShortcutPanel" id="shortcutpanel"/>
     </resources>
     <panels>
-        <panel classname="HelloPanel"/>
+        <panel classname="HTMLHelloPanel"/>
         <panel classname="InfoPanel"/>
         <panel classname="LicencePanel"/>
         <panel classname="TargetPanel"/> 

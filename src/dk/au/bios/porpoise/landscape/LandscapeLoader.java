@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2019 Jacob Nabe-Nielsen <jnn@bios.au.dk>
+ * Copyright (C) 2017-2020 Jacob Nabe-Nielsen <jnn@bios.au.dk>
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
  * License version 2 and only version 2 as published by the Free Software Foundation.
@@ -27,200 +27,58 @@
 
 package dk.au.bios.porpoise.landscape;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.FileReader;
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
+import java.util.ArrayList;
+import java.util.List;
 
 import dk.au.bios.porpoise.Globals;
-import dk.au.bios.porpoise.SimulationParameters;
-import dk.au.bios.porpoise.util.ASCUtil;
 
 /**
  * Loads the landscape data files and returns a CellData instance.
  */
 public class LandscapeLoader {
 
-	private static final String BATHY_FILE = "bathy.asc";
-	private static final String BLOCKS_FILE = "blocks.asc";
-	private static final String DISTTOCOAST_FILE = "disttocoast.asc";
-	private static final String PATCHES_FILE = "patches.asc";
-	private static final String QUARTER_FILE1 = "quarter1.asc";
-	private static final String QUARTER_FILE2 = "quarter2.asc";
-	private static final String QUARTER_FILE3 = "quarter3.asc";
-	private static final String QUARTER_FILE4 = "quarter4.asc";
-	private static final String MASK_FILE = "mask.asc";
+	private static final String DATA_PATH = "data";
+	public static final String FILE_EXT_ASC = ".asc";
+	public static final String FILE_EXT_TIF = ".tif";
+	public static final String FILE_EXT_ZIP = ".zip";
+	public static final String FILE_EXT = FILE_EXT_ASC;
 
-	private final String dataPath;
+	public static final String BATHY_FILE = "bathy" + FILE_EXT;
+	public static final String BLOCKS_FILE = "blocks" + FILE_EXT;
+	public static final String DISTTOCOAST_FILE = "disttocoast" + FILE_EXT;
+	public static final String PATCHES_FILE = "patches" + FILE_EXT;
+	public static final String PREY_FILE_PREFIX = "prey";
+	public static final String SALINITY_FILE_PREFIX = "salinity";
 
-	public LandscapeLoader() {
-		dataPath = "data";
+	private final String landscape;
+
+	public LandscapeLoader(final String landscape) {
+		this.landscape = landscape;
 	}
 
-	public LandscapeLoader(final String dataPath) {
-		this.dataPath = dataPath;
-	}
+	public CellData load() throws IOException {
+		List<CellDataSource> sources = new ArrayList<>(2);
 
-	public CellData load(final String landscape, final boolean onDemandFood) {
-		CellData cellData;
-		String landscapeToLoad = landscape;
-		try {
-			if (SimulationParameters.isHomogenous()) {
-				landscapeToLoad = SimulationParameters.LANDSCAPE_HOMOGENOUS_NAME;
-			}
-
-			final String landscapeDataPath = dataPath + "/" + landscapeToLoad;
-			if (Files.exists(Paths.get(landscapeDataPath))) {
-				// System.err.println("Loading from directory");
-				cellData = loadFromDirectory(dataPath + "/" + landscapeToLoad, onDemandFood);
-			} else if (Files.exists(Paths.get(landscapeDataPath + ".zip"))) {
-				// System.err.println("Loading from ZIP");
-				cellData = loadFromZip(landscapeDataPath + ".zip", onDemandFood);
-			} else {
-				throw new RuntimeException("The landscape " + landscapeToLoad + " could not be found.");
-			}
-			return cellData;
-		} catch (final IOException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	private CellData loadFromDirectory(final String landscapeDataPath, final boolean onDemandFood) throws IOException {
-		final double[][] distance = ASCUtil.loadDoubleAscFile(Globals.getWorldWidth(), Globals.getWorldHeight(),
-				new FileInputStream(landscapeDataPath + "/" + DISTTOCOAST_FILE), false);
-		final double[][] depth = ASCUtil.loadDoubleAscFile(Globals.getWorldWidth(), Globals.getWorldHeight(),
-				new FileInputStream(landscapeDataPath + "/" + BATHY_FILE), false);
-		final double[][] block = ASCUtil.loadDoubleAscFile(Globals.getWorldWidth(), Globals.getWorldHeight(),
-				new FileInputStream(landscapeDataPath + "/" + BLOCKS_FILE), true);
-		final double[][] foodProb = ASCUtil.loadDoubleAscFile(Globals.getWorldWidth(), Globals.getWorldHeight(),
-				new FileInputStream(landscapeDataPath + "/" + PATCHES_FILE), false);
-
-		double[][] quarter1;
-		double[][] quarter2;
-		double[][] quarter3;
-		double[][] quarter4;
-		if (SimulationParameters.isHomogenous()) {
-			quarter1 = ASCUtil.loadDoubleAscFile(Globals.getWorldWidth(), Globals.getWorldHeight(), new FileInputStream(
-					landscapeDataPath + "/" + QUARTER_FILE1), false);
-			quarter2 = ASCUtil.loadDoubleAscFile(Globals.getWorldWidth(), Globals.getWorldHeight(), new FileInputStream(
-					landscapeDataPath + "/" + QUARTER_FILE1), false);
-			quarter3 = ASCUtil.loadDoubleAscFile(Globals.getWorldWidth(), Globals.getWorldHeight(), new FileInputStream(
-					landscapeDataPath + "/" + QUARTER_FILE1), false);
-			quarter4 = ASCUtil.loadDoubleAscFile(Globals.getWorldWidth(), Globals.getWorldHeight(), new FileInputStream(
-					landscapeDataPath + "/" + QUARTER_FILE1), false);
-		} else {
-			quarter1 = ASCUtil.loadDoubleAscFile(Globals.getWorldWidth(), Globals.getWorldHeight(), new FileInputStream(
-					landscapeDataPath + "/" + QUARTER_FILE1), false);
-			quarter2 = ASCUtil.loadDoubleAscFile(Globals.getWorldWidth(), Globals.getWorldHeight(), new FileInputStream(
-					landscapeDataPath + "/" + QUARTER_FILE2), false);
-			quarter3 = ASCUtil.loadDoubleAscFile(Globals.getWorldWidth(), Globals.getWorldHeight(), new FileInputStream(
-					landscapeDataPath + "/" + QUARTER_FILE3), false);
-			quarter4 = ASCUtil.loadDoubleAscFile(Globals.getWorldWidth(), Globals.getWorldHeight(), new FileInputStream(
-					landscapeDataPath + "/" + QUARTER_FILE4), false);
+		Path basePath = Paths.get(DATA_PATH, landscape);
+		if (Files.isDirectory(basePath)) {
+			sources.add(new DirectoryCellDataSource(basePath));
 		}
 
-		boolean[][] mask;
-		if (Files.exists(Paths.get(landscapeDataPath + "/" + MASK_FILE))) {
-			mask = ASCUtil.loadBooleanAscFile(Globals.getWorldWidth(), Globals.getWorldHeight(), new FileInputStream(
-					landscapeDataPath + "/" + MASK_FILE));
-		} else {
-			mask = null;
+		Path zipFilePath = Paths.get(DATA_PATH, landscape + FILE_EXT_ZIP);
+		if (Files.exists(zipFilePath)) {
+			sources.add(new ZipFileCellDataSource(zipFilePath));
 		}
 
-		final double[][][] salinityMaps = new double[12][][];
-		for (int i = 1; i < 13; i++) {
-			// System.err.println("Loading salinity: " + i);
-			salinityMaps[i - 1] = ASCUtil.loadDoubleAscFile(Globals.getWorldWidth(), Globals.getWorldHeight(),
-					new FileInputStream(landscapeDataPath + "/salinity_" + i + ".asc"), false);
-			// System.err.println("Loaded salinity: " + i);
-		}
-
-		final CellData cellData = new CellData(distance, depth, block, foodProb, quarter1, quarter2, quarter3,
-				quarter4, salinityMaps, onDemandFood, mask, onDemandFood);
-		if (!onDemandFood) {
-			cellData.initializeFoodPatches();
-		}
+		initLandscape(sources);
+		final CellData cellData = new CellData(landscape, sources);
+		cellData.initializeFoodPatches();
 
 		return cellData;
-	}
-
-	private CellData loadFromZip(final String landscapeZip, final boolean onDemandFood) throws IOException {
-		try (ZipFile zf = new ZipFile(landscapeZip)) {
-			final double[][] distance = ASCUtil.loadDoubleAscFile(Globals.getWorldWidth(), Globals.getWorldHeight(),
-					zf.getInputStream(zf.getEntry(DISTTOCOAST_FILE)), false);
-			final double[][] depth = ASCUtil.loadDoubleAscFile(Globals.getWorldWidth(), Globals.getWorldHeight(),
-					zf.getInputStream(zf.getEntry(BATHY_FILE)), false);
-			final double[][] block = ASCUtil.loadDoubleAscFile(Globals.getWorldWidth(), Globals.getWorldHeight(),
-					zf.getInputStream(zf.getEntry(BLOCKS_FILE)), true);
-			final double[][] foodProb = ASCUtil.loadDoubleAscFile(Globals.getWorldWidth(), Globals.getWorldHeight(),
-					zf.getInputStream(zf.getEntry(PATCHES_FILE)), false);
-
-			double[][] quarter1;
-			double[][] quarter2;
-			double[][] quarter3;
-			double[][] quarter4;
-			if (SimulationParameters.isHomogenous()) {
-				quarter1 = ASCUtil.loadDoubleAscFile(Globals.getWorldWidth(), Globals.getWorldHeight(),
-						zf.getInputStream(zf.getEntry(QUARTER_FILE1)), false);
-				quarter2 = ASCUtil.loadDoubleAscFile(Globals.getWorldWidth(), Globals.getWorldHeight(),
-						zf.getInputStream(zf.getEntry(QUARTER_FILE1)), false);
-				quarter3 = ASCUtil.loadDoubleAscFile(Globals.getWorldWidth(), Globals.getWorldHeight(),
-						zf.getInputStream(zf.getEntry(QUARTER_FILE1)), false);
-				quarter4 = ASCUtil.loadDoubleAscFile(Globals.getWorldWidth(), Globals.getWorldHeight(),
-						zf.getInputStream(zf.getEntry(QUARTER_FILE1)), false);
-			} else {
-				quarter1 = ASCUtil.loadDoubleAscFile(Globals.getWorldWidth(), Globals.getWorldHeight(),
-						zf.getInputStream(zf.getEntry(QUARTER_FILE1)), false);
-				quarter2 = ASCUtil.loadDoubleAscFile(Globals.getWorldWidth(), Globals.getWorldHeight(),
-						zf.getInputStream(zf.getEntry(QUARTER_FILE2)), false);
-				quarter3 = ASCUtil.loadDoubleAscFile(Globals.getWorldWidth(), Globals.getWorldHeight(),
-						zf.getInputStream(zf.getEntry(QUARTER_FILE3)), false);
-				quarter4 = ASCUtil.loadDoubleAscFile(Globals.getWorldWidth(), Globals.getWorldHeight(),
-						zf.getInputStream(zf.getEntry(QUARTER_FILE4)), false);
-			}
-
-			final ZipEntry maskEntry = zf.getEntry(MASK_FILE);
-			boolean[][] mask;
-			if (maskEntry != null) {
-				final InputStream maskIn = zf.getInputStream(maskEntry);
-				mask = ASCUtil.loadBooleanAscFile(Globals.getWorldWidth(), Globals.getWorldHeight(), maskIn);
-			} else {
-				mask = null;
-			}
-
-			final double[][][] salinityMaps = new double[12][][];
-			for (int i = 1; i < 13; i++) {
-				// System.err.println("Loading salinity: " + i);
-				salinityMaps[i - 1] = ASCUtil.loadDoubleAscFile(Globals.getWorldWidth(), Globals.getWorldHeight(),
-						zf.getInputStream(zf.getEntry("salinity_" + i + ".asc")), false);
-				// System.err.println("Loaded salinity: " + i);
-			}
-
-			final CellData cellData = new CellData(distance, depth, block, foodProb, quarter1, quarter2, quarter3,
-					quarter4, salinityMaps, onDemandFood, mask, onDemandFood);
-			if (!onDemandFood) {
-				cellData.initializeFoodPatches();
-			}
-
-			return cellData;
-		}
-	}
-
-	private int optionToInteger(final String s) {
-		final String value = s.substring(s.lastIndexOf(" ") + 1);
-		return Integer.parseInt(value);
-	}
-
-	private double optionToDouble(final String s) {
-		final String value = s.substring(s.lastIndexOf(" ") + 1);
-		return Double.parseDouble(value);
 	}
 
 	/**
@@ -228,51 +86,30 @@ public class LandscapeLoader {
 	 *
 	 * This function will update the Global parametes.
 	 *
-	 * TODO: Get rid of the Global parameters and find a nicer way to distribute these values.
-	 *
 	 * @param landscapeDataPath The asc to load the landscape parameters from.
 	 * @throws Exception Thrown in the asc data cannot be read.
 	 */
-	public void initLandscape(final String landscapeDataPath) {
-		int ncols;
-		int nrows;
-		double xllcorner;
-		double yllcorner;
-		int cellsize;
+	private void initLandscape(final List<CellDataSource> sources) {
 		try {
-			if (Files.isDirectory(Paths.get(landscapeDataPath))) {
-				try (BufferedReader reader = new BufferedReader(new FileReader(landscapeDataPath + "/bathy.asc"))) {
-					ncols = optionToInteger(reader.readLine().trim());
-					nrows = optionToInteger(reader.readLine().trim());
-					xllcorner = optionToDouble(reader.readLine().trim());
-					yllcorner = optionToDouble(reader.readLine().trim());
-					cellsize = optionToInteger(reader.readLine().trim());
+			DataFileMetaData metadata = null;
+			for (CellDataSource src: sources) {
+				if (src.hasData(BATHY_FILE)) {
+					metadata = src.getMetaData(BATHY_FILE);
+					break;
 				}
-			} else if (Files.exists(Paths.get(landscapeDataPath + ".zip"))) {
-				try (ZipFile zf = new ZipFile(landscapeDataPath + ".zip")) {
-					final InputStream in = zf.getInputStream(zf.getEntry(BATHY_FILE));
-					final BufferedReader reader = new BufferedReader(
-							new InputStreamReader(in, Charset.defaultCharset()));
-					ncols = optionToInteger(reader.readLine().trim());
-					nrows = optionToInteger(reader.readLine().trim());
-					xllcorner = optionToDouble(reader.readLine().trim());
-					yllcorner = optionToDouble(reader.readLine().trim());
-					cellsize = optionToInteger(reader.readLine().trim());
-				}
-			} else {
-				throw new RuntimeException("Unable to load landscape from " + landscapeDataPath);
 			}
 
-			if (cellsize != 400) {
+			if (metadata == null) {
+				throw new FileNotFoundException("Unable to load landscape " + landscape + " from " + BATHY_FILE);
+			}
+
+			if (metadata.getCellsize() != 400) {
 				throw new IOException("Cell size != 400, not supported");
 			}
 
-			Globals.setWorldWidth(ncols);
-			Globals.setWorldHeight(nrows);
-			Globals.setXllCorner(xllcorner);
-			Globals.setYllCorner(yllcorner);
+			Globals.setLandscapeMetadata(metadata);
 		} catch (final IOException e) {
-			throw new RuntimeException("Error loading bathy.asc during initialization.", e);
+			throw new RuntimeException("Error loading " + BATHY_FILE + " during initialization.", e);
 		}
 	}
 
