@@ -12,6 +12,6 @@
     <string>SettingsRegistryId</string>
     <string>Repast.registry</string>
     <string>LastLoadedScenario</string>
-    <string>/home/jonas/git/porpoise/PorpoiseJava/DEPONS.rs</string>
+    <string>/home/jonas/git/DEPONS/DEPONS.rs</string>
   </hashtable>
 </simphony.settings.SettingsRegistry>

@@ -1,4 +1,4 @@
-<repast.simphony.data2.engine.DataSetDescriptor simphonyVersion="2.7.0">
+<repast.simphony.data2.engine.DataSetDescriptor simphonyVersion="2.8.0">
   <name>Landscape energy</name>
   <type>AGGREGATE</type>
   <inclTick>true</inclTick>

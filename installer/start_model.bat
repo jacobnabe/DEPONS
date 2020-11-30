@@ -26,7 +26,7 @@ SET CP=%CP%;%REPAST_SIMPHONY_LIB%xstream-1.4.7.jar
 SET CP=%CP%;%REPAST_SIMPHONY_LIB%xmlpull-1.1.3.1.jar
 SET CP=%CP%;%REPAST_SIMPHONY_LIB%commons-cli-1.3.1.jar
 REM SET CP=%CP%;../groovylib/$Groovy_All_Jar
-SET CP=%CP%;../groovylib/groovy-all-2.4.17.jar
+SET CP=%CP%;../groovylib/groovy-all-2.4.20.jar
 
 REM Change to the Default Repast Simphony Directory
 CD DEPONS
