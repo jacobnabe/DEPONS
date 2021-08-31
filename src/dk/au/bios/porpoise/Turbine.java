@@ -103,6 +103,9 @@ public class Turbine extends Agent {
 			fr.readLine(); // Header is ignored.
 			String line;
 			while ((line = fr.readLine()) != null) {
+				if (line.trim().length() < 1) {
+					continue; // skip empty lines
+				}
 				final String[] cols = line.split("\\s+");
 				final String name = cols[0];
 				final double locX = (Double.parseDouble(cols[1]) - Globals.getXllCorner()) / 400;
@@ -111,10 +114,10 @@ public class Turbine extends Agent {
 				int startTick = 0;
 				int endTick = Integer.MAX_VALUE;
 				if (cols.length >= 5) {
-					startTick = Integer.parseInt(cols[4]) - 26124;
+					startTick = Integer.parseInt(cols[4]);
 				}
 				if (cols.length >= 6) {
-					endTick = Integer.parseInt(cols[5]) - 26124;
+					endTick = Integer.parseInt(cols[5]);
 				}
 
 				final Turbine t = new Turbine(space, grid, name, impact, locX, locY, startTick, endTick, numTurbines);
