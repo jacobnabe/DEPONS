@@ -1,4 +1,34 @@
+/*
+ * Copyright (C) 2017-2021 Jacob Nabe-Nielsen <jnn@bios.au.dk>
+ *
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License version 2 and only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this program; if not, see 
+ * <https://www.gnu.org/licenses>.
+ * 
+ * Linking DEPONS statically or dynamically with other modules is making a combined work based on DEPONS. 
+ * Thus, the terms and conditions of the GNU General Public License cover the whole combination.
+ * 
+ * In addition, as a special exception, the copyright holders of DEPONS give you permission to combine DEPONS 
+ * with free software programs or libraries that are released under the GNU LGPL and with code included in the 
+ * standard release of Repast Simphony under the Repast Suite License (or modified versions of such code, with unchanged license). 
+ * You may copy and distribute such a system following the terms of the GNU GPL for DEPONS and the licenses of the 
+ * other code concerned.
+ * 
+ * Note that people who make modified versions of DEPONS are not obligated to grant this special exception for 
+ * their modified versions; it is their choice whether to do so. 
+ * The GNU General Public License gives permission to release a modified version without this exception; 
+ * this exception also makes it possible to release a modified version which carries forward this exception.
+ */
+
 package dk.au.bios.porpoise.behavior;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 import cern.colt.Arrays;
 import dk.au.bios.porpoise.Agent;
@@ -6,10 +36,12 @@ import dk.au.bios.porpoise.Globals;
 import dk.au.bios.porpoise.Porpoise;
 import dk.au.bios.porpoise.SimulationConstants;
 import dk.au.bios.porpoise.SimulationParameters;
+import dk.au.bios.porpoise.util.ASCUtil;
 import dk.au.bios.porpoise.util.DebugLog;
 import dk.au.bios.porpoise.util.ReplayHelper;
 import dk.au.bios.porpoise.util.SimulationTime;
 import repast.simphony.space.continuous.NdPoint;
+import repast.simphony.space.grid.GridPoint;
 
 public class InnerDanishWatersDispersal implements Dispersal {
 
@@ -49,6 +81,23 @@ public class InnerDanishWatersDispersal implements Dispersal {
 			750, 750, 750, 750, 750, 650, 650, 650, 650, 650, 650, 550, 550, 550, 550, 550, 550, 450, 450, 450, 450,
 			450, 450, 350, 350, 350, 350, 350, 350, 250, 250, 250, 250, 250, 250, 150, 150, 150, 150, 150, 150, 50, 50,
 			50, 50, 50, 50 };
+
+	private static int[][] NAV_BLOCKS;
+	static {
+		try (InputStream in = InnerDanishWatersDispersal.class.getResourceAsStream("InnerDanishWatersDispersalNavigationBlocks.asc")) {
+			double[][] navBlocksDouble = ASCUtil.loadDoubleAscFile(600, 1000, in, false);
+			int[][] navBlocks = new int[navBlocksDouble.length][navBlocksDouble[0].length];
+
+			for (int i = 0; i < navBlocks.length; i++) {
+				for (int j = 0; j < navBlocks[0].length; j++) {
+					navBlocks[i][j] = (int) navBlocksDouble[i][j];
+				}
+			}
+			InnerDanishWatersDispersal.NAV_BLOCKS = navBlocks;
+		} catch (IOException e) {
+			throw new RuntimeException("Unable to load navigation blocks", e);
+		}
+	}
 
 	/**
 	 * Number of potential dispersal targets = 40x40 km blocks (calibrated visually). In parameters.xml: q
@@ -153,7 +202,7 @@ public class InnerDanishWatersDispersal implements Dispersal {
 			return true;
 		}
 
-		int currentBlock = Globals.getCellData().getBlock(Agent.ndPointToGridPoint(owner.getPosition()));
+		int currentBlock = getNavigationBlock(Agent.ndPointToGridPoint(owner.getPosition()));
 		// If porp is N of Djursland or in Little Belt, don't do directed dispersal
 		if (currentBlock == 14 || currentBlock == 31) {
 			this.dispType = 2;
@@ -498,7 +547,7 @@ public class InnerDanishWatersDispersal implements Dispersal {
 		int selBlock = highQualityBlocks[theNbr];
 
 		// find block slightly more to the east if currently far north
-		if (Globals.getCellData().getBlock(Agent.ndPointToGridPoint(owner.getPosition())) < 20
+		if (getNavigationBlock(Agent.ndPointToGridPoint(owner.getPosition())) < 20
 				&& (selBlock == 30 || selBlock == 31 || selBlock == 36 || selBlock == 37 || selBlock == 43)) {
 			selBlock += 2;
 		}
@@ -509,7 +558,7 @@ public class InnerDanishWatersDispersal implements Dispersal {
 		if (DebugLog.isEnabledFor(7) && (owner.getId() == 0 || owner.getId() == 1)) {
 			DebugLog.print("");
 			DebugLog.print(owner.getId() + "Disp from: "
-					+ Globals.getCellData().getBlock(Agent.ndPointToGridPoint(owner.getPosition())) + " -> "
+					+ getNavigationBlock(Agent.ndPointToGridPoint(owner.getPosition())) + " -> "
 					+ dispTarget);
 		}
 	}
@@ -543,6 +592,10 @@ public class InnerDanishWatersDispersal implements Dispersal {
 
 	private boolean isLandscapeKattegat() {
 		return "Kattegat".equals(SimulationParameters.getLandscape());
+	}
+
+	private int getNavigationBlock(final GridPoint point) {
+		return InnerDanishWatersDispersal.NAV_BLOCKS[point.getX()][point.getY()];
 	}
 
 }

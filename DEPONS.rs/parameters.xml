@@ -216,15 +216,13 @@
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
 		/>
-        <parameter name="alpha_hat" displayName="alpha_hat - Absorption coefficient for sound" type="double" 
+        <parameter name="alpha_hat" displayName="alpha_hat - Absorption coefficient for sound" type="string" 
 						defaultValue="0.0" 
 						isReadOnly="false" 
-						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
 		/>
-        <parameter name="beta_hat" displayName="beta_hat - Spreading loss factor for sound" type="double" 
+        <parameter name="beta_hat" displayName="beta_hat - Spreading loss factor for sound" type="string" 
 						defaultValue="20.0" 
 						isReadOnly="false" 
-						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
 		/>
 		<parameter name="tgest" displayName="tgest - Gestation time [days]" type="int" 
 						defaultValue="300" 

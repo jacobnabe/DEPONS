@@ -1,4 +1,4 @@
-# DEPONS 2.1.1
+# DEPONS 2.2
 Simulating effects of disturbances on harbour porpoises in the North Sea.
 
 This is the second public version of the DEPONS model for simulation of population effects of noise for the harbour porpoise. It differs from version 1.1 (the first public version) in being calibrated entirely based on data from the North Sea (see TRACE document for details).

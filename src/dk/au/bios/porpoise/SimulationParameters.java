@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2019 Jacob Nabe-Nielsen <jnn@bios.au.dk>
+ * Copyright (C) 2017-2021 Jacob Nabe-Nielsen <jnn@bios.au.dk>
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
  * License version 2 and only version 2 as published by the Free Software Foundation.
@@ -27,9 +27,13 @@
 
 package dk.au.bios.porpoise;
 
-import repast.simphony.parameter.Parameters;
+import org.apache.log4j.Level;
+
 import dk.au.bios.porpoise.behavior.DispersalFactory;
 import dk.au.bios.porpoise.util.LogisticDecreaseSSLogis;
+import repast.simphony.parameter.Parameters;
+import repast.simphony.ui.RSApplication;
+import simphony.util.messages.MessageEvent;
 
 public final class SimulationParameters {
 
@@ -225,8 +229,8 @@ public final class SimulationParameters {
 		deterResponseThreshold = params.getDouble("RT");
 		deterDecay = params.getDouble("Psi_deter");
 		deterMaxDistance = params.getDouble("dmax_deter") * 1000; // entered in KM but stored in meters.
-		alphaHat = params.getDouble("alpha_hat");
-		betaHat = params.getDouble("beta_hat");
+		alphaHat = convertStringToDouble(params, "alpha_hat");
+		betaHat = convertStringToDouble(params, "beta_hat");
 		meanDispDist = params.getDouble("ddisp");
 		maxMov = params.getDouble("dmax_mov");
 		eUsePer30Min = params.getDouble("Euse");
@@ -479,4 +483,29 @@ public final class SimulationParameters {
 		q1 = newQ1;
 	}
 
+	/**
+	 * This conversion was introduced in response to issues with the precision in
+	 * the Repast UI. The decimal would be restricted to maximum 6. As a workaround
+	 * the parameter type has been changed to string and the conversion performed
+	 * with the following method. The actual conversion is the same as used
+	 * internally in Repast but it does not include the restriction of maximum 6
+	 * decimals.
+	 * 
+	 * @param params    The Parameters map
+	 * @param paramName The parameter name
+	 * @return The value of the string parameter as a Double
+	 */
+	private static Double convertStringToDouble(final Parameters params, final String paramName) {
+		String strVal = params.getString(paramName);
+		try {
+			return Double.valueOf(strVal);
+		} catch (NumberFormatException e) {
+			if (RSApplication.getRSApplicationInstance() != null) {
+				RSApplication.getRSApplicationInstance().getErrorLog().addError(new MessageEvent(paramName, Level.FATAL,
+						"Value " + strVal + " for parameter " + paramName + " is not a valid floating point value."));
+				RSApplication.getRSApplicationInstance().getErrorLog().show();
+			}
+			throw e;
+		}
+	}
 }
