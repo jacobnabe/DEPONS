@@ -1284,6 +1284,14 @@ public class Porpoise extends Agent {
 		return this.energyLevel;
 	}
 
+	public double getEnergyLevelSum() {
+		return energyLevelSum;
+	}
+	
+	public CircularBuffer<Double> getEnergyLevelDaily() {
+		return energyLevelDaily;
+	}
+
 	public double getSoundSourceDistance() {
 		return soundSourceDistance;
 	}
@@ -1316,12 +1324,14 @@ public class Porpoise extends Agent {
 		return this.deterTimeLeft;
 	}
 
-	public String getDeterVector() {
-		return "[" + this.deterVt[0] + "," + this.deterVt[1] + "]";
+	public double[] getDeterVector() {
+//		return "[" + this.deterVt[0] + "," + this.deterVt[1] + "]";
+		return this.deterVt;
 	}
 
-	public String getVT() {
-		return "[" + this.vt[0] + "," + this.vt[1] + "]";
+	public double[] getVT() {
+//		return "[" + this.vt[0] + "," + this.vt[1] + "]";
+		return this.vt;
 	}
 
 	public int getBlock() {
@@ -1386,6 +1396,14 @@ public class Porpoise extends Agent {
 	 */
 	public double getAge() {
 		return age;
+	}
+
+	public double getAgeOfMaturity() {
+		return ageOfMaturity;
+	}
+
+	public byte getPregnancyStatus() {
+		return pregnancyStatus;
 	}
 
 	/**
@@ -1492,6 +1510,18 @@ public class Porpoise extends Agent {
 
 	public double getPresLogMov() {
 		return this.presLogMov;
+	}
+	
+	public double getPrevAngle() {
+		return prevAngle;
+	}
+
+	public double getPresAngle() {
+		return presAngle;
+	}
+	
+	public double getTickMoveAdjustMultiplier() {
+		return tickMoveAdjustMultiplier;
 	}
 
 	public int getInFoodPatch() {

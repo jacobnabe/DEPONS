@@ -349,6 +349,10 @@ public final class SimulationParameters {
 	public static double getDeterDecay() {
 		return deterDecay;
 	}
+	
+	public static void setDeterDecay(double deterDecay) {
+		SimulationParameters.deterDecay = deterDecay;
+	}
 
 	public static double getDeterMaxDistance() {
 		return deterMaxDistance;
@@ -384,6 +388,10 @@ public final class SimulationParameters {
 
 	public static int getDeterTime() {
 		return deterTime;
+	}
+	
+	public static void setDeterTime(int deterTime) {
+		SimulationParameters.deterTime = deterTime;
 	}
 
 	public static double getMaxU() {
@@ -461,9 +469,17 @@ public final class SimulationParameters {
 	public static int getModel() {
 		return model;
 	}
+	
+	public static void setModel(int model) {
+		SimulationParameters.model = model;
+	}
 
 	public static int getTDisp() {
 		return tDisp;
+	}
+	
+	public static void setTDisp(int tDisp) {
+		SimulationParameters.tDisp = tDisp;
 	}
 
 	public static double getFoodGrowthRate() {
@@ -479,7 +495,7 @@ public final class SimulationParameters {
 	 *
 	 * @param newQ1 New value for the Q1 parameter.
 	 */
-	protected static void setQ1(final double newQ1) {
+	public static void setQ1(final double newQ1) {
 		q1 = newQ1;
 	}
 

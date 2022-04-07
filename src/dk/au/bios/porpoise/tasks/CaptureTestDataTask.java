@@ -44,7 +44,7 @@ public class CaptureTestDataTask implements IAction {
 	}
 
 	@Override
-	public void execute() {
+	public void execute()  {
 		PorpoiseTestDataCapturer.captureSimulation(context);
 	}
 
