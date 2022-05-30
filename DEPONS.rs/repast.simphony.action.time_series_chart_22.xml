@@ -1,4 +1,4 @@
-<repast.simphony.chart2.engine.TimeSeriesChartDescriptor simphonyVersion="2.8.0">
+<repast.simphony.chart2.engine.TimeSeriesChartDescriptor simphonyVersion="2.9.1">
   <name>Food grown and consumed</name>
   <dataSet>FoodGrownAndConsumed</dataSet>
   <xAxisLabel>Tick Count</xAxisLabel>
