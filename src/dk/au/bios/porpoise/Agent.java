@@ -33,11 +33,13 @@ import java.util.List;
 
 import repast.simphony.query.space.grid.GridCell;
 import repast.simphony.query.space.grid.GridCellNgh;
+import repast.simphony.random.RandomHelper;
 import repast.simphony.relogo.Utility;
 import repast.simphony.space.continuous.ContinuousSpace;
 import repast.simphony.space.continuous.NdPoint;
 import repast.simphony.space.grid.Grid;
 import repast.simphony.space.grid.GridPoint;
+import repast.simphony.util.SimUtilities;
 
 /**
  * Base class for agents.
@@ -118,7 +120,7 @@ public class Agent {
 			list.add(g.getPoint());
 		}
 
-		Collections.shuffle(list);
+		SimUtilities.shuffle(list, RandomHelper.getUniform());
 
 		return list;
 	}
