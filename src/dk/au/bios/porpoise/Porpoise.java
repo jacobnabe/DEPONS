@@ -1023,7 +1023,6 @@ public class Porpoise extends Agent {
 	}
 
 	private void die(final CauseOfDeath cause) {
-		// System.out.println("Porpoise " + id + " died of : " + cause);
 		this.alive = false;
 		context.remove(this);
 		Globals.getMonthlyStats().addDeath(cause);
@@ -1043,14 +1042,14 @@ public class Porpoise extends Agent {
 
 		// Only the space is initialized at this time..
 		while (Globals.getCellData().getDepth(ndPointToGridPoint(getPosition())) <= 0) {
-			this.getSpace().moveTo(this, RandomHelper.nextDoubleFromTo(0, dim.getWidth() - dim.getOrigin(0)),
+			NdPoint newPos = new NdPoint(RandomHelper.nextDoubleFromTo(0, dim.getWidth() - dim.getOrigin(0)),
 					RandomHelper.nextDoubleFromTo(0, dim.getHeight() - dim.getOrigin(1)));
+			this.setPosition(newPos);
 		}
 
 		// Initialize the posList
 		this.posList.add(getPosition());
 	}
-
 	/**
 	 * The tasks to perform daily. This is called from the DailyTask class. Consider making this a @ScheduledMethod and
 	 * removing the DailyTask class.
@@ -1476,8 +1475,7 @@ public class Porpoise extends Agent {
 			setPrevAngle(0);
 		}
 
-		final NdPoint temp = this.getSpace().moveByVector(this, distance, anglesInRadians);
-		this.setPosition(temp); // update the grid as well.
+		moveByVector(distance, anglesInRadians);
 	}
 
 	public int getLactatingCalf() {

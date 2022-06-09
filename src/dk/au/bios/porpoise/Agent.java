@@ -27,7 +27,6 @@
 
 package dk.au.bios.porpoise;
 
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -51,7 +50,7 @@ public class Agent {
 	private final Grid<Agent> grid;  // FIXME Global object, should not be an instance variable
 
 	private double heading = Globals.getRandomReplaySource() != null ? SimulationParameters.isHomogenous() ? 134 : 134
-			: Globals.getRandomSource().randomInt(0, 360); // 260 is the initial value in NetLogo replays random scenario.
+			: Globals.getRandomSource() != null ? Globals.getRandomSource().randomInt(0, 360) : 0.0d; // 260 is the initial value in NetLogo replays random scenario.
 
 	protected Agent(final ContinuousSpace<Agent> space, final Grid<Agent> grid, final long id) {
 		this.space = space;
@@ -155,9 +154,18 @@ public class Agent {
 	public void forward(final double distance) {
 		final double[] anglesForMoveByVector = { (Math.PI / 2) - getHeadingInRads(), 0.0 };
 
-		final NdPoint newPos = space.moveByVector(this, distance, anglesForMoveByVector);
-		this.setPosition(newPos); // update the grid as well.
+		moveByVector(distance, anglesForMoveByVector);
 	}
+	
+	public NdPoint moveByVector(double distance, double... anglesInRadians) {
+		final NdPoint newPos = getSpace().moveByVector(this, distance, anglesInRadians);
+
+		final GridPoint p = ndPointToGridPoint(newPos);
+		getGrid().moveTo(this, p.getX(), p.getY());
+		
+		return newPos;
+	}	
+
 
 	/**
 	 * Gets the heading of the agent. The heading is a degree in the range (-180;180].

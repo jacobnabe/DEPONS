@@ -34,6 +34,7 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import dk.au.bios.porpoise.behavior.RandomSource;
 import dk.au.bios.porpoise.landscape.CellData;
 import dk.au.bios.porpoise.landscape.DataFileMetaData;
+import dk.au.bios.porpoise.landscape.GridSpatialPartitioning;
 import dk.au.bios.porpoise.util.SimulationTime;
 
 /**
@@ -70,6 +71,8 @@ public final class Globals {
 
 	private static Integer simYears = null; // Limit simulation to number of years.
 
+	private static GridSpatialPartitioning spatialPartitioning;
+
 	public static RandomSource getRandomSource() {
 		return randomSource;
 	}
@@ -88,6 +91,14 @@ public final class Globals {
 
 	public static void resetMonthlyStats() {
 		monthlyStats = new PorpoiseStatistics();
+	}
+
+	public static GridSpatialPartitioning getSpatialPartitioning() {
+		return spatialPartitioning;
+	}
+
+	public static void setSpatialPartitioning(GridSpatialPartitioning gsp) {
+		spatialPartitioning = gsp;
 	}
 
 	public static LinkedList<Integer> getListOfDeadAge() {

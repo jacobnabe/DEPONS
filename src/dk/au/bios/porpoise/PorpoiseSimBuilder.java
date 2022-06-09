@@ -38,6 +38,7 @@ import dk.au.bios.porpoise.behavior.RefMem;
 import dk.au.bios.porpoise.behavior.RefMemTurnCalculator;
 import dk.au.bios.porpoise.behavior.ReplayedRandomSource;
 import dk.au.bios.porpoise.landscape.CellData;
+import dk.au.bios.porpoise.landscape.GridSpatialPartitioning;
 import dk.au.bios.porpoise.landscape.LandscapeLoader;
 import dk.au.bios.porpoise.ships.ShipLoader;
 import dk.au.bios.porpoise.tasks.AddTrackedPorpoisesTask;
@@ -139,6 +140,9 @@ public class PorpoiseSimBuilder implements ContextBuilder<Agent> {
 
 		final ContinuousSpace<Agent> space = buildSpace(context);
 		final Grid<Agent> grid = buildGrid(context);
+
+		Globals.setSpatialPartitioning(new GridSpatialPartitioning(25, 25)); // Each "super-grid" cell is 25x25 normal cells (10km x 10km)
+		space.addProjectionListener(Globals.getSpatialPartitioning());
 
 		final FoodAgentProxy foodAgent = new FoodAgentProxy(space, grid, 0);
 		context.add(foodAgent);
