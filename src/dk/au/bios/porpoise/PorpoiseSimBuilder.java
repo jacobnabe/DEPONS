@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2019 Jacob Nabe-Nielsen <jnn@bios.au.dk>
+ * Copyright (C) 2017-2022 Jacob Nabe-Nielsen <jnn@bios.au.dk>
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
  * License version 2 and only version 2 as published by the Free Software Foundation.
@@ -141,10 +141,12 @@ public class PorpoiseSimBuilder implements ContextBuilder<Agent> {
 		final ContinuousSpace<Agent> space = buildSpace(context);
 		final Grid<Agent> grid = buildGrid(context);
 
+		Globals.setSpace(space);
+		Globals.setGrid(grid);
 		Globals.setSpatialPartitioning(new GridSpatialPartitioning(25, 25)); // Each "super-grid" cell is 25x25 normal cells (10km x 10km)
 		space.addProjectionListener(Globals.getSpatialPartitioning());
 
-		final FoodAgentProxy foodAgent = new FoodAgentProxy(space, grid, 0);
+		final FoodAgentProxy foodAgent = new FoodAgentProxy(0);
 		context.add(foodAgent);
 		context.add(Globals.getMonthlyStats());
 
@@ -155,7 +157,7 @@ public class PorpoiseSimBuilder implements ContextBuilder<Agent> {
 		if (SimulationParameters.isShipsEnabled()) {
 			ShipLoader loader = new ShipLoader();
 			try {
-				loader.load(context, space, grid, landscape);
+				loader.load(context, landscape);
 			} catch (Exception e) {
 				if (RSApplication.getRSApplicationInstance() != null) {
 					RSApplication.getRSApplicationInstance().getErrorLog().addError(new MessageEvent(this, Level.FATAL, "Error loading ship data"));
@@ -234,7 +236,7 @@ public class PorpoiseSimBuilder implements ContextBuilder<Agent> {
 		final int numPorpoises = SimulationParameters.getPorpoiseCount();
 		for (int i = 0; i < numPorpoises; i++) {
 			final int nextAgeDistrib = Globals.getRandomSource().nextAgeDistrib(0, ageDistribution.length);
-			final Porpoise p = new Porpoise(space, grid, context, ageDistribution[nextAgeDistrib], refMemTurn);
+			final Porpoise p = new Porpoise(context, ageDistribution[nextAgeDistrib], refMemTurn);
 			context.add(p);
 			p.moveAwayFromLand();
 
@@ -254,7 +256,7 @@ public class PorpoiseSimBuilder implements ContextBuilder<Agent> {
 			final Grid<Agent> grid) {
 		final int trackedPorpoisesCount = SimulationParameters.getTrackedPorpoiseCount();
 		if (trackedPorpoisesCount > 0) {
-			final AddTrackedPorpoisesTask addTrackedPorpoisesTask = new AddTrackedPorpoisesTask(context, space, grid,
+			final AddTrackedPorpoisesTask addTrackedPorpoisesTask = new AddTrackedPorpoisesTask(context,
 					SimulationParameters.getLandscape(), trackedPorpoisesCount);
 			addTrackedPorpoisesTask.setup();
 		}
@@ -265,7 +267,7 @@ public class PorpoiseSimBuilder implements ContextBuilder<Agent> {
 		if (turbines != null && !"off".equalsIgnoreCase(turbines)) {
 			// Load and set up turbines
 			try {
-				Turbine.load(context, space, grid, turbines, RunEnvironment.getInstance().isBatch());
+				Turbine.load(context, turbines, RunEnvironment.getInstance().isBatch());
 			} catch (final Exception e) {
 				throw new RuntimeException(e);
 			}
@@ -283,11 +285,11 @@ public class PorpoiseSimBuilder implements ContextBuilder<Agent> {
 					new WrapAroundBorders(), Globals.getWorldWidth(), Globals.getWorldHeight());
 			context.addValueLayer(visitedCellValueLayer);
 
-			final BackgroundAgent ba = new BackgroundAgent(space, grid);
+			final BackgroundAgent ba = new BackgroundAgent();
 			context.add(ba);
 			ba.initialize();
 
-			final TrackingDisplayAgent tda = new TrackingDisplayAgent(space, grid, 0);
+			final TrackingDisplayAgent tda = new TrackingDisplayAgent(0);
 			context.add(tda);
 			tda.initialize();
 
@@ -369,7 +371,7 @@ public class PorpoiseSimBuilder implements ContextBuilder<Agent> {
 		Block.initialize(maxBlock + 1);
 
 		for (int i = 0; i < (maxBlock + 1); i++) {
-			final Block b = new Block(space, grid, i, context);
+			final Block b = new Block(i, context);
 			context.add(b);
 		}
 	}

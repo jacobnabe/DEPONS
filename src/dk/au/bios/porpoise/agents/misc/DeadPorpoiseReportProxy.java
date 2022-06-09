@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2019 Jacob Nabe-Nielsen <jnn@bios.au.dk>
+ * Copyright (C) 2017-2022 Jacob Nabe-Nielsen <jnn@bios.au.dk>
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
  * License version 2 and only version 2 as published by the Free Software Foundation.
@@ -30,8 +30,6 @@ package dk.au.bios.porpoise.agents.misc;
 import dk.au.bios.porpoise.Agent;
 import dk.au.bios.porpoise.Porpoise;
 import dk.au.bios.porpoise.util.SimulationTime;
-import repast.simphony.space.continuous.ContinuousSpace;
-import repast.simphony.space.grid.Grid;
 
 /**
  * A special agent used for reporting statistics at the time of death. An
@@ -51,8 +49,8 @@ public class DeadPorpoiseReportProxy extends Agent {
 	private int calvesWeaned;
 	private String longDistMovType;
 
-	public DeadPorpoiseReportProxy(ContinuousSpace<Agent> space, Grid<Agent> grid, Porpoise porp) {
-		super(space, grid, porp.getId());
+	public DeadPorpoiseReportProxy(Porpoise porp) {
+		super(porp.getId());
 
 		this.tickAtDeath = SimulationTime.getTick();
 		this.ageAtDeath = porp.getAge();

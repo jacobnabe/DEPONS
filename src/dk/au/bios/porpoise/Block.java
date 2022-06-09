@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2019 Jacob Nabe-Nielsen <jnn@bios.au.dk>
+ * Copyright (C) 2017-2022 Jacob Nabe-Nielsen <jnn@bios.au.dk>
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
  * License version 2 and only version 2 as published by the Free Software Foundation.
@@ -27,10 +27,8 @@
 
 package dk.au.bios.porpoise;
 
-import repast.simphony.context.Context;
-import repast.simphony.space.continuous.ContinuousSpace;
-import repast.simphony.space.grid.Grid;
 import dk.au.bios.porpoise.util.SimulationTime;
+import repast.simphony.context.Context;
 
 /**
  * Dummy placeholder for the squares in the model.
@@ -49,8 +47,8 @@ public class Block extends Agent {
 	 * @param id The id number of the square, this is the number from the
 	 * @param context The current context.
 	 */
-	public Block(final ContinuousSpace<Agent> space, final Grid<Agent> grid, final long id, final Context<Agent> context) {
-		super(space, grid, id);
+	public Block(final long id, final Context<Agent> context) {
+		super(id);
 		Block.context = context;
 	}
 

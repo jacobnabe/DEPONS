@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2019 Jacob Nabe-Nielsen <jnn@bios.au.dk>
+ * Copyright (C) 2017-2022 Jacob Nabe-Nielsen <jnn@bios.au.dk>
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
  * License version 2 and only version 2 as published by the Free Software Foundation.
@@ -29,9 +29,7 @@ package dk.au.bios.porpoise;
 
 import dk.au.bios.porpoise.util.SimulationTime;
 import repast.simphony.engine.schedule.ScheduledMethod;
-import repast.simphony.space.continuous.ContinuousSpace;
 import repast.simphony.space.continuous.NdPoint;
-import repast.simphony.space.grid.Grid;
 
 /**
  * A ship agent. This is used in the Kattegat simulation and is not relevant for the current DEPONS model.
@@ -45,8 +43,8 @@ public class Ship extends SoundSource {
 	private final dk.au.bios.porpoise.ships.Ship data;
 	private final NdPoint surveyAreaPoint;
 	
-	public Ship(final ContinuousSpace<Agent> space, final Grid<Agent> grid, final NdPoint[] route, final dk.au.bios.porpoise.ships.Ship data) {
-		super(space, grid, data.getImpact());
+	public Ship(final NdPoint[] route, final dk.au.bios.porpoise.ships.Ship data) {
+		super(data.getImpact());
 		this.route = route;
 		this.data = data;
 		this.forward = false;

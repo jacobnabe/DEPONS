@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2019 Jacob Nabe-Nielsen <jnn@bios.au.dk>
+ * Copyright (C) 2017-2022 Jacob Nabe-Nielsen <jnn@bios.au.dk>
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
  * License version 2 and only version 2 as published by the Free Software Foundation.
@@ -29,9 +29,7 @@ package dk.au.bios.porpoise;
 
 import java.awt.Color;
 
-import repast.simphony.space.continuous.ContinuousSpace;
 import repast.simphony.space.continuous.NdPoint;
-import repast.simphony.space.grid.Grid;
 import repast.simphony.space.grid.GridPoint;
 
 /**
@@ -49,8 +47,8 @@ public class BackgroundAgent extends Agent {
 	private double maxValue = Double.MIN_VALUE;
 	private final double rangeDiv;
 
-	public BackgroundAgent(final ContinuousSpace<Agent> space, final Grid<Agent> grid) {
-		super(space, grid, 0);
+	public BackgroundAgent() {
+		super(0);
 
 		for (int x = 0; x < Globals.getWorldWidth(); x++) {
 			for (int y = 0; y < Globals.getWorldHeight(); y++) {

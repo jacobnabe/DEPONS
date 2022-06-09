@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2019 Jacob Nabe-Nielsen <jnn@bios.au.dk>
+ * Copyright (C) 2017-2022 Jacob Nabe-Nielsen <jnn@bios.au.dk>
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
  * License version 2 and only version 2 as published by the Free Software Foundation.
@@ -27,8 +27,6 @@
 
 package dk.au.bios.porpoise;
 
-import repast.simphony.space.continuous.ContinuousSpace;
-import repast.simphony.space.grid.Grid;
 import dk.au.bios.porpoise.tasks.FoodTask;
 import dk.au.bios.porpoise.util.Pair;
 
@@ -38,8 +36,8 @@ import dk.au.bios.porpoise.util.Pair;
  */
 public class FoodAgentProxy extends Agent {
 
-	public FoodAgentProxy(final ContinuousSpace<Agent> space, final Grid<Agent> grid, final long id) {
-		super(space, grid, id);
+	public FoodAgentProxy(final long id) {
+		super(id);
 	}
 
 	public double getFoodEnergyLevel() {

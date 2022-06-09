@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2019 Jacob Nabe-Nielsen <jnn@bios.au.dk>
+ * Copyright (C) 2017-2022 Jacob Nabe-Nielsen <jnn@bios.au.dk>
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
  * License version 2 and only version 2 as published by the Free Software Foundation.
@@ -36,6 +36,8 @@ import dk.au.bios.porpoise.landscape.CellData;
 import dk.au.bios.porpoise.landscape.DataFileMetaData;
 import dk.au.bios.porpoise.landscape.GridSpatialPartitioning;
 import dk.au.bios.porpoise.util.SimulationTime;
+import repast.simphony.space.continuous.ContinuousSpace;
+import repast.simphony.space.grid.Grid;
 
 /**
  * Placeholder for NETLOGO globals and various utility functionality.
@@ -71,6 +73,9 @@ public final class Globals {
 
 	private static Integer simYears = null; // Limit simulation to number of years.
 
+	private static ContinuousSpace<Agent> space;
+	private static Grid<Agent> grid;
+
 	private static GridSpatialPartitioning spatialPartitioning;
 
 	public static RandomSource getRandomSource() {
@@ -91,6 +96,22 @@ public final class Globals {
 
 	public static void resetMonthlyStats() {
 		monthlyStats = new PorpoiseStatistics();
+	}
+
+	public static ContinuousSpace<Agent> getSpace() {
+		return space;
+	}
+
+	public static void setSpace(ContinuousSpace<Agent> space) {
+		Globals.space = space;
+	}
+
+	public static Grid<Agent> getGrid() {
+		return grid;
+	}
+
+	public static void setGrid(Grid<Agent> grid) {
+		Globals.grid = grid;
 	}
 
 	public static GridSpatialPartitioning getSpatialPartitioning() {

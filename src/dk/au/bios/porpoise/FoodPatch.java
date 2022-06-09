@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2019 Jacob Nabe-Nielsen <jnn@bios.au.dk>
+ * Copyright (C) 2017-2022 Jacob Nabe-Nielsen <jnn@bios.au.dk>
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
  * License version 2 and only version 2 as published by the Free Software Foundation.
@@ -29,8 +29,6 @@ package dk.au.bios.porpoise;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-import repast.simphony.space.continuous.ContinuousSpace;
-import repast.simphony.space.grid.Grid;
 import repast.simphony.space.grid.GridPoint;
 
 /**
@@ -41,8 +39,8 @@ public class FoodPatch extends Agent {
 	private static AtomicLong nextId = new AtomicLong(0);
 	private final GridPoint location;
 
-	protected FoodPatch(final ContinuousSpace<Agent> space, final Grid<Agent> grid, final GridPoint location) {
-		super(space, grid, nextId.incrementAndGet());
+	protected FoodPatch(final GridPoint location) {
+		super(nextId.incrementAndGet());
 		this.location = location;
 	}
 

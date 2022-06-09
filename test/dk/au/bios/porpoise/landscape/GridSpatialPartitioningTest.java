@@ -65,10 +65,12 @@ public class GridSpatialPartitioningTest {
 		var space = factory.createContinuousSpace("space", context, new RandomCartesianAdder<Agent>(), new BouncyBorders(), new double[] { Globals.getWorldWidth(), Globals.getWorldHeight()}, new double[] {0.5f, 0.5f});
 		var gridFactory = GridFactoryFinder.createGridFactory(null);
 		var grid = gridFactory.createGrid("grid", context, new GridBuilderParameters<Agent>(new repast.simphony.space.grid.BouncyBorders(), new SimpleGridAdder<Agent>(), true, Globals.getWorldWidth(), Globals.getWorldHeight()));
+		Globals.setSpace(space);
+		Globals.setGrid(grid);
 		spatialPart = new GridSpatialPartitioning(25, 25);
 		Globals.setSpatialPartitioning(spatialPart);
 		space.addProjectionListener(spatialPart);
-		p = new Porpoise(space, grid, context, 1, new FastRefMemTurn());
+		p = new Porpoise(context, 1, new FastRefMemTurn());
 		context.add(p);
 	}
 

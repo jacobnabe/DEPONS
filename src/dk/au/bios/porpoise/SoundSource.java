@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2019 Jacob Nabe-Nielsen <jnn@bios.au.dk>
+ * Copyright (C) 2017-2022 Jacob Nabe-Nielsen <jnn@bios.au.dk>
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
  * License version 2 and only version 2 as published by the Free Software Foundation.
@@ -29,12 +29,10 @@ package dk.au.bios.porpoise;
 
 import java.util.concurrent.atomic.AtomicLong;
 
+import dk.au.bios.porpoise.util.DebugLog;
 import repast.simphony.context.Context;
 import repast.simphony.query.space.continuous.ContinuousWithin;
-import repast.simphony.space.continuous.ContinuousSpace;
 import repast.simphony.space.continuous.NdPoint;
-import repast.simphony.space.grid.Grid;
-import dk.au.bios.porpoise.util.DebugLog;
 
 /**
  * A generic sound source agent. This has been used for the deterrence testing.
@@ -46,18 +44,18 @@ public class SoundSource extends Agent {
 
 	protected final double impact;
 
-	public SoundSource(final ContinuousSpace<Agent> space, final Grid<Agent> grid, final double impact) {
-		super(space, grid, soundSourceId.incrementAndGet());
+	public SoundSource(final double impact) {
+		super(soundSourceId.incrementAndGet());
 		this.impact = impact;
 	}
 
-	public SoundSource(final Context<Agent> context, final ContinuousSpace<Agent> space, final Grid<Agent> grid,
-			final Porpoise p, final double angleFromPorpoise, final double distanceFromPorpoise, final double impact) {
-		this(space, grid, impact);
+	public SoundSource(final Context<Agent> context, final Porpoise p, final double angleFromPorpoise,
+			final double distanceFromPorpoise, final double impact) {
+		this(impact);
 
 		context.add(this);
 		setPosition(p.getPosition());
-		final NdPoint position = space.moveByVector(this, distanceFromPorpoise,
+		final NdPoint position = getSpace().moveByVector(this, distanceFromPorpoise,
 				((angleFromPorpoise - 90.0) * -Math.PI / 180.0), 0);
 		this.setPosition(position);
 	}

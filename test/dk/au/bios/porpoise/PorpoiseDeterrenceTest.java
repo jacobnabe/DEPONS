@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2019 Jacob Nabe-Nielsen <jnn@bios.au.dk>
+ * Copyright (C) 2017-2022 Jacob Nabe-Nielsen <jnn@bios.au.dk>
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
  * License version 2 and only version 2 as published by the Free Software Foundation.
@@ -40,6 +40,7 @@ import dk.au.bios.porpoise.behavior.RandomSource;
 import dk.au.bios.porpoise.landscape.CellData;
 import dk.au.bios.porpoise.landscape.CellDataTestData;
 import dk.au.bios.porpoise.landscape.DataFileMetaData;
+import dk.au.bios.porpoise.landscape.GridSpatialPartitioning;
 import repast.simphony.context.Context;
 import repast.simphony.context.DefaultContext;
 import repast.simphony.context.space.continuous.ContinuousSpaceFactoryFinder;
@@ -48,10 +49,8 @@ import repast.simphony.engine.environment.RunEnvironment;
 import repast.simphony.engine.environment.RunState;
 import repast.simphony.engine.schedule.Schedule;
 import repast.simphony.space.continuous.BouncyBorders;
-import repast.simphony.space.continuous.ContinuousSpace;
 import repast.simphony.space.continuous.NdPoint;
 import repast.simphony.space.continuous.RandomCartesianAdder;
-import repast.simphony.space.grid.Grid;
 import repast.simphony.space.grid.GridBuilderParameters;
 import repast.simphony.space.grid.SimpleGridAdder;
 
@@ -63,8 +62,6 @@ public class PorpoiseDeterrenceTest {
 	private Context<Agent> context;
 	private Schedule schedule;
 
-	private ContinuousSpace<Agent> space;
-	private Grid<Agent> grid;
 	private CellData cellData;
 
 	@BeforeEach
@@ -75,25 +72,20 @@ public class PorpoiseDeterrenceTest {
 		this.schedule = new Schedule();
 		RunEnvironment.init(schedule, null, null, true);
 		context = new DefaultContext<>();
-		//		System.out.println("Loading model");
-		//		context = new PorpoiseSimBuilder().build(context);
 		RunState.init().setMasterContext(context);
 		
 		var factory = ContinuousSpaceFactoryFinder.createContinuousSpaceFactory(null);
-		space = factory.createContinuousSpace("space", context, new RandomCartesianAdder<Agent>(), new BouncyBorders(), new double[] {Globals.getWorldWidth(), Globals.getWorldHeight()}, new double[] {0.5f, 0.5f});
+		var space = factory.createContinuousSpace("space", context, new RandomCartesianAdder<Agent>(), new BouncyBorders(), new double[] {Globals.getWorldWidth(), Globals.getWorldHeight()}, new double[] {0.5f, 0.5f});
 		var gridFactory = GridFactoryFinder.createGridFactory(null);
-		grid = gridFactory.createGrid("grid", context, new GridBuilderParameters<Agent>(new repast.simphony.space.grid.BouncyBorders(), new SimpleGridAdder<Agent>(), true, Globals.getWorldWidth(), Globals.getWorldHeight()));
+		var grid = gridFactory.createGrid("grid", context, new GridBuilderParameters<Agent>(new repast.simphony.space.grid.BouncyBorders(), new SimpleGridAdder<Agent>(), true, Globals.getWorldWidth(), Globals.getWorldHeight()));
 		cellData = CellDataTestData.getCellData();
 		Globals.setCellData(cellData);
+		Globals.setSpace(space);
+		Globals.setGrid(grid);
+		Globals.setSpatialPartitioning(new GridSpatialPartitioning(25, 25));
 		DispersalFactory.setType("off");
 
 		var random = mock(RandomSource.class);
-//		when(random.nextStdMove(from, to))
-//		def random = Mock(RandomSource)
-//		random.nextNormal_0_38() >>> [0.0]
-//		random.nextNormal_96_28() >>> [0.0]
-//		random.nextStdMove() >>> [0.0]
-//		random.nextNormal_42_48() >>> [0.0]
 
 		Globals.setRandomSource(random);
 	}
@@ -102,21 +94,18 @@ public class PorpoiseDeterrenceTest {
 	public void deterrenceDecay50() {
 		SimulationParameters.setDeterDecay(50);
 		SimulationParameters.setDeterTime(1000);
-		var p = new Porpoise(space, grid, context, 1, null);
+		var p = new Porpoise(context, 1, null);
 		context.add(p);
 		p.setPosition(new NdPoint(10.0, 10.0));
 		p.setHeading(0.0);
 
-		var turb = new Turbine(space, grid, "Test Turbing", 64, 5.0, 5.0, 100, 150, 1);
+		var turb = new Turbine("Test Turbine", 64, 5.0, 5.0, 100, 150, 1);
 		context.add(turb);
 		turb.setPosition(new NdPoint(5.0, 5.0));
 
-//		expect: "initial checks"
 		assertThat(p.getDeterStrength()).isEqualTo(0.0);
 
-//		when: "deter porpoise"; 
 		p.deter(64, turb);
-//		then: 
 		assertThat(p.getDeterStrength()).isEqualTo(64);
 
 		DoubleStream.of(32.0, 16.0, 8.0, 4.0, 2.0, 1.0, 0.5, 0.25, 0.125).forEach(v -> {
@@ -127,24 +116,20 @@ public class PorpoiseDeterrenceTest {
 
 	@Test
 	public void deterrenceDecay25() {
-//		given: "test has been set up"
 		SimulationParameters.setDeterDecay(25);
 		SimulationParameters.setDeterTime(1000);
-		var p = new Porpoise(space, grid, context, 1, null);
+		var p = new Porpoise(context, 1, null);
 		context.add(p);
 		p.setPosition(new NdPoint(10.0, 10.0));
 		p.setHeading(0.0);
 
-		var turb = new Turbine(space, grid, "Test Turbing", 64, 5.0, 5.0, 100, 150, 1);
+		var turb = new Turbine("Test Turbine", 64, 5.0, 5.0, 100, 150, 1);
 		context.add(turb);
 		turb.setPosition(new NdPoint(5.0, 5.0));
 
-//		expect: "initial checks"
 		assertThat(p.getDeterStrength()).isEqualTo(0.0);
 
-//		when: "deter porpoise"; 
 		p.deter(64, turb);
-//		then: 
 		assertThat(p.getDeterStrength()).isEqualTo(64);
 
 		DoubleStream.of(48.0, 36.0, 27.0, 20.25, 15.1875, 11.390625, 8.54296875, 6.4072265625).forEach(v -> {
@@ -158,21 +143,18 @@ public class PorpoiseDeterrenceTest {
 //		given: "test has been set up"
 		SimulationParameters.setDeterDecay(50);
 		SimulationParameters.setDeterTime(5);
-		var p = new Porpoise(space, grid, context, 1, null);
+		var p = new Porpoise(context, 1, null);
 		context.add(p);
 		p.setPosition(new NdPoint(10.0, 10.0));
 		p.setHeading(0.0);
 
-		var turb = new Turbine(space, grid, "Test Turbing", 64, 5.0, 5.0, 100, 150, 1);
+		var turb = new Turbine("Test Turbine", 64, 5.0, 5.0, 100, 150, 1);
 		context.add(turb);
 		turb.setPosition(new NdPoint(5.0, 5.0));
 
-//		expect: "initial checks"
 		assertThat(p.getDeterStrength()).isEqualTo(0.0);
 
-//		when: "deter porpoise"; 
 		p.deter(64, turb);
-//		then: 
 		assertThat(p.getDeterStrength()).isEqualTo(64);
 
 		DoubleStream.of(32.0, 16.0, 8.0, 4.0, 2.0, 0.0).forEach(v -> {
@@ -180,12 +162,9 @@ public class PorpoiseDeterrenceTest {
 			assertThat(p.getDeterStrength()).isEqualTo(v);
 		});
 
-		// Deter time = 2
-//		when:
 		SimulationParameters.setDeterTime(2);
 		p.deter(64, turb);
 
-//		then: 
 		assertThat(p.getDeterStrength()).isEqualTo(64);
 
 		DoubleStream.of(32.0, 16.0, 0.0).forEach(v -> {

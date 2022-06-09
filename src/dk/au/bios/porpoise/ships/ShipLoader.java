@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2021 Jacob Nabe-Nielsen <jnn@bios.au.dk>
+ * Copyright (C) 2017-2022 Jacob Nabe-Nielsen <jnn@bios.au.dk>
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
  * License version 2 and only version 2 as published by the Free Software Foundation.
@@ -46,31 +46,27 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import dk.au.bios.porpoise.Agent;
 import dk.au.bios.porpoise.Globals;
 import repast.simphony.context.Context;
-import repast.simphony.space.continuous.ContinuousSpace;
 import repast.simphony.space.continuous.NdPoint;
-import repast.simphony.space.grid.Grid;
 
 public class ShipLoader {
 
-	public void load(final Context<Agent> context, final ContinuousSpace<Agent> space, final Grid<Agent> grid,
-			final String landscape) throws Exception {
+	public void load(final Context<Agent> context, final String landscape) throws Exception {
 
 		if (Files.exists(Paths.get("data", landscape, "ships.json"))) {
 			try (InputStream dataIS = new FileInputStream(Paths.get("data", landscape, "ships.json").toFile())) {
-				loadFromStream(context, space, grid, dataIS);
+				loadFromStream(context, dataIS);
 			}
 		} else if (Files.exists(Paths.get("data", landscape + ".zip"))) {
 			try (ZipFile zf = new ZipFile(Paths.get("data", landscape + ".zip").toFile());
 					InputStream dataIS = zf.getInputStream(zf.getEntry("ships.json"))) {
-				loadFromStream(context, space, grid, dataIS);
+				loadFromStream(context, dataIS);
 			}
 		} else {
 			throw new Exception("File ships.json does not exist for landscape " + landscape);
 		}
 	}
 
-	private void loadFromStream(final Context<Agent> context, final ContinuousSpace<Agent> space,
-			final Grid<Agent> grid, final InputStream source)
+	private void loadFromStream(final Context<Agent> context, final InputStream source)
 			throws JsonParseException, JsonMappingException, IOException {
 		ObjectMapper objMapper = new ObjectMapper();
 
@@ -89,7 +85,7 @@ public class ShipLoader {
 
 		for (Ship s : shipsData.getShips()) {
 			NdPoint[] route = routes.get(s.getRoute());
-			dk.au.bios.porpoise.Ship agent = new dk.au.bios.porpoise.Ship(space, grid, route, s);
+			dk.au.bios.porpoise.Ship agent = new dk.au.bios.porpoise.Ship(route, s);
 			context.add(agent);
 			agent.initialize();
 		}

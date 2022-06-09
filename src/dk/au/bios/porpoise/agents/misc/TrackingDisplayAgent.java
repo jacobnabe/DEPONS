@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2019 Jacob Nabe-Nielsen <jnn@bios.au.dk>
+ * Copyright (C) 2017-2022 Jacob Nabe-Nielsen <jnn@bios.au.dk>
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
  * License version 2 and only version 2 as published by the Free Software Foundation.
@@ -31,12 +31,9 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 
 import aragost.repast.visualization.DirtyRegion;
-import repast.simphony.space.continuous.ContinuousSpace;
-import repast.simphony.space.continuous.NdPoint;
-import repast.simphony.space.grid.Grid;
-
 import dk.au.bios.porpoise.Agent;
 import dk.au.bios.porpoise.Globals;
+import repast.simphony.space.continuous.NdPoint;
 
 /**
  * A helper-agent to display the cells visited by a tracked porpoise (RandomPorpoiseReportProxy)
@@ -46,8 +43,8 @@ public class TrackingDisplayAgent extends Agent {
 	private final BufferedImage img;
 	private final DirtyRegion dr = new DirtyRegion(Globals.getWorldWidth(), Globals.getWorldHeight(), 0, 0);
 
-	public TrackingDisplayAgent(final ContinuousSpace<Agent> space, final Grid<Agent> grid, final long id) {
-		super(space, grid, id);
+	public TrackingDisplayAgent(final long id) {
+		super(id);
 		img = new BufferedImage(Globals.getWorldWidth(), Globals.getWorldHeight(), BufferedImage.TYPE_INT_ARGB);
 	}
 
