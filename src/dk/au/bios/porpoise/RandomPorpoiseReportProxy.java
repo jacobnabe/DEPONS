@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2019 Jacob Nabe-Nielsen <jnn@bios.au.dk>
+ * Copyright (C) 2017-2022 Jacob Nabe-Nielsen <jnn@bios.au.dk>
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
  * License version 2 and only version 2 as published by the Free Software Foundation.
@@ -27,12 +27,10 @@
 
 package dk.au.bios.porpoise;
 
-import repast.simphony.engine.schedule.ScheduledMethod;
-import repast.simphony.space.continuous.ContinuousSpace;
-import repast.simphony.space.grid.Grid;
 import dk.au.bios.porpoise.util.DebugLog;
 import dk.au.bios.porpoise.util.SimulationTime;
 import dk.au.bios.porpoise.util.test.PorpoiseTestDataCapturer;
+import repast.simphony.engine.schedule.ScheduledMethod;
 
 /**
  * Used to report on a porpoise in the simulation.
@@ -41,9 +39,8 @@ public class RandomPorpoiseReportProxy extends Agent {
 
 	private final Porpoise porpoise;
 
-	public RandomPorpoiseReportProxy(final ContinuousSpace<Agent> space, final Grid<Agent> grid, final long id,
-			final Porpoise trackedPorpoise) {
-		super(space, grid, id);
+	public RandomPorpoiseReportProxy(final long id, final Porpoise trackedPorpoise) {
+		super(id);
 
 		this.porpoise = trackedPorpoise;
 	}

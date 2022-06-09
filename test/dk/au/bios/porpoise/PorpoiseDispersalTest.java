@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2019 Jacob Nabe-Nielsen <jnn@bios.au.dk>
+ * Copyright (C) 2017-2022 Jacob Nabe-Nielsen <jnn@bios.au.dk>
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
  * License version 2 and only version 2 as published by the Free Software Foundation.
@@ -43,6 +43,7 @@ import dk.au.bios.porpoise.behavior.DispersalFactory;
 import dk.au.bios.porpoise.behavior.RandomSource;
 import dk.au.bios.porpoise.landscape.CellDataTestData;
 import dk.au.bios.porpoise.landscape.DataFileMetaData;
+import dk.au.bios.porpoise.landscape.GridSpatialPartitioning;
 import repast.simphony.context.Context;
 import repast.simphony.context.DefaultContext;
 import repast.simphony.context.space.continuous.ContinuousSpaceFactoryFinder;
@@ -113,42 +114,30 @@ class PorpoiseDispersalTest {
 		var grid = gridFactory.createGrid("grid", context, new GridBuilderParameters<Agent>(new repast.simphony.space.grid.BouncyBorders(), new SimpleGridAdder<Agent>(), true, Globals.getWorldWidth(), Globals.getWorldHeight()));
 		var cellData = CellDataTestData.getCellData();
 		Globals.setCellData(cellData);
+		Globals.setSpace(space);
+		Globals.setGrid(grid);
+		Globals.setSpatialPartitioning(new GridSpatialPartitioning(25, 25));
 
 		var random = mock(RandomSource.class);
-//		random.nextNormal_0_38() >>> [0.0]
-//		random.nextNormal_96_28() >>> [0.0]
-//		random.nextStdMove() >>> [0.0]
-//		random.nextNormal_42_48() >>> [0.0]
 
 		Globals.setRandomSource(random);
 
-		var p = new Porpoise(space, grid, context, 1, null);
+		var p = new Porpoise(context, 1, null);
 		context.add(p);
 		p.setPosition(new NdPoint(10.0, 10.0));
 		p.setHeading(0.0);
 
-//		expect: "dispersal status"
 		assertThat(p.getDispersalBehaviour().getDispersalType()).isEqualTo(0);
 
-//		when: "three days, with energy drop and increase"
+		// three days, with energy drop and increase
 		SimulationParameters.setTDisp(days.length);
 		Arrays.stream(days).forEach(v -> {
 			p.getEnergyLevelDaily().add(v);
 		});
 		p.performDailyStep();
 
-//		then: "still not dispersing"
+		// still not dispersing
 		assertThat(p.getDispersalBehaviour().getDispersalType()).isEqualTo(disp);
-
-//		where:
-//		        days         | disp
-//		[2d, 1d, 5d]         |   0
-//		[3d, 2d, 1d]         |   3
-//		[3d, 4d, 1d]         |   0
-//		[5d, 4d, 3d, 2d, 1d] |   3
-//		[7d, 5d, 3d, 2d, 1d] |   3
-//		[3d, 2d, 3d, 2d, 1d] |   0
-//		[2d, 1d]             |   3
-//		[1d, 2d]             |   0
 	}
+
 }

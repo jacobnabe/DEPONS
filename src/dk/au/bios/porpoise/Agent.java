@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2019 Jacob Nabe-Nielsen <jnn@bios.au.dk>
+ * Copyright (C) 2017-2022 Jacob Nabe-Nielsen <jnn@bios.au.dk>
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
  * License version 2 and only version 2 as published by the Free Software Foundation.
@@ -46,15 +46,11 @@ import repast.simphony.util.SimUtilities;
 public class Agent {
 
 	private final long id;
-	private final ContinuousSpace<Agent> space;  // FIXME Global object, should not be an instance variable
-	private final Grid<Agent> grid;  // FIXME Global object, should not be an instance variable
 
 	private double heading = Globals.getRandomReplaySource() != null ? SimulationParameters.isHomogenous() ? 134 : 134
 			: Globals.getRandomSource() != null ? Globals.getRandomSource().randomInt(0, 360) : 0.0d; // 260 is the initial value in NetLogo replays random scenario.
 
-	protected Agent(final ContinuousSpace<Agent> space, final Grid<Agent> grid, final long id) {
-		this.space = space;
-		this.grid = grid;
+	protected Agent(final long id) {
 		this.id = id;
 	}
 
@@ -64,7 +60,7 @@ public class Agent {
 	 * @return The position of the agent.
 	 */
 	public NdPoint getPosition() {
-		return space.getLocation(this);
+		return getSpace().getLocation(this);
 	}
 
 	/**
@@ -73,10 +69,10 @@ public class Agent {
 	 * @param newPos the new position for the agent.
 	 */
 	public void setPosition(final NdPoint newPos) {
-		space.moveTo(this, newPos.getX(), newPos.getY());
+		getSpace().moveTo(this, newPos.getX(), newPos.getY());
 
 		final GridPoint p = ndPointToGridPoint(newPos);
-		grid.moveTo(this, p.getX(), p.getY());
+		getGrid().moveTo(this, p.getX(), p.getY());
 	}
 
 	/**
@@ -107,10 +103,10 @@ public class Agent {
 	 * @return A list of the neighboring cells.
 	 */
 	protected List<GridPoint> getNeighbors() {
-		final GridPoint currentLocation = grid.getLocation(this);
+		final GridPoint currentLocation = getGrid().getLocation(this);
 
 		// Look one cell in each direction, this is similar to the NetLogo neighborhood
-		final GridCellNgh<Object> nghCreator = new GridCellNgh<Object>(grid, currentLocation, Object.class, 1, 1);
+		final GridCellNgh<Object> nghCreator = new GridCellNgh<Object>(getGrid(), currentLocation, Object.class, 1, 1);
 		final List<GridCell<Object>> cells = nghCreator.getNeighborhood(false);
 
 		final List<GridPoint> list = new LinkedList<GridPoint>();
@@ -131,7 +127,7 @@ public class Agent {
 	 */
 	public void facePoint(final NdPoint point) {
 		if (!point.equals(getPosition())) {
-			final double[] displacement = space.getDisplacement(getPosition(), point);
+			final double[] displacement = getSpace().getDisplacement(getPosition(), point);
 			setHeading(normHeading(Utility.angleFromDisplacement(displacement[0], displacement[1])));
 		}
 		// else - We cannot face the current point, do nothing (NetLogo compatible)
@@ -143,7 +139,7 @@ public class Agent {
 	 * @param ndPoint
 	 */
 	public double distanceXY(final NdPoint ndPoint) {
-		return space.getDistance(getPosition(), ndPoint);
+		return getSpace().getDistance(getPosition(), ndPoint);
 	}
 
 	/**
@@ -245,11 +241,11 @@ public class Agent {
 	}
 
 	public ContinuousSpace<Agent> getSpace() {
-		return space;
+		return Globals.getSpace();
 	}
 
 	public Grid<Agent> getGrid() {
-		return grid;
+		return Globals.getGrid();
 	}
 
 }

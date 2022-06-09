@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2019 Jacob Nabe-Nielsen <jnn@bios.au.dk>
+ * Copyright (C) 2017-2022 Jacob Nabe-Nielsen <jnn@bios.au.dk>
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
  * License version 2 and only version 2 as published by the Free Software Foundation.
@@ -42,6 +42,7 @@ import dk.au.bios.porpoise.behavior.RandomSource;
 import dk.au.bios.porpoise.landscape.CellData;
 import dk.au.bios.porpoise.landscape.CellDataTestData;
 import dk.au.bios.porpoise.landscape.DataFileMetaData;
+import dk.au.bios.porpoise.landscape.GridSpatialPartitioning;
 import repast.simphony.context.Context;
 import repast.simphony.context.DefaultContext;
 import repast.simphony.context.space.continuous.ContinuousSpaceFactoryFinder;
@@ -50,10 +51,8 @@ import repast.simphony.engine.environment.RunEnvironment;
 import repast.simphony.engine.environment.RunState;
 import repast.simphony.engine.schedule.Schedule;
 import repast.simphony.space.continuous.BouncyBorders;
-import repast.simphony.space.continuous.ContinuousSpace;
 import repast.simphony.space.continuous.NdPoint;
 import repast.simphony.space.continuous.RandomCartesianAdder;
-import repast.simphony.space.grid.Grid;
 import repast.simphony.space.grid.GridBuilderParameters;
 import repast.simphony.space.grid.SimpleGridAdder;
 
@@ -64,8 +63,6 @@ class PorpoiseMoveTest {
 
 	private Context<Agent> context;
 	private Schedule schedule;
-	private ContinuousSpace<Agent> space;
-	private Grid<Agent> grid;
 	private CellData cellData;
 	private Porpoise p;
 
@@ -80,22 +77,20 @@ class PorpoiseMoveTest {
 		RunState.init().setMasterContext(context);
 
 		var factory = ContinuousSpaceFactoryFinder.createContinuousSpaceFactory(null);
-		space = factory.createContinuousSpace("space", context, new RandomCartesianAdder<Agent>(), new BouncyBorders(), new double[] { Globals.getWorldWidth(), Globals.getWorldHeight() }, new double[] { 0.5f, 0.5f});
+		var space = factory.createContinuousSpace("space", context, new RandomCartesianAdder<Agent>(), new BouncyBorders(), new double[] { Globals.getWorldWidth(), Globals.getWorldHeight() }, new double[] { 0.5f, 0.5f});
 		var gridFactory = GridFactoryFinder.createGridFactory(null);
-		grid = gridFactory.createGrid("grid", context, new GridBuilderParameters<Agent>(new repast.simphony.space.grid.BouncyBorders(), new SimpleGridAdder<Agent>(), true, Globals.getWorldWidth(), Globals.getWorldHeight()));
+		var grid = gridFactory.createGrid("grid", context, new GridBuilderParameters<Agent>(new repast.simphony.space.grid.BouncyBorders(), new SimpleGridAdder<Agent>(), true, Globals.getWorldWidth(), Globals.getWorldHeight()));
 		cellData = CellDataTestData.getCellData();
 		Globals.setCellData(cellData);
+		Globals.setSpace(space);
+		Globals.setGrid(grid);
+		Globals.setSpatialPartitioning(new GridSpatialPartitioning(25, 25));
 		DispersalFactory.setType("off");
 
-//		and: "no randomness"
 		var random = mock(RandomSource.class);
-//		random.nextNormal_0_38() >>> [0.0]
-//		random.nextNormal_96_28() >>> [0.0]
-//		random.nextStdMove() >>> [0.0]
-//		random.nextNormal_42_48() >>> [0.0]
 		Globals.setRandomSource(random);
 
-		p = new Porpoise(space, grid, context, 1, new FastRefMemTurn());
+		p = new Porpoise(context, 1, new FastRefMemTurn());
 		context.add(p);
 		p.setPosition(new NdPoint(10.0, 10.0));
 		p.setHeading(0.0);

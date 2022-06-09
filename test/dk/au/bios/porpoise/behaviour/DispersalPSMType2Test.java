@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2019 Jacob Nabe-Nielsen <jnn@bios.au.dk>
+ * Copyright (C) 2017-2022 Jacob Nabe-Nielsen <jnn@bios.au.dk>
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
  * License version 2 and only version 2 as published by the Free Software Foundation.
@@ -44,6 +44,7 @@ import dk.au.bios.porpoise.behavior.PersistentSpatialMemory;
 import dk.au.bios.porpoise.behavior.RandomSource;
 import dk.au.bios.porpoise.landscape.CellDataTestData;
 import dk.au.bios.porpoise.landscape.DataFileMetaData;
+import dk.au.bios.porpoise.landscape.GridSpatialPartitioning;
 import repast.simphony.context.Context;
 import repast.simphony.context.DefaultContext;
 import repast.simphony.context.space.continuous.ContinuousSpaceFactoryFinder;
@@ -71,10 +72,6 @@ class DispersalPSMType2Test {
 		Globals.setLandscapeMetadata(new DataFileMetaData(100, 100, 529473, 5972242, 400, null));
 		DispersalFactory.setType("PSM-Type2");
 		random = mock(RandomSource.class);
-//		random.nextCrwAngle() >>> [0.0]
-//		random.nextCrwAngleWithM() >>> [0.0]
-//		random.nextStdMove() >>> [0.0]
-//		random.nextCrwStepLength() >>> [0.0]
 		Globals.setRandomSource(random);
 
 		// Repast initialization
@@ -86,7 +83,6 @@ class DispersalPSMType2Test {
 
 	@Test
 	public void findMostAttractiveMemCell()	throws Exception {
-//		given: "A clear Persistent Spatial Memory"
 		var factory = ContinuousSpaceFactoryFinder.createContinuousSpaceFactory(null);
 		var space = factory.createContinuousSpace("space", context, new RandomCartesianAdder<Agent>(), new BouncyBorders(),
 				new double[] { Globals.getWorldWidth(), Globals.getWorldHeight() }, new double[] { 0.5f, 0.5f });
@@ -94,7 +90,10 @@ class DispersalPSMType2Test {
 		var grid = gridFactory.createGrid("grid", context, new GridBuilderParameters<Agent>(new repast.simphony.space.grid.BouncyBorders(), new SimpleGridAdder<Agent>(), true, Globals.getWorldWidth(), Globals.getWorldHeight()));
 		var cellData = CellDataTestData.getCellData();
 		Globals.setCellData(cellData);
-		var p = new Porpoise(space, grid, context, 1, new FastRefMemTurn());
+		Globals.setSpace(space);
+		Globals.setGrid(grid);
+		Globals.setSpatialPartitioning(new GridSpatialPartitioning(25, 25));
+		var p = new Porpoise(context, 1, new FastRefMemTurn());
 		context.add(p);
 		p.setPosition(new NdPoint(50.0, 50.0));
 		p.setHeading(0.0);
@@ -106,17 +105,15 @@ class DispersalPSMType2Test {
 		var psm = new PersistentSpatialMemory(Globals.getWorldWidth(), Globals.getWorldHeight(), 10);
 
 
-//		when: "the PSM is deactivated"
+		// the PSM is deactivated
 		p.getDispersalBehaviour().deactivate();
-//		then: "the PSM is not active"
 		assertThat(p.getDispersalBehaviour().isDispersing()).isFalse();
 
-//		when: "the PSM is activated"
+		// the PSM is activated
 		p.getDispersalBehaviour().activate();
-//		then: "the PSM is active"
 		assertThat(p.getDispersalBehaviour().isDispersing()).isTrue();   // Not enough data in memory yet
 
-//		when: "the PSM is first updated"
+		// the PSM is first updated
 		IntStream.range(1,  21).forEach(i -> {
 			psm.updateMemory(new NdPoint((double)i * 5, 0.0), 1.0f);
 			psm.updateMemory(new NdPoint((double)i * 5, 5.0), 1.0f);
@@ -141,12 +138,8 @@ class DispersalPSMType2Test {
 		});
 
 		psm.updateMemory(new NdPoint(50.0f, 50.0f), 100.0f);
-		//		then: "the most attractive cell is 210"
-		//		p.getDispersalBehaviour().findMostAttractiveMemCell() == 210
 
-		//		when: "the PSM is activated"
 		p.getDispersalBehaviour().activate();
-//		then: "the PSM is active"
 		assertThat(p.getDispersalBehaviour().isDispersing()).isTrue();
 	}
 

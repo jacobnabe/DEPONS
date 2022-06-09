@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2019 Jacob Nabe-Nielsen <jnn@bios.au.dk>
+ * Copyright (C) 2017-2022 Jacob Nabe-Nielsen <jnn@bios.au.dk>
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
  * License version 2 and only version 2 as published by the Free Software Foundation.
@@ -56,6 +56,7 @@ import dk.au.bios.porpoise.behavior.RandomSource;
 import dk.au.bios.porpoise.landscape.CellData;
 import dk.au.bios.porpoise.landscape.CellDataTestData;
 import dk.au.bios.porpoise.landscape.DataFileMetaData;
+import dk.au.bios.porpoise.landscape.GridSpatialPartitioning;
 
 /**
  * Abstract base class for replayed tests. Replayed tests are simulations which are captured using the
@@ -64,9 +65,9 @@ import dk.au.bios.porpoise.landscape.DataFileMetaData;
  */
 public abstract class AbstractSimulationBDDTest {
 
-	protected static Context<Agent> context;
-	protected static Schedule schedule;
-	protected static RandomSource random;
+	protected Context<Agent> context;
+	protected Schedule schedule;
+	protected RandomSource random;
 
 	protected ContinuousSpaceFactory factory;
 	protected ContinuousSpace<Agent> space;
@@ -79,10 +80,6 @@ public abstract class AbstractSimulationBDDTest {
 	protected void aNewWorld(int worldWidth, int worldHeight) throws Exception {
 		Globals.setLandscapeMetadata(new DataFileMetaData(100, 100, 529473, 5972242, 400, null));
 		random = mock(RandomSource.class);
-//		random.nextCrwAngle() >>> [0.0]
-//		random.nextCrwAngleWithM() >>> [0.0]
-//		random.nextStdMove() >>> [0.0]
-//		random.nextCrwStepLength() >>> [0.0]
 		Globals.setRandomSource(random);
 
 		// Repast initialization
@@ -98,6 +95,9 @@ public abstract class AbstractSimulationBDDTest {
 		grid = gridFactory.createGrid("grid", context, new GridBuilderParameters<Agent>(new repast.simphony.space.grid.BouncyBorders(), new SimpleGridAdder<Agent>(), true, Globals.getWorldWidth(), Globals.getWorldHeight()));
 		cellData = CellDataTestData.getCellData();
 		Globals.setCellData(cellData);
+		Globals.setSpace(space);
+		Globals.setGrid(grid);
+		Globals.setSpatialPartitioning(new GridSpatialPartitioning(25, 25));
 	}
 
 	protected void aHomogenousWorld() throws Exception {
@@ -127,7 +127,7 @@ public abstract class AbstractSimulationBDDTest {
 	}
 
 	protected Porpoise aPorpoise(double x, double y, double heading) {
-		var p = new Porpoise(space, grid, context, 1, new FastRefMemTurn());
+		var p = new Porpoise(context, 1, new FastRefMemTurn());
 		context.add(p);
 		p.setPosition(new NdPoint(50.0, 50.0));
 		p.setHeading(0.0);

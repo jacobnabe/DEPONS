@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2019 Jacob Nabe-Nielsen <jnn@bios.au.dk>
+ * Copyright (C) 2017-2022 Jacob Nabe-Nielsen <jnn@bios.au.dk>
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
  * License version 2 and only version 2 as published by the Free Software Foundation.
@@ -36,20 +36,18 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import repast.simphony.context.Context;
-import repast.simphony.engine.environment.RunEnvironment;
-import repast.simphony.engine.schedule.IAction;
-import repast.simphony.engine.schedule.ISchedule;
-import repast.simphony.engine.schedule.ScheduleParameters;
-import repast.simphony.space.continuous.ContinuousSpace;
-import repast.simphony.space.continuous.NdPoint;
-import repast.simphony.space.grid.Grid;
 import dk.au.bios.porpoise.Agent;
 import dk.au.bios.porpoise.AgentPriority;
 import dk.au.bios.porpoise.Globals;
 import dk.au.bios.porpoise.Porpoise;
 import dk.au.bios.porpoise.RandomPorpoiseReportProxy;
 import dk.au.bios.porpoise.util.DebugLog;
+import repast.simphony.context.Context;
+import repast.simphony.engine.environment.RunEnvironment;
+import repast.simphony.engine.schedule.IAction;
+import repast.simphony.engine.schedule.ISchedule;
+import repast.simphony.engine.schedule.ScheduleParameters;
+import repast.simphony.space.continuous.NdPoint;
 
 /**
  * A scheduled action to run some code once a (simulation) day.
@@ -57,8 +55,6 @@ import dk.au.bios.porpoise.util.DebugLog;
 public class AddTrackedPorpoisesTask implements IAction {
 
 	private final Context<Agent> context;
-	private final ContinuousSpace<Agent> space;
-	private final Grid<Agent> grid;
 	private final String landscape;
 	private final int trackedPorpoisesCount;
 
@@ -66,11 +62,9 @@ public class AddTrackedPorpoisesTask implements IAction {
 	private int tick;
 	private NdPoint delayedSelectionPoint = null;
 
-	public AddTrackedPorpoisesTask(final Context<Agent> context, final ContinuousSpace<Agent> space,
-			final Grid<Agent> grid, final String landscape, final int trackedPorpoisesCount) {
+	public AddTrackedPorpoisesTask(final Context<Agent> context, final String landscape,
+			final int trackedPorpoisesCount) {
 		this.context = context;
-		this.space = space;
-		this.grid = grid;
 		this.landscape = landscape;
 		this.trackedPorpoisesCount = trackedPorpoisesCount;
 	}
@@ -127,7 +121,7 @@ public class AddTrackedPorpoisesTask implements IAction {
 		for (final Agent a : agents) {
 			final Porpoise p = (Porpoise) a;
 
-			final RandomPorpoiseReportProxy randomPorpoiseAgent = new RandomPorpoiseReportProxy(space, grid, 1, p);
+			final RandomPorpoiseReportProxy randomPorpoiseAgent = new RandomPorpoiseReportProxy(1, p);
 			if (trackedPorpoiseLocations.size() > ti) {
 				final String[] locParams = trackedPorpoiseLocations.get(ti).split(",");
 				final double locX = (Double.parseDouble(locParams[0]) - Globals.getXllCorner()) / 400;
@@ -161,7 +155,7 @@ public class AddTrackedPorpoisesTask implements IAction {
 					DebugLog.print10(p, "Tracking random porpoise {}", p.getId());
 				}
 
-				final RandomPorpoiseReportProxy randomPorpoiseAgent = new RandomPorpoiseReportProxy(space, grid, 1, p);
+				final RandomPorpoiseReportProxy randomPorpoiseAgent = new RandomPorpoiseReportProxy(1, p);
 				context.add(randomPorpoiseAgent);
 				randomPorpoiseAgent.getPorpoise().setTrackVisitedCells(true);
 				randomPorpoiseAgent.getPorpoise().setWritePsmSteps(true);
@@ -169,7 +163,7 @@ public class AddTrackedPorpoisesTask implements IAction {
 		} else {
 			final List<Porpoise> porpoisesToTrack = getClosestPorpoises(delayedSelectionPoint, trackedPorpoisesCount);
 			for (final Porpoise p : porpoisesToTrack) {
-				final RandomPorpoiseReportProxy randomPorpoiseAgent = new RandomPorpoiseReportProxy(space, grid, 1, p);
+				final RandomPorpoiseReportProxy randomPorpoiseAgent = new RandomPorpoiseReportProxy(1, p);
 				context.add(randomPorpoiseAgent);
 
 				randomPorpoiseAgent.getPorpoise().setTrackVisitedCells(true);
@@ -187,7 +181,7 @@ public class AddTrackedPorpoisesTask implements IAction {
 	 */
 	private List<Porpoise> getClosestPorpoises(final NdPoint point, final int numPorpoises) {
 		final List<Porpoise> allPorps = new ArrayList<Porpoise>();
-		final Iterable<Agent> agents = space.getObjects();
+		final Iterable<Agent> agents = Globals.getSpace().getObjects();
 		for (final Agent a : agents) {
 			if (a instanceof Porpoise) {
 				final Porpoise p = (Porpoise) a;
@@ -198,8 +192,8 @@ public class AddTrackedPorpoisesTask implements IAction {
 
 			@Override
 			public int compare(final Porpoise p1, final Porpoise p2) {
-				final double p1Dist = space.getDistance(point, p1.getPosition());
-				final double p2Dist = space.getDistance(point, p2.getPosition());
+				final double p1Dist = Globals.getSpace().getDistance(point, p1.getPosition());
+				final double p2Dist = Globals.getSpace().getDistance(point, p2.getPosition());
 				return (int) p1Dist - (int) p2Dist;
 			}
 		});

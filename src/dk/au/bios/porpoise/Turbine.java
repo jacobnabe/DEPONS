@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2019 Jacob Nabe-Nielsen <jnn@bios.au.dk>
+ * Copyright (C) 2017-2022 Jacob Nabe-Nielsen <jnn@bios.au.dk>
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
  * License version 2 and only version 2 as published by the Free Software Foundation.
@@ -35,14 +35,12 @@ import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
+import dk.au.bios.porpoise.util.DebugLog;
+import dk.au.bios.porpoise.util.SimulationTime;
 import repast.simphony.context.Context;
 import repast.simphony.query.space.continuous.ContinuousWithin;
 import repast.simphony.space.SpatialException;
-import repast.simphony.space.continuous.ContinuousSpace;
 import repast.simphony.space.continuous.NdPoint;
-import repast.simphony.space.grid.Grid;
-import dk.au.bios.porpoise.util.DebugLog;
-import dk.au.bios.porpoise.util.SimulationTime;
 
 /**
  * A turbine in a wind farm.
@@ -69,10 +67,9 @@ public class Turbine extends Agent {
 	private final int startTick;
 	private final int endTick;
 
-	protected Turbine(final ContinuousSpace<Agent> space, final Grid<Agent> grid, final String name,
-			final double impact, final double locX, final double locY, final int startTick, final int endTick,
-			final int id) {
-		super(space, grid, id);
+	protected Turbine(final String name, final double impact, final double locX, final double locY, final int startTick,
+			final int endTick, final int id) {
+		super(id);
 		this.name = name;
 		this.impact = impact;
 		this.locX = locX;
@@ -90,8 +87,8 @@ public class Turbine extends Agent {
 	 * @return List of turbines read from the file.
 	 * @throws Exception Error reading the file.
 	 */
-	public static void load(final Context<Agent> context, final ContinuousSpace<Agent> space, final Grid<Agent> grid,
-			final String fileName, final boolean dynamicCreation) throws Exception {
+	public static void load(final Context<Agent> context, final String fileName, final boolean dynamicCreation)
+			throws Exception {
 		if (dynamicCreation) {
 			turbineCreateQueue = new LinkedList<>();
 		}
@@ -120,7 +117,7 @@ public class Turbine extends Agent {
 					endTick = Integer.parseInt(cols[5]);
 				}
 
-				final Turbine t = new Turbine(space, grid, name, impact, locX, locY, startTick, endTick, numTurbines);
+				final Turbine t = new Turbine(name, impact, locX, locY, startTick, endTick, numTurbines);
 				if (turbineCreateQueue != null) {
 					turbineCreateQueue.add(t);
 				} else {

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2019 Jacob Nabe-Nielsen <jnn@bios.au.dk>
+ * Copyright (C) 2017-2022 Jacob Nabe-Nielsen <jnn@bios.au.dk>
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
  * License version 2 and only version 2 as published by the Free Software Foundation.
@@ -61,12 +61,6 @@ public abstract class AbstractReplayedSimulationTest {
 	private Context<Agent> context;
 	private Runner testRunner;
 
-	//	private Porpoise p;
-	//	private RandomSource random;
-
-	//	private static UnitTestRunner runner;
-
-	//	@BeforeClass
 	void setupContext(Map<String, Object> simParams) throws Exception {
 		// Repast initialization
 		ParametersParser paramSpecParser = new ParametersParser(new File("DEPONS.rs/parameters.xml"));

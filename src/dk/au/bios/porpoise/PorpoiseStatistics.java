@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2019 Jacob Nabe-Nielsen <jnn@bios.au.dk>
+ * Copyright (C) 2017-2022 Jacob Nabe-Nielsen <jnn@bios.au.dk>
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
  * License version 2 and only version 2 as published by the Free Software Foundation.
@@ -39,7 +39,7 @@ public class PorpoiseStatistics extends Agent {
 	private int numDeathsByByCatch = 0;
 
 	public PorpoiseStatistics() {
-		super(null, null, 0);
+		super(0);
 	}
 
 	public void addBirth() {

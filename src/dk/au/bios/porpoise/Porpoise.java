@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2019 Jacob Nabe-Nielsen <jnn@bios.au.dk>
+ * Copyright (C) 2017-2022 Jacob Nabe-Nielsen <jnn@bios.au.dk>
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
  * License version 2 and only version 2 as published by the Free Software Foundation.
@@ -50,10 +50,8 @@ import repast.simphony.engine.schedule.ScheduledMethod;
 import repast.simphony.random.RandomHelper;
 import repast.simphony.space.Dimensions;
 import repast.simphony.space.SpatialMath;
-import repast.simphony.space.continuous.ContinuousSpace;
 import repast.simphony.space.continuous.NdPoint;
 import repast.simphony.space.continuous.PointTranslator;
-import repast.simphony.space.grid.Grid;
 import repast.simphony.space.grid.GridPoint;
 
 /**
@@ -139,8 +137,7 @@ public class Porpoise extends Agent {
 	 * @param parent
 	 */
 	public Porpoise(final Porpoise parent) {
-		this(parent.getSpace(), parent.getGrid(), parent.context, 0, parent.refMemTurnCalculator, parent
-				.getCalfPersistentSpatialMemory());
+		this(parent.context, 0, parent.refMemTurnCalculator, parent.getCalfPersistentSpatialMemory());
 	}
 
 	/**
@@ -154,9 +151,8 @@ public class Porpoise extends Agent {
 	 * @param hatched
 	 * @param refMemTurnCalculator
 	 */
-	public Porpoise(final ContinuousSpace<Agent> space, final Grid<Agent> grid, final Context<Agent> context,
-			final double age, final RefMemTurnCalculator refMemTurnCalculator) {
-		this(space, grid, context, age, refMemTurnCalculator, new PersistentSpatialMemory(Globals.getWorldWidth(),
+	public Porpoise(final Context<Agent> context, final double age, final RefMemTurnCalculator refMemTurnCalculator) {
+		this(context, age, refMemTurnCalculator, new PersistentSpatialMemory(Globals.getWorldWidth(),
 				Globals.getWorldHeight(), PersistentSpatialMemory.generatedPreferredDistance()));
 
 		if (age > 0) {
@@ -176,9 +172,9 @@ public class Porpoise extends Agent {
 		}
 	}
 
-	private Porpoise(final ContinuousSpace<Agent> space, final Grid<Agent> grid, final Context<Agent> context,
-			final double age, final RefMemTurnCalculator refMemTurnCalculator, final PersistentSpatialMemory psm) {
-		super(space, grid, Porpoise.PORPOISE_ID.getAndIncrement());
+	private Porpoise(final Context<Agent> context, final double age, final RefMemTurnCalculator refMemTurnCalculator,
+			final PersistentSpatialMemory psm) {
+		super(Porpoise.PORPOISE_ID.getAndIncrement());
 		this.posList = new CircularBuffer<NdPoint>(SimulationConstants.MEMORY_MAX);
 		this.posListDaily = new CircularBuffer<NdPoint>(10);
 		for (int i = 0; i < 10; i++) {
@@ -221,8 +217,7 @@ public class Porpoise extends Agent {
 		}
 
 		if (this.soundSourceDistance != -1) {
-			new SoundSource(context, this.getSpace(), this.getGrid(), this, this.soundSourceAngle,
-					this.soundSourceDistance, this.soundSourceImpact);
+			new SoundSource(context, this, this.soundSourceAngle, this.soundSourceDistance, this.soundSourceImpact);
 			this.soundSourceDistance = -1;
 		}
 
@@ -1028,7 +1023,7 @@ public class Porpoise extends Agent {
 		Globals.getMonthlyStats().addDeath(cause);
 		YearlyTask.recordDeath((int) Math.floor(this.getAge()));
 		
-		DeadPorpoiseReportProxy reportProxy = new DeadPorpoiseReportProxy(this.getSpace(), this.getGrid(), this);
+		DeadPorpoiseReportProxy reportProxy = new DeadPorpoiseReportProxy(this);
 		context.add(reportProxy);
 	}
 
