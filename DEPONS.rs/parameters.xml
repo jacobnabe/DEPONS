@@ -171,6 +171,16 @@
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
 		/>
+		<parameter name="c_ships" displayName="c_ships - Deterrence coefficient for ships" type="double" 
+						defaultValue="0.07" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
+		/>
+        <parameter name="T_ships" displayName="T_ships - Response threshold for ships" type="double" 
+						defaultValue="152.9" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
+		/>
         <parameter name="Psi_deter" displayName="Psi_deter - Deterrence decay constant [percent]" type="double" 
 						defaultValue="50.0" 
 						isReadOnly="false" 

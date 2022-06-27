@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2021 Jacob Nabe-Nielsen <jnn@bios.au.dk>
+ * Copyright (C) 2017-2022 Jacob Nabe-Nielsen <jnn@bios.au.dk>
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
  * License version 2 and only version 2 as published by the Free Software Foundation.
@@ -75,6 +75,16 @@ public final class SimulationParameters {
 	 */
 	private static double deterResponseThreshold = 158;
 
+	/**
+	 * Deterrence coefficient for ships. In parameters.xml: c_ships
+	 */
+	private static double deterrenceCoeffShips = 1;
+
+	/**
+	 * The response-threshold for ships. In parameters.xml: T_ships
+	 */
+	private static double deterResponseThresholdShips = 158;
+	
 	/**
 	 * Deterrence decay; In parameter.xml: Psi_deter
 	 */
@@ -227,6 +237,8 @@ public final class SimulationParameters {
 		deterrenceCoeff = params.getDouble("c");
 		m = 0.00001; // Hardcoded value - Math.pow(10, params.getDouble("m"));
 		deterResponseThreshold = params.getDouble("RT");
+		deterrenceCoeffShips = params.getDouble("c_ships");
+		deterResponseThresholdShips = params.getDouble("T_ships");
 		deterDecay = params.getDouble("Psi_deter");
 		deterMaxDistance = params.getDouble("dmax_deter") * 1000; // entered in KM but stored in meters.
 		alphaHat = convertStringToDouble(params, "alpha_hat");
@@ -284,6 +296,58 @@ public final class SimulationParameters {
 		tDisp = params.getInteger("tdisp");
 		foodGrowthRate = params.getDouble("rU");
 		bycatchProb = params.getDouble("bycatchProb");
+	}
+	
+	public static void resetToDefaultsForUnitTest() {
+		landscape = null;
+		turbines = null;
+		shipsEnabled = false;
+		porpoiseCount = 0;
+		trackedPorpoiseCount = 0;
+		inertiaConst = 0.001;
+		corrLogmovLength = 0.94;
+		corrLogmovBathy = 0.94;
+		corrLogmovSalinity = 0.94;
+		corrAngleBase = 0.26;
+		corrAngleBathy = 0.26;
+		corrAngleSalinity = 0.26;
+		corrAngleBaseSD = 38.0;
+		deterrenceCoeff = 1;
+		m = Math.pow(10, 0.74);
+		deterResponseThreshold = 158;
+		deterrenceCoeffShips = 1;
+		deterResponseThresholdShips = 158;
+		deterDecay = 50;
+		deterMaxDistance = 50 * 1000; // 50 KM
+		alphaHat = 0;
+		betaHat = 20;
+		meanDispDist = 1.6;
+		maxMov = 1.18;
+		eUsePer30Min = 4.5;
+		eLact = 1.4;
+		eWarm = 1.3;
+		deterTime = 5;
+		maxU = 1.0;
+		minDispDepth = 4.0;
+		minDepth = 1.0;
+		xSurvivalProbConst = 0.4;
+		conceiveProb = 0.68;
+		gestationTime = 300;
+		nursingTime = 240;
+		maxAge = 30.0;
+		maturityAge = 3.44;
+		regrowthFoodQualifier = 0.001;
+		pstPreferredDistanceTolerance = 0.0d;
+		psmType2RandomAngle = 0.0d;
+		q1 = 0.0d;
+		psmLogisticDecreaseFunction = null;
+		homogenous = true;
+		wrapBorderHomo = true;
+		model = 1;
+		tDisp = 3;
+		foodGrowthRate = 0.10;
+		bycatchProb = 0.0;
+		psmLog = null;
 	}
 
 	public static String getLandscape() {
@@ -344,6 +408,18 @@ public final class SimulationParameters {
 
 	public static double getDeterResponseThreshold() {
 		return deterResponseThreshold;
+	}
+
+	public static double getDeterrenceCoeffShips() {
+		return deterrenceCoeffShips;
+	}
+
+	public static double getDeterResponseThresholdShips() {
+		return deterResponseThresholdShips;
+	}
+
+	public static void setDeterResponseThresholdShips(double deterResponseThresholdShips) {
+		SimulationParameters.deterResponseThresholdShips = deterResponseThresholdShips;
 	}
 
 	public static double getDeterDecay() {

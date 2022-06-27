@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2020 Jacob Nabe-Nielsen <jnn@bios.au.dk>
+ * Copyright (C) 2017-2022 Jacob Nabe-Nielsen <jnn@bios.au.dk>
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
  * License version 2 and only version 2 as published by the Free Software Foundation.
@@ -41,9 +41,6 @@ import saf.v3d.scene.VSpatial;
  */
 public class ShipStyle extends DefaultStyleOGL2D {
 
-	private final Color RED = new Color(255, 10, 10);
-	private final Color LIGHT_RED = new Color(255, 110, 110);
-
 	@Override
 	public void init(final ShapeFactory2D factory) {
 		super.init(factory);
@@ -72,21 +69,10 @@ public class ShipStyle extends DefaultStyleOGL2D {
 
 	@Override
 	public Color getColor(final Object object) {
-		Ship t;
 		if (object instanceof Ship) {
-			t = (Ship) object;
+			return Color.GREEN;
 		} else {
 			return Color.BLACK;
-		}
-
-		if (t.getName().startsWith("survey")) {
-			if (t.isInSurveyArea()) {
-				return RED;
-			} else {
-				return LIGHT_RED;
-			}
-		} else {
-			return Color.GREEN;
 		}
 	}
 

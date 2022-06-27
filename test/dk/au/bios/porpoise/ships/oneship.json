@@ -1,0 +1,1 @@
+{"routes":[{"name":"Route_1","route":[{"x":625584,"y":6250196,"speed":1.5852,"pause":0},{"x":666684,"y":6250196,"speed":3.121,"pause":6},{"x":695584,"y":6250196,"speed":3.121,"pause":0}]}],"ships":[{"name":"1","type":"Containership","length":100,"route":"Route_1","tickStart":1,"tickEnd":999999999}]}

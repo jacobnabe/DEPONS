@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2021 Jacob Nabe-Nielsen <jnn@bios.au.dk>
+ * Copyright (C) 2017-2022 Jacob Nabe-Nielsen <jnn@bios.au.dk>
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
  * License version 2 and only version 2 as published by the Free Software Foundation.
@@ -27,62 +27,33 @@
 
 package dk.au.bios.porpoise.ships;
 
-public class Ship {
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
-	private String name;
-	private double speed;
-	private double impact;
-	private int start;
-	private String route;
-	private SurveyShipData survey;
+@JsonDeserialize(as = dk.au.bios.porpoise.Ship.class)
+public interface Ship {
 
+	public String getName();
 
-	public String getName() {
-		return name;
-	}
+	public void setName(String name);
 
-	public void setName(String name) {
-		this.name = name;
-	}
+	public int getTickStart();
 
-	public double getSpeed() {
-		return speed;
-	}
+	public void setTickStart(int tickStart);
 
-	public void setSpeed(double speed) {
-		this.speed = speed;
-	}
+	public int getTickEnd();
 
-	public double getImpact() {
-		return impact;
-	}
+	public void setTickEnd(int tickEnd);
 
-	public void setImpact(double impact) {
-		this.impact = impact;
-	}
+	public VesselClass getType();
 
-	public int getStart() {
-		return start;
-	}
+	public void setType(VesselClass type);
 
-	public void setStart(int start) {
-		this.start = start;
-	}
+	public double getLength();
 
-	public String getRoute() {
-		return route;
-	}
+	public void setLength(double length);
 
-	public void setRoute(String route) {
-		this.route = route;
-	}
+	Route getRoute();
 
-	public SurveyShipData getSurvey() {
-		return survey;
-	}
-
-	public void setSurvey(SurveyShipData survey) {
-		this.survey = survey;
-	}
+	void setRoute(Route route);
 
 }

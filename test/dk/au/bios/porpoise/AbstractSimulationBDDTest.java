@@ -30,6 +30,7 @@ package dk.au.bios.porpoise;
 import static org.mockito.Mockito.mock;
 
 import java.io.File;
+import java.util.stream.Stream;
 
 import repast.simphony.context.Context;
 import repast.simphony.context.DefaultContext;
@@ -42,6 +43,7 @@ import repast.simphony.engine.environment.RunEnvironment;
 import repast.simphony.engine.environment.RunState;
 import repast.simphony.engine.environment.Runner;
 import repast.simphony.engine.schedule.Schedule;
+import repast.simphony.engine.schedule.ScheduleParameters;
 import repast.simphony.parameter.ParametersParser;
 import repast.simphony.random.RandomHelper;
 import repast.simphony.space.continuous.BouncyBorders;
@@ -51,12 +53,14 @@ import repast.simphony.space.continuous.RandomCartesianAdder;
 import repast.simphony.space.grid.Grid;
 import repast.simphony.space.grid.GridBuilderParameters;
 import repast.simphony.space.grid.SimpleGridAdder;
+import dk.au.bios.porpoise.behavior.DispersalFactory;
 import dk.au.bios.porpoise.behavior.FastRefMemTurn;
 import dk.au.bios.porpoise.behavior.RandomSource;
 import dk.au.bios.porpoise.landscape.CellData;
 import dk.au.bios.porpoise.landscape.CellDataTestData;
 import dk.au.bios.porpoise.landscape.DataFileMetaData;
 import dk.au.bios.porpoise.landscape.GridSpatialPartitioning;
+import dk.au.bios.porpoise.tasks.DeterenceTask;
 
 /**
  * Abstract base class for replayed tests. Replayed tests are simulations which are captured using the
@@ -64,6 +68,9 @@ import dk.au.bios.porpoise.landscape.GridSpatialPartitioning;
  * the current simulation matches the previously captured simulation.
  */
 public abstract class AbstractSimulationBDDTest {
+
+	protected static final double XLL_CORNER = 529473;
+	protected static final double YLL_CORNER = 5972242;
 
 	protected Context<Agent> context;
 	protected Schedule schedule;
@@ -78,7 +85,13 @@ public abstract class AbstractSimulationBDDTest {
 	private Runner testRunner;
 
 	protected void aNewWorld(int worldWidth, int worldHeight) throws Exception {
-		Globals.setLandscapeMetadata(new DataFileMetaData(100, 100, 529473, 5972242, 400, null));
+		aNewWorld(worldWidth, worldHeight, XLL_CORNER, YLL_CORNER);
+	}
+
+	protected void aNewWorld(int worldWidth, int worldHeight, double xllCorner, double yllCorner) throws Exception {
+		SimulationParameters.resetToDefaultsForUnitTest();
+		Globals.setLandscapeMetadata(new DataFileMetaData(worldWidth, worldHeight, xllCorner, yllCorner, 400, null));
+		SimulationParameters.setModel(4);
 		random = mock(RandomSource.class);
 		Globals.setRandomSource(random);
 
@@ -98,6 +111,11 @@ public abstract class AbstractSimulationBDDTest {
 		Globals.setSpace(space);
 		Globals.setGrid(grid);
 		Globals.setSpatialPartitioning(new GridSpatialPartitioning(25, 25));
+		space.addProjectionListener(Globals.getSpatialPartitioning());
+		DispersalFactory.setType("off");
+		final ScheduleParameters deterenceParams = ScheduleParameters.createRepeating(0, 1,
+				AgentPriority.PORP_DETERRENCE);
+		schedule.schedule(deterenceParams, new DeterenceTask(context));
 	}
 
 	protected void aHomogenousWorld() throws Exception {
@@ -129,7 +147,7 @@ public abstract class AbstractSimulationBDDTest {
 	protected Porpoise aPorpoise(double x, double y, double heading) {
 		var p = new Porpoise(context, 1, new FastRefMemTurn());
 		context.add(p);
-		p.setPosition(new NdPoint(50.0, 50.0));
+		p.setPosition(new NdPoint(x, y));
 		p.setHeading(0.0);
 		p.moveAwayFromLand();  // Weird side-effect here, updating the initial poslist
 
@@ -140,7 +158,25 @@ public abstract class AbstractSimulationBDDTest {
 	}
 
 	protected Porpoise findPorpoiseById(int id) {
-		return (Porpoise) context.getObjectsAsStream(Porpoise.class).filter(p -> p.getId() == id).findAny().orElse(null);
+		return porpoiseStream().filter(p -> p.getId() == id).findAny().orElse(null);
+	}
+
+	protected Stream<Porpoise> porpoiseStream() {
+		Stream<Porpoise> porpoises = context.getObjectsAsStream(Porpoise.class).map(Porpoise.class::cast);
+		return porpoises;
+	}
+
+	protected Stream<Ship> shipStream() {
+		Stream<Ship> ships = context.getObjectsAsStream(Ship.class).map(Ship.class::cast);
+		return ships;
+	}
+
+	protected double convertGridXToUtmX(double gridX) {
+		return XLL_CORNER + (gridX * 400.0d);
+	}
+
+	protected double convertGridYToUtmX(double gridY) {
+		return YLL_CORNER + (gridY * 400.0d);
 	}
 
 }

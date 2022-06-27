@@ -44,6 +44,11 @@ public class SoundSource extends Agent {
 
 	protected final double impact;
 
+	public SoundSource() {
+		super(soundSourceId.incrementAndGet());
+		this.impact = 0;
+	}
+
 	public SoundSource(final double impact) {
 		super(soundSourceId.incrementAndGet());
 		this.impact = impact;
@@ -55,8 +60,8 @@ public class SoundSource extends Agent {
 
 		context.add(this);
 		setPosition(p.getPosition());
-		final NdPoint position = getSpace().moveByVector(this, distanceFromPorpoise,
-				((angleFromPorpoise - 90.0) * -Math.PI / 180.0), 0);
+		final NdPoint position = moveByVector(distanceFromPorpoise,
+				((angleFromPorpoise - 90.0) * -Math.PI / 180.0), 0.0);
 		this.setPosition(position);
 	}
 
@@ -67,7 +72,7 @@ public class SoundSource extends Agent {
 		// number of grid-cells where a wind turbine or ship with impact 1 (standard
 		// deterrence strength) affects a
 		// porpoise
-		final double radius = Math.pow(10, ((getImpact() - SimulationParameters.getDeterResponseThreshold()) / 20));
+		final double radius = Math.pow(10, ((impact - SimulationParameters.getDeterResponseThreshold()) / 20));
 
 		// i.e. porps <deter-dist away (although porps can hear only ships <200 away,
 		// the dist has to be larger to
@@ -78,13 +83,13 @@ public class SoundSource extends Agent {
 		for (final Agent a : agents) {
 			if (a instanceof Porpoise) {
 				final Porpoise p = (Porpoise) a;
-				final double distToShip = this.getSpace().getDistance(getPosition(), p.getPosition()) * 400;
-				if (distToShip <= SimulationParameters.getDeterMaxDistance()) {
+				final double distToSound = this.getSpace().getDistance(getPosition(), p.getPosition()) * 400;
+				if (distToSound <= SimulationParameters.getDeterMaxDistance()) {
 					// deterring-strength decreases linearly with distance to turbine, decreases to
 					// 0 at 400 m
 					final double currentDeterence = impact
-							- (SimulationParameters.getBetaHat() * Math.log10(distToShip)
-									+ (SimulationParameters.getAlphaHat() * distToShip))
+							- (SimulationParameters.getBetaHat() * Math.log10(distToSound)
+									+ (SimulationParameters.getAlphaHat() * distToSound))
 							- SimulationParameters.getDeterResponseThreshold();
 
 					if (currentDeterence > 0) {
@@ -92,15 +97,11 @@ public class SoundSource extends Agent {
 					}
 
 					if (DebugLog.isEnabledFor(8)) {
-						DebugLog.print8("who: {} dist-to-ship {}: {}", p.getId(), this, distToShip);
+						DebugLog.print8("who: {} dist-to-sound {}: {}", p.getId(), this, distToSound);
 					}
 				}
 			}
 		}
-	}
-
-	public double getImpact() {
-		return this.impact;
 	}
 
 }

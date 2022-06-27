@@ -91,6 +91,8 @@ public class Turbine extends Agent {
 			throws Exception {
 		if (dynamicCreation) {
 			turbineCreateQueue = new LinkedList<>();
+		} else {
+			turbineCreateQueue = null;
 		}
 
 		final File file = new File("data/wind-farms", fileName + ".txt");
@@ -196,7 +198,7 @@ public class Turbine extends Agent {
 		}
 	}
 
-	private void initialize() {
+	public void initialize() {
 		this.setPosition(new NdPoint(locX, locY));
 	}
 
