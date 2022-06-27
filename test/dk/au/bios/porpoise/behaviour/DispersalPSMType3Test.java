@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2019 Jacob Nabe-Nielsen <jnn@bios.au.dk>
+ * Copyright (C) 2017-2022 Jacob Nabe-Nielsen <jnn@bios.au.dk>
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
  * License version 2 and only version 2 as published by the Free Software Foundation.
@@ -31,7 +31,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.stream.IntStream;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import dk.au.bios.porpoise.AbstractSimulationBDDTest;
@@ -44,22 +43,13 @@ import dk.au.bios.porpoise.behavior.DispersalFactory;
  */
 class DispersalPSMType3Test extends AbstractSimulationBDDTest {
 
-	@BeforeEach
-	public void setup() {
-		DispersalFactory.setType("PSM-Type3");
-	}
-
-	public void energyCalculation() {
-	}
-
 	/**
 	 * We create a world 100x100 cells, which means 20x20 PSM cells.
 	 */
 	@Test
 	public void findMostAttractiveMemCell() throws Exception {
-//		given: "A world with a single porpoise and a baseline PSM setup"
-
 		aNewWorld(100, 100);
+		DispersalFactory.setType("PSM-Type3");
 		Porpoise p = aPorpoise(50.0, 50.0, 0.0);
 		int[] basePsmVisits = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 25, 27, 31,
 				33, 34, 36, 43, 46, 47, 52, 55, 68, 73, 77, 80, 81, 86, 92, 95, 98, 104, 105, 110, 113, 125, 160, 183,
@@ -79,34 +69,34 @@ class DispersalPSMType3Test extends AbstractSimulationBDDTest {
 		p.getPersistentSpatialMemory().updateMemory(cell3, 1.2);
 		p.getPersistentSpatialMemory().updateMemory(cell3, 0.8);
 
-//		when: "no travel cost (Q1 is 0.0)"
+		// when: "no travel cost (Q1 is 0.0)"
 		p.getDispersalBehaviour().activate();
 
-//		then: "cell3 is selected"
+		// then: "cell3 is selected"
 		assertThat(p.getDispersalBehaviour().getTargetPosition()).isEqualTo(cell3);
 
-//		when: "very low travel cost (Q1 is 0.01)"
+		// when: "very low travel cost (Q1 is 0.01)"
 		SimulationParameters.setQ1(0.01);
 		p.getDispersalBehaviour().deactivate();
 		p.getDispersalBehaviour().activate();
 
-//		then: "cell3 is selected"
+		// then: "cell3 is selected"
 		assertThat(p.getDispersalBehaviour().getTargetPosition()).isEqualTo(cell3);
 
-//		when: "low travel cost (Q1 is 0.05)"
+		// when: "low travel cost (Q1 is 0.05)"
 		SimulationParameters.setQ1(0.05);
 		p.getDispersalBehaviour().deactivate();
 		p.getDispersalBehaviour().activate();
 
-//		then: "cell2 is selected"
+		// then: "cell2 is selected"
 		assertThat(p.getDispersalBehaviour().getTargetPosition()).isEqualTo(cell2);
 
-//		when: "high travel cost (Q1 is 0.8)"
+		// when: "high travel cost (Q1 is 0.8)"
 		SimulationParameters.setQ1(0.8);
 		p.getDispersalBehaviour().deactivate();
 		p.getDispersalBehaviour().activate();
 
-//		then: "cell1 is selected"
+		// then: "cell1 is selected"
 		assertThat(p.getDispersalBehaviour().getTargetPosition()).isEqualTo(cell1);
 	}
 

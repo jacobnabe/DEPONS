@@ -27,116 +27,176 @@
 
 package dk.au.bios.porpoise;
 
+import java.util.Iterator;
+import java.util.Set;
+
+import dk.au.bios.porpoise.ships.JomopansEchoSPL;
+import dk.au.bios.porpoise.ships.Route;
+import dk.au.bios.porpoise.ships.VesselClass;
+import dk.au.bios.porpoise.util.DebugLog;
 import dk.au.bios.porpoise.util.SimulationTime;
 import repast.simphony.engine.schedule.ScheduledMethod;
-import repast.simphony.space.continuous.NdPoint;
 
 /**
  * A ship agent. This is used in the Kattegat simulation and is not relevant for the current DEPONS model.
  */
-public class Ship extends SoundSource {
+public class Ship extends SoundSource implements dk.au.bios.porpoise.ships.Ship {
 
-	private final NdPoint[] route;
-	private int nextPoint;
-	private boolean forward = true;
+	private static final int JOMOPANS_BAND = 12;
 
-	private final dk.au.bios.porpoise.ships.Ship data;
-	private final NdPoint surveyAreaPoint;
-	
-	public Ship(final NdPoint[] route, final dk.au.bios.porpoise.ships.Ship data) {
-		super(data.getImpact());
+	private String name;
+	private VesselClass type;
+	private double length;
+	private Route route;
+	private int tickStart = -1;
+	private int tickEnd = Integer.MAX_VALUE;
+
+	private int currentBuoy = -1;
+	private int ticksStillPaused = 0;
+
+	public Ship() {
+		super();
+	}
+
+	public Ship(String name, VesselClass type, double length, Route route) {
+		this(name, type, length, route, -1, Integer.MAX_VALUE);
+	}
+
+	public Ship(String name, VesselClass type, double length, Route route, int tickStart, int tickEnd) {
+		super();
+		this.name = name;
+		this.type = type;
+		this.length = length;
 		this.route = route;
-		this.data = data;
-		this.forward = false;
-		this.nextPoint = -1;
-		
-		if (data.getSurvey() != null && data.getSurvey().getPoint() != null) {
-			this.surveyAreaPoint = new NdPoint(data.getSurvey().getPoint().getX(), data.getSurvey().getPoint().getY());
-		} else {
-			this.surveyAreaPoint = null;
-		}
+		this.tickStart = tickStart;
+		this.tickEnd = tickEnd;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public int getTickStart() {
+		return tickStart;
+	}
+
+	public void setTickStart(int start) {
+		this.tickStart = start;
+	}
+
+	public int getTickEnd() {
+		return tickEnd;
+	}
+
+	public void setTickEnd(int end) {
+		this.tickEnd = end;
+	}
+
+	public VesselClass getType() {
+		return type;
+	}
+
+	public void setType(VesselClass type) {
+		this.type = type;
+	}
+
+	public double getLength() {
+		return length;
+	}
+
+	public void setLength(double length) {
+		this.length = length;
+	}
+
+	public Route getRoute() {
+		return route;
+	}
+
+	public void setRoute(Route route) {
+		this.route = route;
 	}
 
 	public void initialize() {
-//		final int pastLoc = Globals.getRandomSource().pastLoc(name, route.length);
-		final int pastLoc = 0;
+		this.setPosition(route.getRoute().get(0).getNdPoint());
 
-		if (pastLoc == route.length - 1) {
-			// we are at the end and will move backward
-			this.forward = false;
-			this.nextPoint = pastLoc - 1;
+		if (route.getRoute().size() > 1) {
+			facePoint(route.getRoute().get(1).getNdPoint());
 		} else {
-			this.forward = true;
-			this.nextPoint = pastLoc + 1;
-
+			facePoint(route.getRoute().get(0).getNdPoint());			
 		}
-
-		this.setPosition(route[pastLoc]);
-		facePoint(route[nextPoint]);
 	}
 
 	@ScheduledMethod(start = 0, interval = 1, priority = AgentPriority.SHIP_MOVE)
 	public void move() {
-		if (SimulationTime.getTick() < data.getStart()) {
+		if (SimulationTime.getTick() < tickStart) {
+			return;
+		}
+		if (SimulationTime.getTick() > tickEnd) {
+			currentBuoy = -1;
 			return;
 		}
 
-		final double moveLength = 2.5 * this.data.getSpeed() / 2; // km / t to steps / 30 min
-
-		// approaching next location on route?
-		if (distanceXY(this.route[nextPoint]) <= moveLength) {
-			// check wheter position numbers should increase, or if ships should turn around:
-			if (forward) {
-				this.nextPoint++;
-				if (this.nextPoint >= this.route.length) {
-					this.nextPoint -= 2;
-					forward = false;
-				}
-			} else {
-				this.nextPoint--;
-				if (this.nextPoint < 0) {
-					this.nextPoint += 2;
-					forward = true;
-				}
+		if (ticksStillPaused > 0) {
+			ticksStillPaused--;
+		} else {
+			currentBuoy++;
+			if (currentBuoy >= route.getRoute().size()) {
+				currentBuoy = 0;  // repeat the route from the beginning
 			}
 
-			facePoint(this.route[this.nextPoint]);
+			var buoy = route.getRoute().get(currentBuoy);
+			setPosition(buoy.getNdPoint());
+				
+			if (buoy.getPause() > 0) {
+				ticksStillPaused = buoy.getPause();
+			}
+		}
+	}
+
+	@Override
+	public void deterPorpoise() {
+		if (currentBuoy < 0) {
+			return;
+		}
+		if (ticksStillPaused > 0) {
+			return;
 		}
 
-		forward(moveLength);
+		Set<Porpoise> porps = Globals.getSpatialPartitioning().getPorpoisesInNeighborhood(this.getPosition());
+		Iterator<Porpoise> iter = porps.iterator();
+		JomopansEchoSPL splCalc = new JomopansEchoSPL();
+		while (iter.hasNext()) {
+			final Porpoise p = iter.next();
+
+			final double distToShip = this.getSpace().getDistance(getPosition(), p.getPosition()) * 400;
+
+			if (distToShip <= SimulationParameters.getDeterMaxDistance()) {
+				final double sourceLevel = splCalc.calculate(distToShip, type, getSpeed(), length, JOMOPANS_BAND);
+
+				final double currentDeterence = (sourceLevel /  SimulationParameters.getDeterResponseThresholdShips()) - SimulationParameters.getDeterrenceCoeffShips();
+
+				if (currentDeterence > 0) {
+					p.deter(currentDeterence, this);
+				}
+
+				if (DebugLog.isEnabledFor(8)) {
+					DebugLog.print8("who: {} dist-to-ship {}: {}", p.getId(), this, distToShip);
+				}
+			}
+		}
 	}
 
-	public double getSpeed() {
-		return this.data.getSpeed();
-	}
-
-	public String getName() {
-		return data.getName();
+	protected double getSpeed() {
+		return this.route.getRoute().get(currentBuoy).getSpeed();
 	}
 
 	@Override
 	public String toString() {
-		return data.getName();
+		return getName();
 	}
 
-	public boolean isInSurveyArea() {
-		if (this.surveyAreaPoint != null) {
-			if (this.getSpace().getDistance(getPosition(), this.surveyAreaPoint) < this.data.getSurvey().getRadius()) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	@Override
-	public double getImpact() {
-		if (isInSurveyArea()) {
-			return this.data.getSurvey().getImpact();
-		}
-
-		return this.impact;
-	}
-
-	
 }

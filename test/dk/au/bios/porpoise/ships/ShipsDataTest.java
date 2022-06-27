@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2021 Jacob Nabe-Nielsen <jnn@bios.au.dk>
+ * Copyright (C) 2017-2022 Jacob Nabe-Nielsen <jnn@bios.au.dk>
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
  * License version 2 and only version 2 as published by the Free Software Foundation.
@@ -27,6 +27,8 @@
 
 package dk.au.bios.porpoise.ships;
 
+import static dk.au.bios.porpoise.ships.VesselClass.CONTAINERSHIP;
+import static dk.au.bios.porpoise.ships.VesselClass.GOVERNMENT_RESEARCH;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
@@ -36,12 +38,63 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 class ShipsDataTest {
 
 	@Test
-	public void LoadShipDataFromJsonFile() throws Exception {
+	public void loadShipDataFromJsonFile() throws Exception {
 		var objMapper = new ObjectMapper();
 		ShipsData shipsData = objMapper.readValue(ShipsDataTest.class.getResourceAsStream("ships.json"),
 				ShipsData.class);
 
 		assertThat(shipsData.getRoutes()).hasSize(2);
-		assertThat(shipsData.getShips()).hasSize(5);
+		assertThat(shipsData.getShips()).hasSize(3);
+
+		assertThat(shipsData.getShips().get(0).getName()).isEqualTo("ao1");
+		assertThat(shipsData.getShips().get(0).getType()).isEqualTo(CONTAINERSHIP);
+		assertThat(shipsData.getShips().get(0).getLength()).isEqualTo(300.0);
+		assertThat(shipsData.getShips().get(0).getRoute().getName()).isEqualTo("Aarhus-Odden");
+		assertThat(shipsData.getShips().get(0).getTickStart()).isEqualTo(1);
+		assertThat(shipsData.getShips().get(0).getTickEnd()).isEqualTo(999999999);
+
+		assertThat(shipsData.getShips().get(1).getName()).isEqualTo("ao2");
+		assertThat(shipsData.getShips().get(1).getType()).isEqualTo(GOVERNMENT_RESEARCH);
+		assertThat(shipsData.getShips().get(1).getLength()).isEqualTo(82.90);
+		assertThat(shipsData.getShips().get(1).getRoute().getName()).isEqualTo("Aarhus-Odden");
+		assertThat(shipsData.getShips().get(1).getTickStart()).isEqualTo(-1);
+		assertThat(shipsData.getShips().get(1).getTickEnd()).isEqualTo(Integer.MAX_VALUE);
 	}
+
+	@Test
+	public void loadOneShip() throws Exception {
+		var objMapper = new ObjectMapper();
+		ShipsData shipsData = objMapper.readValue(ShipsDataTest.class.getResourceAsStream("oneship.json"),
+				ShipsData.class);
+
+		assertThat(shipsData.getRoutes()).hasSize(1);
+		assertThat(shipsData.getShips()).hasSize(1);
+		var ship = shipsData.getShips().get(0);
+		assertThat(ship.getName()).isEqualTo("1");
+		assertThat(ship.getType()).isEqualTo(CONTAINERSHIP);
+		assertThat(ship.getLength()).isEqualTo(100.0);
+		assertThat(ship.getRoute().getName()).isEqualTo("Route_1");
+		assertThat(ship.getTickStart()).isEqualTo(1);
+		assertThat(ship.getTickEnd()).isEqualTo(999999999);
+		
+		assertThat(shipsData.getRoutes().get(0).getName()).isEqualTo("Route_1");
+		var buoy1 = shipsData.getRoutes().get(0).getRoute().get(0);
+		assertThat(buoy1.getX()).isEqualTo(625584);
+		assertThat(buoy1.getY()).isEqualTo(6250196);
+		assertThat(buoy1.getSpeed()).isEqualTo(1.5852);
+		assertThat(buoy1.getPause()).isEqualTo(0);
+		
+		var buoy2 = shipsData.getRoutes().get(0).getRoute().get(1);
+		assertThat(buoy2.getX()).isEqualTo(666684);
+		assertThat(buoy2.getY()).isEqualTo(6250196);
+		assertThat(buoy2.getSpeed()).isEqualTo(3.121);
+		assertThat(buoy2.getPause()).isEqualTo(6);
+
+		var buoy3 = shipsData.getRoutes().get(0).getRoute().get(2);
+		assertThat(buoy3.getX()).isEqualTo(695584);
+		assertThat(buoy3.getY()).isEqualTo(6250196);
+		assertThat(buoy3.getSpeed()).isEqualTo(3.121);
+		assertThat(buoy3.getPause()).isEqualTo(0);
+	}
+
 }

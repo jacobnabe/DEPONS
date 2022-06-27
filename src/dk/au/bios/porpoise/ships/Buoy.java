@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2021 Jacob Nabe-Nielsen <jnn@bios.au.dk>
+ * Copyright (C) 2017-2022 Jacob Nabe-Nielsen <jnn@bios.au.dk>
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
  * License version 2 and only version 2 as published by the Free Software Foundation.
@@ -27,10 +27,27 @@
 
 package dk.au.bios.porpoise.ships;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import dk.au.bios.porpoise.Globals;
+import repast.simphony.space.continuous.NdPoint;
+
 public class Buoy {
 
 	private double x;
 	private double y;
+	private double speed;
+	private int pause;
+
+	@JsonCreator
+	public Buoy(@JsonProperty("x") double x, @JsonProperty("y") double y, @JsonProperty("speed") double speed,
+			@JsonProperty("pause") int pause) {
+		this.x = x;
+		this.y = y;
+		this.speed = speed;
+		this.pause = pause;
+	}
 
 	public double getX() {
 		return x;
@@ -46,6 +63,34 @@ public class Buoy {
 
 	public void setY(double y) {
 		this.y = y;
+	}
+
+	public double getSpeed() {
+		return speed;
+	}
+
+	public void setSpeed(double speed) {
+		this.speed = speed;
+	}
+
+	public int getPause() {
+		return pause;
+	}
+
+	public void setPause(int pause) {
+		this.pause = pause;
+	}
+
+	public NdPoint getNdPoint() {
+		return new NdPoint(convertUtmXToGrid(x), convertUtmYToGrid(y));
+	}
+
+	private double convertUtmXToGrid(final double utmX) {
+		return (utmX - Globals.getXllCorner()) / 400.0d;
+	}
+
+	private double convertUtmYToGrid(final double utmY) {
+		return (utmY - Globals.getYllCorner()) / 400.0d;
 	}
 
 }

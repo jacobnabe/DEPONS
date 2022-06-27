@@ -152,16 +152,15 @@ public class Agent {
 
 		moveByVector(distance, anglesForMoveByVector);
 	}
-	
+
 	public NdPoint moveByVector(double distance, double... anglesInRadians) {
 		final NdPoint newPos = getSpace().moveByVector(this, distance, anglesInRadians);
 
 		final GridPoint p = ndPointToGridPoint(newPos);
 		getGrid().moveTo(this, p.getX(), p.getY());
-		
-		return newPos;
-	}	
 
+		return newPos;
+	}
 
 	/**
 	 * Gets the heading of the agent. The heading is a degree in the range (-180;180].

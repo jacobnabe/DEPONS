@@ -171,7 +171,7 @@ public class PorpoiseSimBuilder implements ContextBuilder<Agent> {
 
 		for (final Agent a : context) {
 			final NdPoint pt = space.getLocation(a);
-			grid.moveTo(a, (int) pt.getX(), (int) pt.getY());
+			a.setPosition(pt);
 		}
 
 		setupSchedules(context, space, grid, cellData);
