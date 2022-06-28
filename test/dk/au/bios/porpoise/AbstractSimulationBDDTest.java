@@ -60,7 +60,7 @@ import dk.au.bios.porpoise.landscape.CellData;
 import dk.au.bios.porpoise.landscape.CellDataTestData;
 import dk.au.bios.porpoise.landscape.DataFileMetaData;
 import dk.au.bios.porpoise.landscape.GridSpatialPartitioning;
-import dk.au.bios.porpoise.tasks.DeterenceTask;
+import dk.au.bios.porpoise.tasks.DeterrenceTask;
 
 /**
  * Abstract base class for replayed tests. Replayed tests are simulations which are captured using the
@@ -115,7 +115,7 @@ public abstract class AbstractSimulationBDDTest {
 		DispersalFactory.setType("off");
 		final ScheduleParameters deterenceParams = ScheduleParameters.createRepeating(0, 1,
 				AgentPriority.PORP_DETERRENCE);
-		schedule.schedule(deterenceParams, new DeterenceTask(context));
+		schedule.schedule(deterenceParams, new DeterrenceTask(context));
 	}
 
 	protected void aHomogenousWorld() throws Exception {

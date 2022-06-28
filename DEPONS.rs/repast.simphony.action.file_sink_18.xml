@@ -1,0 +1,16 @@
+<repast.simphony.data2.engine.FileSinkDescriptor simphonyVersion="2.9.1">
+  <name>Hydrophones</name>
+  <dataSet>Hydrophones</dataSet>
+  <delimiter>;</delimiter>
+  <format>TABULAR</format>
+  <sourceIds class="linked-hash-set">
+    <string>tick</string>
+    <string>name</string>
+    <string>receivedSoundLevel</string>
+    <string>shipName</string>
+    <string>shipUtmX</string>
+    <string>shipUtmY</string>
+  </sourceIds>
+  <fileName>Hydrophones.csv</fileName>
+  <addTimeStamp>true</addTimeStamp>
+</repast.simphony.data2.engine.FileSinkDescriptor>
