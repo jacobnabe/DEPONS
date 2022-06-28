@@ -36,6 +36,7 @@ import dk.au.bios.porpoise.ships.VesselClass;
 import dk.au.bios.porpoise.util.DebugLog;
 import dk.au.bios.porpoise.util.SimulationTime;
 import repast.simphony.engine.schedule.ScheduledMethod;
+import repast.simphony.util.ContextUtils;
 
 /**
  * A ship agent. This is used in the Kattegat simulation and is not relevant for the current DEPONS model.
@@ -166,18 +167,19 @@ public class Ship extends SoundSource implements dk.au.bios.porpoise.ships.Ship 
 			return;
 		}
 
+		JomopansEchoSPL splCalc = new JomopansEchoSPL();
+
 		Set<Porpoise> porps = Globals.getSpatialPartitioning().getPorpoisesInNeighborhood(this.getPosition());
 		Iterator<Porpoise> iter = porps.iterator();
-		JomopansEchoSPL splCalc = new JomopansEchoSPL();
 		while (iter.hasNext()) {
 			final Porpoise p = iter.next();
 
 			final double distToShip = this.getSpace().getDistance(getPosition(), p.getPosition()) * 400;
 
 			if (distToShip <= SimulationParameters.getDeterMaxDistance()) {
-				final double sourceLevel = splCalc.calculate(distToShip, type, getSpeed(), length, JOMOPANS_BAND);
+				final double receivedLevel = splCalc.calculate(distToShip, type, getSpeed(), length, JOMOPANS_BAND);
 
-				final double currentDeterence = (sourceLevel /  SimulationParameters.getDeterResponseThresholdShips()) - SimulationParameters.getDeterrenceCoeffShips();
+				final double currentDeterence = (receivedLevel /  SimulationParameters.getDeterResponseThresholdShips()) - SimulationParameters.getDeterrenceCoeffShips();
 
 				if (currentDeterence > 0) {
 					p.deter(currentDeterence, this);
@@ -187,6 +189,16 @@ public class Ship extends SoundSource implements dk.au.bios.porpoise.ships.Ship 
 					DebugLog.print8("who: {} dist-to-ship {}: {}", p.getId(), this, distToShip);
 				}
 			}
+		}
+		
+		Iterator<Hydrophone> hydrophones = ContextUtils.getContext(this).getObjects(Hydrophone.class).iterator();
+		while (hydrophones.hasNext()) {
+			var hydrophone = hydrophones.next();
+
+			final double distToShip = this.getSpace().getDistance(getPosition(), hydrophone.getPosition()) * 400;
+			final double receivedLevel = splCalc.calculate(distToShip, type, getSpeed(), length, JOMOPANS_BAND);
+
+			hydrophone.receiveSoundLevel(this, receivedLevel);
 		}
 	}
 

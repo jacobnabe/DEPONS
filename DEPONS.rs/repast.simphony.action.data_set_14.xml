@@ -1,0 +1,63 @@
+<repast.simphony.data2.engine.DataSetDescriptor simphonyVersion="2.9.1">
+  <name>Hydrophones</name>
+  <type>NON_AGGREGATE</type>
+  <sourceType>dk.au.bios.porpoise.Hydrophone</sourceType>
+  <inclTick>true</inclTick>
+  <inclBatchRun>false</inclBatchRun>
+  <inclRandomSeed>false</inclRandomSeed>
+  <scheduleParams>
+    <start>1.0</start>
+    <interval>1.0</interval>
+    <priority>-Infinity</priority>
+    <pType>LAST</pType>
+    <duration>-1.0</duration>
+    <frequency>REPEAT</frequency>
+    <hashCode>-1934802726</hashCode>
+  </scheduleParams>
+  <atEnd>false</atEnd>
+  <methodDataSources class="linked-hash-map">
+    <entry>
+      <string>name</string>
+      <repast.simphony.data2.engine.MethodDataSourceDefinition>
+        <id>name</id>
+        <className>dk.au.bios.porpoise.Hydrophone</className>
+        <methodName>getName</methodName>
+      </repast.simphony.data2.engine.MethodDataSourceDefinition>
+    </entry>
+    <entry>
+      <string>shipName</string>
+      <repast.simphony.data2.engine.MethodDataSourceDefinition>
+        <id>shipName</id>
+        <className>dk.au.bios.porpoise.Hydrophone</className>
+        <methodName>getShipName</methodName>
+      </repast.simphony.data2.engine.MethodDataSourceDefinition>
+    </entry>
+    <entry>
+      <string>shipUtmX</string>
+      <repast.simphony.data2.engine.MethodDataSourceDefinition>
+        <id>shipUtmX</id>
+        <className>dk.au.bios.porpoise.Hydrophone</className>
+        <methodName>getShipUtmX</methodName>
+      </repast.simphony.data2.engine.MethodDataSourceDefinition>
+    </entry>
+    <entry>
+      <string>shipUtmY</string>
+      <repast.simphony.data2.engine.MethodDataSourceDefinition>
+        <id>shipUtmY</id>
+        <className>dk.au.bios.porpoise.Hydrophone</className>
+        <methodName>getShipUtmY</methodName>
+      </repast.simphony.data2.engine.MethodDataSourceDefinition>
+    </entry>
+    <entry>
+      <string>receivedSoundLevel</string>
+      <repast.simphony.data2.engine.MethodDataSourceDefinition>
+        <id>receivedSoundLevel</id>
+        <className>dk.au.bios.porpoise.Hydrophone</className>
+        <methodName>getReceivedSoundLevel</methodName>
+      </repast.simphony.data2.engine.MethodDataSourceDefinition>
+    </entry>
+  </methodDataSources>
+  <countSources class="linked-hash-map"/>
+  <customNADataSources class="linked-hash-map"/>
+  <customAggDataSources class="linked-hash-map"/>
+</repast.simphony.data2.engine.DataSetDescriptor>

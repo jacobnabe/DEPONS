@@ -26,6 +26,10 @@
       <string>dk.au.bios.porpoise.Porpoise</string>
       <string>dk.au.bios.porpoise.ui.PorpoiseStyle</string>
     </entry>
+    <entry>
+      <string>dk.au.bios.porpoise.Hydrophone</string>
+      <string>repast.simphony.visualization.editedStyle.EditedStyle2D</string>
+    </entry>
   </styles>
   <editedStyles>
     <entry>
@@ -51,6 +55,10 @@
     <entry>
       <string>dk.au.bios.porpoise.Porpoise</string>
       <null/>
+    </entry>
+    <entry>
+      <string>dk.au.bios.porpoise.Hydrophone</string>
+      <string>dk.au.bios.porpoise.Hydrophone.style_0.xml</string>
     </entry>
   </editedStyles>
   <netStyles/>
@@ -92,6 +100,10 @@
     <entry>
       <string>dk.au.bios.porpoise.Porpoise</string>
       <int>5</int>
+    </entry>
+    <entry>
+      <string>dk.au.bios.porpoise.Hydrophone</string>
+      <int>6</int>
     </entry>
   </layerOrder>
   <projections>

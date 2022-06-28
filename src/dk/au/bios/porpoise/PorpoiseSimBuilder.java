@@ -39,13 +39,14 @@ import dk.au.bios.porpoise.behavior.RefMemTurnCalculator;
 import dk.au.bios.porpoise.behavior.ReplayedRandomSource;
 import dk.au.bios.porpoise.landscape.CellData;
 import dk.au.bios.porpoise.landscape.GridSpatialPartitioning;
+import dk.au.bios.porpoise.landscape.HydrophoneLoader;
 import dk.au.bios.porpoise.landscape.LandscapeLoader;
 import dk.au.bios.porpoise.ships.ShipLoader;
 import dk.au.bios.porpoise.tasks.AddTrackedPorpoisesTask;
 import dk.au.bios.porpoise.tasks.CaptureTestDataTask;
 import dk.au.bios.porpoise.tasks.DailyTask;
 import dk.au.bios.porpoise.tasks.DeadPorpoisesReportProxyCleanupTask;
-import dk.au.bios.porpoise.tasks.DeterenceTask;
+import dk.au.bios.porpoise.tasks.DeterrenceTask;
 import dk.au.bios.porpoise.tasks.FoodTask;
 import dk.au.bios.porpoise.tasks.MonthlyTasks;
 import dk.au.bios.porpoise.tasks.YearlyTask;
@@ -168,6 +169,15 @@ public class PorpoiseSimBuilder implements ContextBuilder<Agent> {
 		}
 
 		addTurbines(context, space, grid);
+		try {
+			HydrophoneLoader.load(context, landscape);
+		} catch (IOException e) {
+			if (RSApplication.getRSApplicationInstance() != null) {
+				RSApplication.getRSApplicationInstance().getErrorLog().addError(new MessageEvent(this, Level.FATAL, "Error loading hydrophone data"));
+				RSApplication.getRSApplicationInstance().getErrorLog().show();
+			}
+			throw new RuntimeException(e);
+		}
 
 		for (final Agent a : context) {
 			final NdPoint pt = space.getLocation(a);
@@ -347,7 +357,7 @@ public class PorpoiseSimBuilder implements ContextBuilder<Agent> {
 		if (SimulationParameters.getModel() >= 3) {
 			final ScheduleParameters deterenceParams = ScheduleParameters.createRepeating(0, 1,
 					AgentPriority.PORP_DETERRENCE);
-			schedule.schedule(deterenceParams, new DeterenceTask(context));
+			schedule.schedule(deterenceParams, new DeterrenceTask(context));
 		}
 	}
 
