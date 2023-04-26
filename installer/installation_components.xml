@@ -9,7 +9,7 @@
 
     <info>
       <appname>DEPONS</appname>
-	  <appversion>2.3</appversion>
+	  <appversion>2.3.1</appversion>
       <summarylogfilepath>$INSTALL_PATH/installinfo/Summary.htm</summarylogfilepath>
     </info>
     
@@ -43,7 +43,7 @@
     </locale>
     
     <resources>
-        <res src="$StagingArea/LICENSE" id="LicencePanel.licence"/>
+        <res src="$StagingArea/LICENSE.txt" id="LicencePanel.licence"/>
         <res src="$StagingArea/installer/hellopanel.html" id="HTMLHelloPanel.info"/>
         <res src="$StagingArea/model_description.txt" id="InfoPanel.info"/>
         
