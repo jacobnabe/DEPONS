@@ -5,7 +5,7 @@
 
   <skipIfNotSupported/>
   
-  <programGroup defaultName="DEPONS Model" location="StartMenu"/>
+  <programGroup defaultName="DEPONS Model" location="applications"/>
   
   <shortcut
             name="DEPONS Model"
@@ -17,7 +17,7 @@
             target="$INSTALL_PATH\start_model.bat"
      		commandLine=""
      		workingDirectory="$INSTALL_PATH"
-            description="Model"
+            description="Run the DEPONS model"
             iconFile="$INSTALL_PATH\DEPONS\icons\model.ico"
      		iconIndex="0"
      		initialState="noShow">

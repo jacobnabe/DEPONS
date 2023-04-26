@@ -3,12 +3,10 @@
   <hashtable>
     <default>
       <loadFactor>0.75</loadFactor>
-      <threshold>3</threshold>
+      <threshold>8</threshold>
     </default>
-    <int>5</int>
-    <int>3</int>
-    <string>SettingsFileName</string>
-    <string>Repast.settings</string>
+    <int>11</int>
+    <int>2</int>
     <string>SettingsRegistryId</string>
     <string>Repast.registry</string>
     <string>LastLoadedScenario</string>
