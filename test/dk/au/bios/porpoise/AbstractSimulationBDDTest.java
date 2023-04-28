@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2022 Jacob Nabe-Nielsen <jnn@bios.au.dk>
+ * Copyright (C) 2017-2023 Jacob Nabe-Nielsen <jnn@bios.au.dk>
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
  * License version 2 and only version 2 as published by the Free Software Foundation.
@@ -32,6 +32,14 @@ import static org.mockito.Mockito.mock;
 import java.io.File;
 import java.util.stream.Stream;
 
+import dk.au.bios.porpoise.behavior.DispersalFactory;
+import dk.au.bios.porpoise.behavior.FastRefMemTurn;
+import dk.au.bios.porpoise.behavior.RandomSource;
+import dk.au.bios.porpoise.landscape.CellData;
+import dk.au.bios.porpoise.landscape.CellDataTestData;
+import dk.au.bios.porpoise.landscape.DataFileMetaData;
+import dk.au.bios.porpoise.landscape.GridSpatialPartitioning;
+import dk.au.bios.porpoise.tasks.DeterrenceTask;
 import repast.simphony.context.Context;
 import repast.simphony.context.DefaultContext;
 import repast.simphony.context.space.continuous.ContinuousSpaceFactory;
@@ -53,14 +61,6 @@ import repast.simphony.space.continuous.RandomCartesianAdder;
 import repast.simphony.space.grid.Grid;
 import repast.simphony.space.grid.GridBuilderParameters;
 import repast.simphony.space.grid.SimpleGridAdder;
-import dk.au.bios.porpoise.behavior.DispersalFactory;
-import dk.au.bios.porpoise.behavior.FastRefMemTurn;
-import dk.au.bios.porpoise.behavior.RandomSource;
-import dk.au.bios.porpoise.landscape.CellData;
-import dk.au.bios.porpoise.landscape.CellDataTestData;
-import dk.au.bios.porpoise.landscape.DataFileMetaData;
-import dk.au.bios.porpoise.landscape.GridSpatialPartitioning;
-import dk.au.bios.porpoise.tasks.DeterrenceTask;
 
 /**
  * Abstract base class for replayed tests. Replayed tests are simulations which are captured using the
@@ -84,12 +84,21 @@ public abstract class AbstractSimulationBDDTest {
 
 	private Runner testRunner;
 
+	protected void anOldWorld(int worldWidth, int worldHeight) throws Exception {
+		SimulationParameters.resetToDefaultsForOldUnitTest();
+		setupWorld(worldWidth, worldHeight, XLL_CORNER, YLL_CORNER);
+	}
+
 	protected void aNewWorld(int worldWidth, int worldHeight) throws Exception {
 		aNewWorld(worldWidth, worldHeight, XLL_CORNER, YLL_CORNER);
 	}
 
 	protected void aNewWorld(int worldWidth, int worldHeight, double xllCorner, double yllCorner) throws Exception {
 		SimulationParameters.resetToDefaultsForUnitTest();
+		setupWorld(worldWidth, worldHeight, xllCorner, yllCorner);
+	}
+
+	private void setupWorld(int worldWidth, int worldHeight, double xllCorner, double yllCorner) throws Exception {
 		Globals.setLandscapeMetadata(new DataFileMetaData(worldWidth, worldHeight, xllCorner, yllCorner, 400, null));
 		SimulationParameters.setModel(4);
 		random = mock(RandomSource.class);
@@ -102,8 +111,9 @@ public abstract class AbstractSimulationBDDTest {
 		RunState.init().setMasterContext(context);
 
 		factory = ContinuousSpaceFactoryFinder.createContinuousSpaceFactory(null);
-		space = factory.createContinuousSpace("space", context, new RandomCartesianAdder<Agent>(), new BouncyBorders(), 
-				new double[] {Globals.getWorldWidth(), Globals.getWorldHeight()}, new double[] { 0.5f, 0.5f });
+		space = factory.createContinuousSpace("space", context, new RandomCartesianAdder<Agent>(), new BouncyBorders(), // new StrictBorders(), //  
+				new double[] {Globals.getWorldWidth(), Globals.getWorldHeight()}, 
+				new double[] { 0.5f, 0.5f });
 		gridFactory = GridFactoryFinder.createGridFactory(null);
 		grid = gridFactory.createGrid("grid", context, new GridBuilderParameters<Agent>(new repast.simphony.space.grid.BouncyBorders(), new SimpleGridAdder<Agent>(), true, Globals.getWorldWidth(), Globals.getWorldHeight()));
 		cellData = CellDataTestData.getCellData();
@@ -148,7 +158,7 @@ public abstract class AbstractSimulationBDDTest {
 		var p = new Porpoise(context, 1, new FastRefMemTurn());
 		context.add(p);
 		p.setPosition(new NdPoint(x, y));
-		p.setHeading(0.0);
+		p.setHeading(heading);
 		p.moveAwayFromLand();  // Weird side-effect here, updating the initial poslist
 
 		// The @ScheduledMethod annotation on Porpoise is not automatically processed
@@ -169,14 +179,6 @@ public abstract class AbstractSimulationBDDTest {
 	protected Stream<Ship> shipStream() {
 		Stream<Ship> ships = context.getObjectsAsStream(Ship.class).map(Ship.class::cast);
 		return ships;
-	}
-
-	protected double convertGridXToUtmX(double gridX) {
-		return XLL_CORNER + (gridX * 400.0d);
-	}
-
-	protected double convertGridYToUtmX(double gridY) {
-		return YLL_CORNER + (gridY * 400.0d);
 	}
 
 }

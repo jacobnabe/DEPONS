@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2020 Jacob Nabe-Nielsen <jnn@bios.au.dk>
+ * Copyright (C) 2017-2023 Jacob Nabe-Nielsen <jnn@bios.au.dk>
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
  * License version 2 and only version 2 as published by the Free Software Foundation.
@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import dk.au.bios.porpoise.Globals;
+import dk.au.bios.porpoise.SimulationConstants;
 
 /**
  * Loads the landscape data files and returns a CellData instance.
@@ -43,17 +44,20 @@ import dk.au.bios.porpoise.Globals;
 public class LandscapeLoader {
 
 	private static final String DATA_PATH = "data";
+	
 	public static final String FILE_EXT_ASC = ".asc";
 	public static final String FILE_EXT_TIF = ".tif";
 	public static final String FILE_EXT_ZIP = ".zip";
 	public static final String FILE_EXT = FILE_EXT_ASC;
 
 	public static final String BATHY_FILE = "bathy" + FILE_EXT;
+	public static final String SEDIMENT_FILE = "sediment" + FILE_EXT;
 	public static final String BLOCKS_FILE = "blocks" + FILE_EXT;
 	public static final String DISTTOCOAST_FILE = "disttocoast" + FILE_EXT;
 	public static final String PATCHES_FILE = "patches" + FILE_EXT;
 	public static final String PREY_FILE_PREFIX = "prey";
 	public static final String SALINITY_FILE_PREFIX = "salinity";
+	public static final String SUNTIMES_FILE = "suntimes.csv";
 
 	private final String landscape;
 
@@ -103,8 +107,8 @@ public class LandscapeLoader {
 				throw new FileNotFoundException("Unable to load landscape " + landscape + " from " + BATHY_FILE);
 			}
 
-			if (metadata.getCellsize() != 400) {
-				throw new IOException("Cell size != 400, not supported");
+			if (metadata.getCellsize() != SimulationConstants.REQUIRED_CELL_SIZE) {
+				throw new IOException("Cell size != " + SimulationConstants.REQUIRED_CELL_SIZE + ", not supported");
 			}
 
 			Globals.setLandscapeMetadata(metadata);

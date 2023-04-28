@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Jacob Nabe-Nielsen <jnn@bios.au.dk>
+ * Copyright (C) 2022-2023 Jacob Nabe-Nielsen <jnn@bios.au.dk>
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
  * License version 2 and only version 2 as published by the Free Software Foundation.
@@ -27,9 +27,9 @@
 
 package dk.au.bios.porpoise.ships;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
@@ -101,7 +101,7 @@ public class JomopansEchoSPLTest {
 		})
 	public void calculateSpl(String vc, int band, double speed, double length, double spl) {
 		var jespl = new JomopansEchoSPL();
-		Assertions.assertThat(jespl.calculateSourceLevel(VesselClass.forValue(vc), speed, length, band)).isCloseTo(spl, within(0.00001));
+		assertThat(jespl.calculateSourceLevel(VesselClass.forValue(vc), speed, length, band)).isCloseTo(spl, within(0.00001));
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2022 Jacob Nabe-Nielsen <jnn@bios.au.dk>
+ * Copyright (C) 2017-2023 Jacob Nabe-Nielsen <jnn@bios.au.dk>
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
  * License version 2 and only version 2 as published by the Free Software Foundation.
@@ -66,7 +66,7 @@ public final class SimulationParameters {
 	/**
 	 * Deterrence coefficient [unitless] (calibrated). In parameters.xml: c
 	 */
-	private static double deterrenceCoeff = 1; // Not declared in NETLOGO, only used
+	private static double deterrenceCoeff = 0.07; // Not declared in NETLOGO, only used
 
 	private static double m = Math.pow(10, 0.74); // Limit for when turning angles stop decreasing with speed
 
@@ -75,16 +75,6 @@ public final class SimulationParameters {
 	 */
 	private static double deterResponseThreshold = 158;
 
-	/**
-	 * Deterrence coefficient for ships. In parameters.xml: c_ships
-	 */
-	private static double deterrenceCoeffShips = 1;
-
-	/**
-	 * The response-threshold for ships. In parameters.xml: T_ships
-	 */
-	private static double deterResponseThresholdShips = 158;
-	
 	/**
 	 * Deterrence decay; In parameter.xml: Psi_deter
 	 */
@@ -96,6 +86,31 @@ public final class SimulationParameters {
 	 * stored in this variable in meters. In parameter.xml: dmax_deter
 	 */
 	private static double deterMaxDistance = 50 * 1000; // 50 KM
+
+	/**
+	 * Minimum deterrence distance for ships. Animals that are less than this far from the
+	 * ship will not be deterred. Parameter is specified in KM but
+	 * stored in this variable in meters. In parameter.xml: dmin_deter_ships
+	 */
+	private static double deterMinDistanceShips = 0.1d * 1000; // 100m
+
+	private static double pship_int_day = -3.0569351d;  // pship_int_day - intercept of equation defining effect of ship noise &amp; distance on prob reacting during daylight
+	private static double pship_int_night = -3.233771d;  // pship_int_night - intercept of equation defining effect of ship noise &amp; distance on prob reacting during darkness
+	private static double cship_int_day = 2.9647996d;  // cship_int_day - intercept of equation defining effect of ship noise & distance on mag reacting during daylight
+	private static double cship_int_night = 2.7543376d;  // cship_int_night - intercept of equation defining effect of ship noise & distance on mag reacting during darkness
+
+	private static double noiseDayProb = 0.2172813d;  // pship_noise_day coefficient determining effect of ship noise level on probability of deterrence
+	private static double distDayProb = -0.1303880d;  // pship_dist_day coefficient determining effect of distance to ship on probability of deterrence
+	private static double noisedistDayProb = 0.0293443d;  // pship_dist_x_noise_day coefficient determining effect of interaction between ship noise and distance on probability of deterrence
+	private static double noiseNightProb = 0.0d;
+	private static double distNightProb = 0.085242d;
+	private static double noisedistNightProb = 0.0d;
+	private static double noiseDayMag = 0.0472709d;  // cship_noise_day coefficient determining effect of ship noise level on magnitude of deterrence
+	private static double distDayMag = -0.0355541d;  // cship_dist_day coefficient determining effect of distance to ship on magnitude of deterrence
+	private static double noisedistDayMag = 0.0d;    // cship_dist_x_noise_day coefficient determining effect of interaction between ship noise and distance on magnitude of deterrence
+	private static double noiseNightMag = 0.0d;
+	private static double distNightMag = 0.0284629d;
+	private static double noisedistNightMag = 0.0d;
 
 	/**
 	 * absorption coefficient for sound. In parameter.xml: alpha_hat
@@ -193,6 +208,9 @@ public final class SimulationParameters {
 	private static double psmType2RandomAngle;
 
 	private static double q1;
+	private static double rS;
+	private static double rR;
+
 
 	private static LogisticDecreaseSSLogis psmLogisticDecreaseFunction;
 
@@ -226,42 +244,60 @@ public final class SimulationParameters {
 		porpoiseCount = params.getInteger("porpoiseCount");
 		trackedPorpoiseCount = params.getInteger("trackedPorpoiseCount");
 		shipsEnabled = params.getBoolean("ships");
-		inertiaConst = params.getDouble("k");
-		corrLogmovLength = params.getDouble("a0");
-		corrLogmovBathy = params.getDouble("a1");
-		corrLogmovSalinity = params.getDouble("a2");
-		corrAngleBase = params.getDouble("b0");
-		corrAngleBathy = params.getDouble("b1");
-		corrAngleSalinity = params.getDouble("b2");
-		corrAngleBaseSD = params.getDouble("b3");
-		deterrenceCoeff = params.getDouble("c");
+		inertiaConst = convertStringToDouble(params, "k");
+		corrLogmovLength = convertStringToDouble(params, "a0");
+		corrLogmovBathy = convertStringToDouble(params, "a1");
+		corrLogmovSalinity = convertStringToDouble(params, "a2");
+		corrAngleBase = convertStringToDouble(params, "b0");
+		corrAngleBathy = convertStringToDouble(params, "b1");
+		corrAngleSalinity = convertStringToDouble(params, "b2");
+		corrAngleBaseSD = convertStringToDouble(params, "b3");
+		deterrenceCoeff = convertStringToDouble(params, "c");
 		m = 0.00001; // Hardcoded value - Math.pow(10, params.getDouble("m"));
-		deterResponseThreshold = params.getDouble("RT");
-		deterrenceCoeffShips = params.getDouble("c_ships");
-		deterResponseThresholdShips = params.getDouble("T_ships");
-		deterDecay = params.getDouble("Psi_deter");
-		deterMaxDistance = params.getDouble("dmax_deter") * 1000; // entered in KM but stored in meters.
+		deterResponseThreshold = convertStringToDouble(params, "RT");
+		deterDecay = convertStringToDouble(params, "Psi_deter");
+		deterMaxDistance = convertStringToDouble(params, "dmax_deter") * 1000; // entered in KM but stored in meters.
+		deterMinDistanceShips = convertStringToDouble(params, "dmin_deter_ships") * 1000;  // entered in KM but stored in meters.
+		pship_int_day = convertStringToDouble(params, "pship_int_day");
+		pship_int_night = convertStringToDouble(params, "pship_int_night");
+		cship_int_day = convertStringToDouble(params, "cship_int_day");
+		cship_int_night = convertStringToDouble(params, "cship_int_night");
+		noiseDayProb = convertStringToDouble(params, "pship_noise_day");
+		distDayProb = convertStringToDouble(params, "pship_dist_day");
+		noisedistDayProb = convertStringToDouble(params, "pship_dist_x_noise_day");
+		noiseNightProb = convertStringToDouble(params, "pship_noise_night");
+		distNightProb = convertStringToDouble(params, "pship_dist_night");
+		noisedistNightProb = convertStringToDouble(params, "pship_dist_x_noise_night");
+		noiseDayMag = convertStringToDouble(params, "cship_noise_day");
+		distDayMag = convertStringToDouble(params, "cship_dist_day");
+		noisedistDayMag = convertStringToDouble(params, "cship_dist_x_noise_day");
+		noiseNightMag = convertStringToDouble(params, "cship_noise_night");
+		distNightMag = convertStringToDouble(params, "cship_dist_night");
+		noisedistNightMag = convertStringToDouble(params, "cship_dist_x_noise_night");
+
 		alphaHat = convertStringToDouble(params, "alpha_hat");
 		betaHat = convertStringToDouble(params, "beta_hat");
-		meanDispDist = params.getDouble("ddisp");
-		maxMov = params.getDouble("dmax_mov");
-		eUsePer30Min = params.getDouble("Euse");
-		eLact = params.getDouble("Elact");
-		eWarm = params.getDouble("Ewarm");
+		meanDispDist = convertStringToDouble(params, "ddisp");
+		maxMov = convertStringToDouble(params, "dmax_mov");
+		eUsePer30Min = convertStringToDouble(params, "Euse");
+		eLact = convertStringToDouble(params, "Elact");
+		eWarm = convertStringToDouble(params, "Ewarm");
 		deterTime = params.getInteger("tdeter");
 		maxU = 1; // Hardcoded value - params.getDouble("Umax");
-		minDispDepth = params.getDouble("wdisp");
-		minDepth = params.getDouble("wmin");
-		xSurvivalProbConst = params.getDouble("beta");
-		conceiveProb = params.getDouble("h");
+		minDispDepth = convertStringToDouble(params, "wdisp");
+		minDepth = convertStringToDouble(params, "wmin");
+		xSurvivalProbConst = convertStringToDouble(params, "beta");
+		conceiveProb = convertStringToDouble(params, "h");
 		gestationTime = params.getInteger("tgest");
 		nursingTime = params.getInteger("tnurs");
-		maxAge = params.getDouble("tmaxage");
-		maturityAge = params.getDouble("tmature");
-		regrowthFoodQualifier = params.getDouble("Umin");
-		pstPreferredDistanceTolerance = params.getDouble("PSM_tol");
-		psmType2RandomAngle = params.getDouble("PSM_angle");
-		q1 = params.getDouble("q1");
+		maxAge = convertStringToDouble(params, "tmaxage");
+		maturityAge = convertStringToDouble(params, "tmature");
+		regrowthFoodQualifier = convertStringToDouble(params, "Umin");
+		pstPreferredDistanceTolerance = convertStringToDouble(params, "PSM_tol");
+		psmType2RandomAngle = convertStringToDouble(params, "PSM_angle");
+		q1 = 0.02d; // Obsolete, hardcoded value - convertStringToDouble(params, "q1");
+		rS = convertStringToDouble(params, "rS");
+		rR = convertStringToDouble(params, "rR");
 
 		final String psmLogParam = params.getString("PSM_log");
 		final String[] psmLogDecrease = psmLogParam.split(";");
@@ -294,11 +330,82 @@ public final class SimulationParameters {
 		DispersalFactory.setType(dispersalTypeStr);
 
 		tDisp = params.getInteger("tdisp");
-		foodGrowthRate = params.getDouble("rU");
-		bycatchProb = params.getDouble("bycatchProb");
+		foodGrowthRate = convertStringToDouble(params, "rU");
+		bycatchProb = convertStringToDouble(params, "bycatchProb");
 	}
 	
 	public static void resetToDefaultsForUnitTest() {
+		landscape = null;
+		turbines = null;
+		shipsEnabled = false;
+		porpoiseCount = 0;
+		trackedPorpoiseCount = 0;
+		inertiaConst = 0.001;
+		corrLogmovLength = 0.35;
+		corrLogmovBathy = 0.0005;
+		corrLogmovSalinity = -0.02;
+		corrAngleBase = -0.024;
+		corrAngleBathy = -0.008;
+		corrAngleSalinity = 0.93;
+		corrAngleBaseSD = -14;
+		deterrenceCoeff = 0.07;
+		m = Math.pow(10, 0.74);
+		deterResponseThreshold = 152.9;
+		deterDecay = 50.0;
+		deterMaxDistance = 1000.0 * 1000; // in KM
+		deterMinDistanceShips = 0.1d * 1000; // 100m
+		alphaHat = 0.0;
+		betaHat = 20.0;
+		meanDispDist = 1.05;
+		maxMov = 1.73;
+		eUsePer30Min = 4.5;
+		eLact = 1.4;
+		eWarm = 1.3;
+		deterTime = 0;
+		maxU = 1.0;
+		minDispDepth = 4.0;
+		minDepth = 1.0;
+		xSurvivalProbConst = 0.4;
+		conceiveProb = 0.68;
+		gestationTime = 300;
+		nursingTime = 240;
+		maxAge = 30.0;
+		maturityAge = 3.44;
+		regrowthFoodQualifier = 0.001;
+		pstPreferredDistanceTolerance = 5.0d;
+		psmType2RandomAngle = 20.0d;
+		q1 = 0.02d;
+		rS = 0.04;
+		rR = 0.04;
+		psmLogisticDecreaseFunction = null;
+		homogenous = true;
+		wrapBorderHomo = true;
+		model = 4;
+		tDisp = 3;
+		foodGrowthRate = 0.10;
+		bycatchProb = 0.0;
+		psmLog = 0.6;
+		psmLogisticDecreaseFunction = new LogisticDecreaseSSLogis(1.0, 0.0, psmLog);
+		
+		pship_int_day = -3.0569351d;
+		pship_int_night = -3.233771d;
+		cship_int_day = 2.9647996d;
+		cship_int_night = 2.7543376d;
+		noiseDayProb = 0.2172813d;
+		distDayProb = -0.1303880d;
+		noisedistDayProb = 0.0293443d;
+		noiseNightProb = 0.0d;
+		distNightProb = 0.085242d;
+		noisedistNightProb = 0.0d;
+		noiseDayMag = 0.0472709d;
+		distDayMag = -0.0355541d;
+		noisedistDayMag = 0.0d;
+		noiseNightMag = 0.0d;
+		distNightMag = 0.0284629d;
+		noisedistNightMag = 0.0d;
+	}
+
+	public static void resetToDefaultsForOldUnitTest() {
 		landscape = null;
 		turbines = null;
 		shipsEnabled = false;
@@ -315,8 +422,6 @@ public final class SimulationParameters {
 		deterrenceCoeff = 1;
 		m = Math.pow(10, 0.74);
 		deterResponseThreshold = 158;
-		deterrenceCoeffShips = 1;
-		deterResponseThresholdShips = 158;
 		deterDecay = 50;
 		deterMaxDistance = 50 * 1000; // 50 KM
 		alphaHat = 0;
@@ -340,6 +445,8 @@ public final class SimulationParameters {
 		pstPreferredDistanceTolerance = 0.0d;
 		psmType2RandomAngle = 0.0d;
 		q1 = 0.0d;
+		rS = 0.04;
+		rR = 0.04;
 		psmLogisticDecreaseFunction = null;
 		homogenous = true;
 		wrapBorderHomo = true;
@@ -350,6 +457,24 @@ public final class SimulationParameters {
 		psmLog = null;
 	}
 
+	public static void disableCrwRandomness() {
+		corrLogmovLength = 0.0;
+		corrLogmovBathy = 0.0;
+		corrLogmovSalinity = 0.0;
+		corrAngleBase = 0.0;
+		corrAngleBathy = 0.0;
+		corrAngleSalinity = 0.0;
+		corrAngleBaseSD = 0.0;
+		
+		// R1 and R2
+		maxMov = 1.25;
+		
+		pship_int_day = 0.0;
+		noiseDayProb = 0.0;
+		distDayProb = -100;
+		noisedistDayProb = 0.0;
+	}
+	
 	public static String getLandscape() {
 		return landscape;
 	}
@@ -410,18 +535,6 @@ public final class SimulationParameters {
 		return deterResponseThreshold;
 	}
 
-	public static double getDeterrenceCoeffShips() {
-		return deterrenceCoeffShips;
-	}
-
-	public static double getDeterResponseThresholdShips() {
-		return deterResponseThresholdShips;
-	}
-
-	public static void setDeterResponseThresholdShips(double deterResponseThresholdShips) {
-		SimulationParameters.deterResponseThresholdShips = deterResponseThresholdShips;
-	}
-
 	public static double getDeterDecay() {
 		return deterDecay;
 	}
@@ -432,6 +545,60 @@ public final class SimulationParameters {
 
 	public static double getDeterMaxDistance() {
 		return deterMaxDistance;
+	}
+
+	public static double getDeterMinDistanceShips() {
+		return deterMinDistanceShips;
+	}
+
+	public static double getShipInterceptDayProb() {
+		return pship_int_day;
+	}
+	public static double getShipInterceptNightProb() {
+		return pship_int_night;
+	}
+	public static double getShipInterceptDayMag() {
+		return cship_int_day;
+	}
+	public static double getShipInterceptNightMag() {
+		return cship_int_night;
+	}
+
+	public static double getShipNoiseDayProb() {
+		return noiseDayProb;
+	}
+	public static double getShipDistDayProb() {
+		return distDayProb;
+	}
+	public static double getShipNoisedistDayProb() {
+		return noisedistDayProb;
+	}
+	public static double getShipNoiseNightProb() {
+		return noiseNightProb;
+	}
+	public static double getShipDistNightProb() {
+		return distNightProb;
+	}
+	public static double getShipNoisedistNightProb() {
+		return noisedistNightProb;
+	}
+	public static double getShipNoiseDayMag() {
+		return noiseDayMag;
+	}
+	public static double getShipDistDayMag() {
+		return distDayMag;
+	}
+	public static double getShipNoisedistDayMag() {
+		return noisedistDayMag;
+	}
+	public static double getShipNoiseNightMag() {
+		return noiseNightMag;
+	}
+	public static double getShipDistNightMag() {
+		return distNightMag;
+	}
+	public static double getShipNoisedistNightMag() {
+		return noisedistNightMag;
 	}
 
 	public static double getAlphaHat() {
@@ -524,6 +691,14 @@ public final class SimulationParameters {
 
 	public static double getQ1() {
 		return q1;
+	}
+
+	public static double getRS() {
+		return rS;
+	}
+
+	public static double getRR() {
+		return rR;
 	}
 
 	public static LogisticDecreaseSSLogis getPsmLogisticDecreaseFunction() {

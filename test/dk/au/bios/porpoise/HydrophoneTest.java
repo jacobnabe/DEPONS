@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Jacob Nabe-Nielsen <jnn@bios.au.dk>
+ * Copyright (C) 2022-2023 Jacob Nabe-Nielsen <jnn@bios.au.dk>
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
  * License version 2 and only version 2 as published by the Free Software Foundation.
@@ -27,6 +27,8 @@
 
 package dk.au.bios.porpoise;
 
+import static dk.au.bios.porpoise.Globals.convertGridXToUtm;
+import static dk.au.bios.porpoise.Globals.convertGridYToUtm;
 import static dk.au.bios.porpoise.ships.VesselClass.CONTAINERSHIP;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
@@ -44,48 +46,81 @@ import repast.simphony.space.continuous.NdPoint;
 public class HydrophoneTest extends AbstractSimulationBDDTest {
 
 	@Test
-	public void recordShip() throws Exception {
+	public void shipPassing() throws Exception {
 		aNewWorld(100, 100);
-		SimulationParameters.setDeterResponseThresholdShips(20.0);
 		var hydrophone = new Hydrophone(1, "test1");
 		context.add(hydrophone);
-		hydrophone.setPosition(new NdPoint(25.0d, 50.0d));
+		hydrophone.setPosition(new NdPoint(50.0d, 50.0d));
 
 		var buoys = new ArrayList<Buoy>();
-		buoys.add(new Buoy(convertGridXToUtmX(20.0), convertGridYToUtmX(50.0), 10.0, 0));
-		buoys.add(new Buoy(convertGridXToUtmX(25.0), convertGridYToUtmX(55.0), 12.0, 0));
-		buoys.add(new Buoy(convertGridXToUtmX(30.0), convertGridYToUtmX(60.0), 10.0, 0));
+		buoys.add(new Buoy(convertGridXToUtm(24.0), convertGridYToUtm(50.0), 10.0, 0));
+		buoys.add(new Buoy(convertGridXToUtm(40.0), convertGridYToUtm(50.0), 10.0, 0));
+		buoys.add(new Buoy(convertGridXToUtm(46.0), convertGridYToUtm(50.0), 10.0, 0));
+		buoys.add(new Buoy(convertGridXToUtm(50.0), convertGridYToUtm(50.0), 10.0, 2));
+		buoys.add(new Buoy(convertGridXToUtm(56.0), convertGridYToUtm(50.0), 10.0, 0));
+		buoys.add(new Buoy(convertGridXToUtm(60.0), convertGridYToUtm(50.0), 10.0, 0));
+		buoys.add(new Buoy(convertGridXToUtm(70.0), convertGridYToUtm(50.0), 10.0, 0));
+		buoys.add(new Buoy(convertGridXToUtm(76.0), convertGridYToUtm(50.0), 10.0, 3));
 		Route route = new Route("route1", buoys);
-		var shipInitialPosition = new NdPoint(10, 50);
-		var ship = new Ship("ship1", CONTAINERSHIP, 366.00, route, 3, 8);
+		var ship = new Ship("ship1", CONTAINERSHIP, 366.00, route, 3, 14);
 		context.add(ship);
-		ship.setPosition(shipInitialPosition);
+		ship.initialize();
 
 		schedule.schedule(ship);
+		
+		assertThat(hydrophone.getPosition().getX()).isEqualTo(50.0);
+		assertThat(hydrophone.getPosition().getY()).isEqualTo(50.0);
+		assertThat(ship.getPosition().getX()).isEqualTo(24.0);
+		assertThat(ship.getPosition().getY()).isEqualTo(50.0);
 
-		var expectedLevels = List.of(0.0d, 0.0d, 0.0d, 0.0d, 73.3605d, 78.1115d, 66.3709d, 73.3605d, 78.1115d, 66.3709d,
-				0.0d, 0.0d);
+		var expectedShipPositions = List.of(
+				new NdPoint(24.0, 50.0),
+				new NdPoint(24.0, 50.0),
+				new NdPoint(24.0, 50.0),
+				new NdPoint(24.0, 50.0),
+				new NdPoint(40.0, 50.0),
+				new NdPoint(46.0, 50.0),
+				new NdPoint(50.0, 50.0),
+				new NdPoint(50.0, 50.0),
+				new NdPoint(50.0, 50.0),
+				new NdPoint(56.0, 50.0),
+				new NdPoint(60.0, 50.0),
+				new NdPoint(70.0, 50.0),
+				new NdPoint(76.0, 50.0),
+				new NdPoint(76.0, 50.0)
+				);
 
-		var expectedDistances = List.of(6000.0d, 6000.0d, 6000.0d, 2000.0d, 2000.0d, 4472.1360d, 2000.0d, 2000.0d,
-				4472.1360d, 4472.1360d, 4472.1360d, 4472.1360d);
+		var expectedLevels = List.of(0.0d, 0.0d, 0.0d, 0.0d, 
+				75.9658d, 86.6498d, 0.0d, 0.0d, 0.0d, 82.5058d, 75.9658d, 63.3043d, 
+				56.7044d, 0.0d);
+
+		var expectedDistances = List.of(10400.0d, 10400.0d, 10400.0d, 10400.0d, 
+				4000.0d, 1600.0d, 0.0d, 0.0d, 0.0d, 2400.0d, 4000.0d, 8000.0d,
+				10400.0d, 10400.0d);
 
 		for (int i = 0; i < expectedLevels.size(); i++) {
 			schedule.execute();
-			var level = expectedLevels.get(i);
-			assertThat(hydrophone.getReceivedSoundLevel())
-					.withFailMessage(
-							"unexpected sound level at tick " + SimulationTime.getTick() + " expectedLevel.idx: " + i
-									+ ". Expected: " + level + ". Actual: " + hydrophone.getReceivedSoundLevel())
-					.isCloseTo(level, within(0.0001d));
 
-			var distance = space.getDistance(ship.getPosition(), hydrophone.getPosition()) * 400;
+			var expectedShipPos = expectedShipPositions.get(i);
+			assertThat(ship.getPosition()).satisfies(pos -> {
+				assertThat(pos.getX()).isEqualTo(expectedShipPos.getX());
+				assertThat(pos.getY()).isEqualTo(expectedShipPos.getY());
+			});
+			
+			var distance = Globals.convertGridDistanceToUtm(ship.getPosition(), hydrophone.getPosition());
 			var expectedDistance = expectedDistances.get(i);
-			assertThat(expectedDistance)
+			assertThat(distance)
 					.withFailMessage(
 							"unexpected distance at tick " + SimulationTime.getTick() + " expectedDistance.idx: " + i
 									+ ". Expected: " + expectedDistance + ". Actual: " + distance)
-					.isCloseTo(distance, within(0.0001d));
+					.isCloseTo(expectedDistance, within(0.0001d));
 
+			var expectedLevel = expectedLevels.get(i);
+			assertThat(hydrophone.getReceivedSoundLevel())
+					.withFailMessage(
+							"unexpected sound level at tick " + SimulationTime.getTick() + " expectedLevel.idx: " + i
+									+ ". Expected: " + expectedLevel + ". Actual: " + hydrophone.getReceivedSoundLevel())
+					.isCloseTo(expectedLevel, within(0.0001d));
 		}
 	}
 

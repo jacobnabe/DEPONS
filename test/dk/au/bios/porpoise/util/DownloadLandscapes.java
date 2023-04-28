@@ -42,17 +42,19 @@ import com.jgoodies.common.base.Objects;
 public class DownloadLandscapes {
 
 	private static final List<LandscapeFile> LANDSCAPES = List.of(
-			new LandscapeFile("DanTysk", "DanTysk.zip", "https://depons.eu/files/landscapes/DanTysk-2ce68aba.zip",
-					2409804, "2ce68aba7efa1b19358654e150320115dd6b676093e174451dfde3a809d6086e"),
-			new LandscapeFile("Gemini", "Gemini.zip", "https://depons.eu/files/landscapes/Gemini-ebd7be0a.zip", 1340405,
-					"ebd7be0ab28c898780776f1f48c7652d62b4a56a4a2d87e35c62b775705ccc0f"),
+			new LandscapeFile("DanTysk", "DanTysk.zip", "https://depons.eu/files/landscapes/v3.0/DanTysk-5348c41f.zip",
+					3615582, "5348c41f8b686c80e6d69eb925d67cb87db63c7cf4a490194ce08563e834bb10"),
+			new LandscapeFile("Gemini", "Gemini.zip", "https://depons.eu/files/landscapes/v3.0/Gemini-ddb9d924.zip",
+					2505613, "ddb9d92487af2053b96a35aa5e05affd02c2205e6cbfad9c40f8e1614fba0d7c"),
 			new LandscapeFile("Homogeneous", "Homogeneous.zip",
-					"https://depons.eu/files/landscapes/Homogeneous-fc68407d.zip", 82075,
-					"fc68407dd2c7ddd74ad8c9f19ee90fc92f97bb90822eac8473a8fe365f22565d"),
-			new LandscapeFile("Kattegat", "Kattegat.zip", "https://depons.eu/files/landscapes/Kattegat-6604cb49.zip",
-					16228688, "6604cb494e5508155f06d882777c7cd9eaeb46fa6992465a67477fe8144c1df1"),
-			new LandscapeFile("NorthSea", "NorthSea.zip", "https://depons.eu/files/landscapes/NorthSea-02048b58.zip",
-					84613681, "02048b58aa2ff59107cdfde38e2b073bce1813de049e2f342a981796f0fa97d7"));
+					"https://depons.eu/files/landscapes/v3.0/Homogeneous-1d1e4acb.zip", 109220,
+					"1d1e4acb453f200b009f9eabfa6774eb682bf353fb16f90912bcfaa5afcfbd7e"),
+			new LandscapeFile("Kattegat", "Kattegat.zip",
+					"https://depons.eu/files/landscapes/v3.0/Kattegat-51c36e01.zip", 43167404,
+					"51c36e012a134120c28e681fdbd0e6b552ba6e790994d3522de86f6b57319c84"),
+			new LandscapeFile("NorthSea", "NorthSea.zip",
+					"https://depons.eu/files/landscapes/v3.0/NorthSea-c0ccbf8f.zip", 107786038,
+					"c0ccbf8f030bee311b8b83ecf70dd7c1cce604abcd32c49b5779f7d1bdd63ce0"));
 
 	public static void main(String[] args) throws Exception {
 		for (var landscape : LANDSCAPES) {

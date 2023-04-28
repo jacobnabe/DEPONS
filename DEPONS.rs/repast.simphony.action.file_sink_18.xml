@@ -6,6 +6,7 @@
   <sourceIds class="linked-hash-set">
     <string>tick</string>
     <string>name</string>
+    <string>sourceSoundLevel</string>
     <string>receivedSoundLevel</string>
     <string>shipName</string>
     <string>shipUtmX</string>

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2022 Jacob Nabe-Nielsen <jnn@bios.au.dk>
+ * Copyright (C) 2017-2023 Jacob Nabe-Nielsen <jnn@bios.au.dk>
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
  * License version 2 and only version 2 as published by the Free Software Foundation.
@@ -130,14 +130,19 @@ public class PorpoiseSimBuilder implements ContextBuilder<Agent> {
 			cellData = dataLoader.load();
 			Globals.setCellData(cellData);
 		} catch (IOException e) {
-			if (RSApplication.getRSApplicationInstance() != null) {
-				RSApplication.getRSApplicationInstance().getErrorLog().addError(new MessageEvent(this, Level.FATAL, "Error loading landscape data"));
-				RSApplication.getRSApplicationInstance().getErrorLog().show();
+			var errorMsg = "Error loading landscape data";
+			if (RunEnvironment.getInstance().isBatch()) {
+				System.err.println(errorMsg);
+			} else {
+				if (RSApplication.getRSApplicationInstance() != null) {
+					RSApplication.getRSApplicationInstance().getErrorLog().addError(new MessageEvent(this, Level.FATAL, errorMsg));
+					RSApplication.getRSApplicationInstance().getErrorLog().show();
+				}
 			}
 			throw new RuntimeException(e);
 		}
 
-		RefMem.initMemLists(params.getDouble("rS"), params.getDouble("rR"));
+		RefMem.initMemLists(SimulationParameters.getRS(), SimulationParameters.getRR());
 
 		final ContinuousSpace<Agent> space = buildSpace(context);
 		final Grid<Agent> grid = buildGrid(context);
@@ -160,9 +165,14 @@ public class PorpoiseSimBuilder implements ContextBuilder<Agent> {
 			try {
 				loader.load(context, landscape);
 			} catch (Exception e) {
-				if (RSApplication.getRSApplicationInstance() != null) {
-					RSApplication.getRSApplicationInstance().getErrorLog().addError(new MessageEvent(this, Level.FATAL, "Error loading ship data"));
-					RSApplication.getRSApplicationInstance().getErrorLog().show();
+				var errorMsg = "Error loading ship data: " + e.getMessage();
+				if (RunEnvironment.getInstance().isBatch()) {
+					System.err.println(errorMsg);
+				} else {
+					if (RSApplication.getRSApplicationInstance() != null) {
+						RSApplication.getRSApplicationInstance().getErrorLog().addError(new MessageEvent(this, Level.FATAL, errorMsg));
+						RSApplication.getRSApplicationInstance().getErrorLog().show();
+					}
 				}
 				throw new RuntimeException(e);
 			}
@@ -172,9 +182,14 @@ public class PorpoiseSimBuilder implements ContextBuilder<Agent> {
 		try {
 			HydrophoneLoader.load(context, landscape);
 		} catch (IOException e) {
-			if (RSApplication.getRSApplicationInstance() != null) {
-				RSApplication.getRSApplicationInstance().getErrorLog().addError(new MessageEvent(this, Level.FATAL, "Error loading hydrophone data"));
-				RSApplication.getRSApplicationInstance().getErrorLog().show();
+			var errorMsg = "Error loading hydrophone data";
+			if (RunEnvironment.getInstance().isBatch()) {
+				System.err.println(errorMsg);
+			} else {
+				if (RSApplication.getRSApplicationInstance() != null) {
+					RSApplication.getRSApplicationInstance().getErrorLog().addError(new MessageEvent(this, Level.FATAL, errorMsg));
+					RSApplication.getRSApplicationInstance().getErrorLog().show();
+				}
 			}
 			throw new RuntimeException(e);
 		}
@@ -385,75 +400,5 @@ public class PorpoiseSimBuilder implements ContextBuilder<Agent> {
 			context.add(b);
 		}
 	}
-
-	/*
-	 * private void queueTask(String intervalText, ISchedule schedule, IAction
-	 * action) { if (!intervalText.equals("off")) { int interval; if
-	 * (intervalText.equals("step")) { interval = 1; } else if
-	 * (intervalText.equals("daily")) { interval = 24 * 2; } else if
-	 * (intervalText.equals("monthly")) { interval = 24 * 2 * 30; } else if
-	 * (intervalText.equals("yearly")) { interval = 24 * 2 * 30 * 360; } else if
-	 * (intervalText.equals("one-porp")) { throw new
-	 * java.lang.NoSuchMethodError("Not implemented"); } else { throw new
-	 * RuntimeException("Unknown interval : " + intervalText); }
-	 * 
-	 * ScheduleParameters scheduleParam = ScheduleParameters.createRepeating(0,
-	 * interval, ScheduleParameters.LAST_PRIORITY); schedule.schedule(scheduleParam,
-	 * action); } }
-	 * 
-	 * // Utility to convert bathy file in case depth is negative. Uses -9999 as no
-	 * value. private void convertBathy(String f) { try { BufferedWriter out = new
-	 * BufferedWriter(new FileWriter("c:/temp/out.txt"));
-	 * 
-	 * FileReader freader = new FileReader(f); BufferedReader reader = new
-	 * BufferedReader(freader);
-	 * 
-	 * for (int i = 0; i < 6; i++) { out.write(reader.readLine()); out.write('\n');
-	 * }
-	 * 
-	 * int y = 0; String line; while ((line = reader.readLine()) != null) { String[]
-	 * points = line.split(" "); for (int x = 0; x < points.length; x++) { int i =
-	 * Integer.parseInt(points[x]);
-	 * 
-	 * if (i == -9999) { out.write(Integer.toString(i)); } else {
-	 * out.write(Integer.toString(i * -1)); }
-	 * 
-	 * if (x + 1 < points.length) { out.write(' '); } else { out.write('\n'); } }
-	 * y++; }
-	 * 
-	 * reader.close(); freader.close(); out.close(); } catch (Exception e) {
-	 * e.printStackTrace(); } }
-	 * 
-	 * private void createFile(String file, int columns, int rows, String s) { try {
-	 * BufferedWriter out = new BufferedWriter(new FileWriter(file));
-	 * 
-	 * for (int row = 0; row < rows; row++) { for (int column = 0; column < columns;
-	 * column++) { out.write(s); out.write(' '); } out.write('\n'); }
-	 * 
-	 * out.close(); } catch (Exception e) { e.printStackTrace(); } }
-	 * 
-	 * private void createFoodProbFile(String file, int columns, int rows, double
-	 * prob) { try { BufferedWriter out = new BufferedWriter(new FileWriter(file));
-	 * 
-	 * for (int row = 0; row < rows; row++) { for (int column = 0; column < columns;
-	 * column++) { if (((int) Math.floor(RandomHelper.nextDoubleFromTo(0, prob))) ==
-	 * 1) { // Using RandomHelper here out.write('1'); } else { out.write('0'); }
-	 * 
-	 * out.write(' '); } out.write('\n'); }
-	 * 
-	 * out.close(); } catch (Exception e) { e.printStackTrace(); } }
-	 * 
-	 * private void addFoodPatches(CellData data, Context<Agent> context,
-	 * ContinuousSpace<Agent> space, Grid<Agent> grid) { Pair[] patches =
-	 * data.getFoodProbAboveZeroPatches();
-	 * 
-	 * for (Pair p : patches) { FoodPatch fp = new FoodPatch(space, grid, new
-	 * GridPoint(p.first, p.second), data); context.add(fp); fp.setPosition(new
-	 * NdPoint(p.first, p.second));
-	 * 
-	 * System.out.println("Adding <" + p.first + "," + p.second + ">");
-	 * 
-	 * } }
-	 */
 
 }

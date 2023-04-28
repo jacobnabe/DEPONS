@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Jacob Nabe-Nielsen <jnn@bios.au.dk>
+ * Copyright (C) 2022-2023 Jacob Nabe-Nielsen <jnn@bios.au.dk>
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
  * License version 2 and only version 2 as published by the Free Software Foundation.
@@ -48,11 +48,10 @@ import repast.simphony.space.continuous.RandomCartesianAdder;
 import repast.simphony.space.grid.GridBuilderParameters;
 import repast.simphony.space.grid.SimpleGridAdder;
 
-public class GridSpatialPartitioningTest {
+class GridSpatialPartitioningTest {
 
 	private Context<Agent> context;
 	private GridSpatialPartitioning spatialPart;
-	private Porpoise p;
 
 	private void initWorld(int width, int height, double xllcorner, double yllcorner) {
 		DispersalFactory.setType("off");
@@ -70,13 +69,14 @@ public class GridSpatialPartitioningTest {
 		spatialPart = new GridSpatialPartitioning(25, 25);
 		Globals.setSpatialPartitioning(spatialPart);
 		space.addProjectionListener(spatialPart);
-		p = new Porpoise(context, 1, new FastRefMemTurn());
-		context.add(p);
 	}
 
 	@Test
-	public void baseDimensions() {
+	void baseDimensions() {
 		initWorld(250, 250, 529473, 5972242);
+		var p = new Porpoise(context, 1, new FastRefMemTurn());
+		context.add(p);
+
 		assertThat(spatialPart.getWidth()).isEqualTo(10);
 		assertThat(spatialPart.getHeight()).isEqualTo(10);
 
@@ -105,8 +105,11 @@ public class GridSpatialPartitioningTest {
 	}
 
 	@Test
-	public void kattegatDimensions() {
+	void kattegatDimensions() {
 		initWorld(600, 1000, 529473, 5972242);
+		var p = new Porpoise(context, 1, new FastRefMemTurn());
+		context.add(p);
+
 		assertThat(spatialPart.getWidth()).isEqualTo(24);
 		assertThat(spatialPart.getHeight()).isEqualTo(40);
 
@@ -144,8 +147,11 @@ public class GridSpatialPartitioningTest {
 	}
 
 	@Test
-	public void northSeaDimensions() {
+	void northSeaDimensions() {
 		initWorld(2088, 2175, 3479625.18158797, 3125583.13019526);
+		var p = new Porpoise(context, 1, new FastRefMemTurn());
+		context.add(p);
+
 		assertThat(spatialPart.getWidth()).isEqualTo(84);
 		assertThat(spatialPart.getHeight()).isEqualTo(87);
 
@@ -168,6 +174,39 @@ public class GridSpatialPartitioningTest {
 		assertThat(spatialPart.getPorpoisesInPartition(new NdPoint(11, 11))).contains(p);
 		assertThat(spatialPart.getPorpoisesInPartition(new NdPoint(19, 19))).contains(p);
 		assertThat(spatialPart.getPorpoisesInPartition(new NdPoint(0, 0))).contains(p);
+	}
+
+	@Test
+	void neighborhood() {
+		initWorld(600, 1000, 529473, 5972242);
+		assertThat(spatialPart.getWidth()).isEqualTo(24);
+		assertThat(spatialPart.getHeight()).isEqualTo(40);
+
+		// Setup landscape with a single porpoise in each super-grid cell
+		for (int gx = 0; gx < spatialPart.getWidth(); gx++) {
+			for (int gy = 0; gy < spatialPart.getHeight(); gy++) {
+				var porp = new Porpoise(context, 1, new FastRefMemTurn());
+				context.add(porp);
+				porp.setPosition(new NdPoint(gx * 25 + 12, gy * 25 + 12));
+			}
+		}
+
+		// Single point, returns 9 (3x3 super-grid cell in the neighborhood)
+		assertThat(spatialPart.getPorpoisesInNeighborhood(new NdPoint(300, 500))).hasSize(9);
+		
+		// Simple start/end, returns 15 (5x3 & 3x5 super-grid cell in the neighborhood)
+		assertThat(spatialPart.getPorpoisesInNeighborhood(new NdPoint(300, 500), new NdPoint(350, 500))).hasSize(15);
+		assertThat(spatialPart.getPorpoisesInNeighborhood(new NdPoint(300, 500), new NdPoint(300, 550))).hasSize(15);
+		assertThat(spatialPart.getPorpoisesInNeighborhood(new NdPoint(350, 500), new NdPoint(300, 500))).hasSize(15);
+		assertThat(spatialPart.getPorpoisesInNeighborhood(new NdPoint(300, 550), new NdPoint(300, 500))).hasSize(15);
+		
+		// Current implementation is based on boxes, so expect 25 (5x5 super-grid cells)
+		assertThat(spatialPart.getPorpoisesInNeighborhood(new NdPoint(300, 500), new NdPoint(350, 550))).hasSize(25);
+
+		// 3x9 super-grid cells
+		assertThat(spatialPart.getPorpoisesInNeighborhood(new NdPoint(300, 500), new NdPoint(300, 650))).hasSize(27);
+		// 5x9 super-grid cells
+		assertThat(spatialPart.getPorpoisesInNeighborhood(new NdPoint(300, 500), new NdPoint(350, 650))).hasSize(45);
 	}
 
 }

@@ -27,7 +27,6 @@
 
 package dk.au.bios.porpoise.ships;
 
-import static dk.au.bios.porpoise.ships.VesselClass.CONTAINERSHIP;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
@@ -44,12 +43,13 @@ public class ShipLoaderTest extends AbstractSimulationBDDTest {
 		ShipLoader shipLoader = new ShipLoader();
 		shipLoader.load(context, "Kattegat");
 
-		assertThat(context.getObjectsAsStream(Ship.class).count()).isEqualTo(132);
+		assertThat(context.getObjectsAsStream(Ship.class).count()).isEqualTo(637);
 		
-		Ship ship = shipStream().filter(s -> "kat1".equals(s.getName())).findAny().orElseThrow();
-		assertThat(ship.getName()).isEqualTo("kat1");
-		assertThat(ship.getType()).isEqualTo(CONTAINERSHIP);
-		assertThat(ship.getRoute().getName()).isEqualTo("Kattegat-Sound-1");
+		Ship ship = shipStream().filter(s -> "111219502".equals(s.getName())).findAny().orElseThrow();
+		assertThat(ship.getName()).isEqualTo("111219502");
+		assertThat(ship.getType()).isEqualTo(VesselClass.GOVERNMENT_RESEARCH);
+		assertThat(ship.getRoute().getName()).isEqualTo("Route_111219502");
+		assertThat(ship.getRoute().getRoute()).hasSize(5);
 	}
 
 }

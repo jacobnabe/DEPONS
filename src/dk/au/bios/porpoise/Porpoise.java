@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2022 Jacob Nabe-Nielsen <jnn@bios.au.dk>
+ * Copyright (C) 2017-2023 Jacob Nabe-Nielsen <jnn@bios.au.dk>
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
  * License version 2 and only version 2 as published by the Free Software Foundation.
@@ -37,6 +37,7 @@ import dk.au.bios.porpoise.behavior.DispersalFactory;
 import dk.au.bios.porpoise.behavior.PersistentSpatialMemory;
 import dk.au.bios.porpoise.behavior.RefMem;
 import dk.au.bios.porpoise.behavior.RefMemTurnCalculator;
+import dk.au.bios.porpoise.ships.ShipDeterrence;
 import dk.au.bios.porpoise.tasks.YearlyTask;
 import dk.au.bios.porpoise.util.CircularBuffer;
 import dk.au.bios.porpoise.util.DebugLog;
@@ -130,6 +131,9 @@ public class Porpoise extends Agent {
 	private PersistentSpatialMemory calfPsm = null; // If the porpoise is with calf, then this is the PSM it will use.
 	private boolean trackVisitedCells = false;
 	private boolean writePsmSteps = false;
+
+	private ShipDeterrence shipDeterrence = new ShipDeterrence();
+	private double loudestShipSPL = 0.0d;
 
 	/**
 	 * Constructor for a newborn porpoised.
@@ -239,6 +243,8 @@ public class Porpoise extends Agent {
 			dispersalBehaviour.disperse();
 		}
 
+		applyShipDeterrence();
+
 		if (isAlive()) {
 			// Simple implementation
 			if (SimulationParameters.getModel() == 1) {
@@ -300,6 +306,7 @@ public class Porpoise extends Agent {
 		}
 
 		trackCellVisit();
+		shipDeterrence.resetSteps();
 	}
 
 	/**
@@ -540,10 +547,8 @@ public class Porpoise extends Agent {
 			checkDeterrence();
 
 			if (this.ignoreDeterrence <= 0) {
-				totalDX = getDx() * crwContrib + this.vt[0] + this.deterVt[0]
-						* SimulationParameters.getDeterrenceCoeff();
-				totalDY = getDy() * crwContrib + this.vt[1] + this.deterVt[1]
-						* SimulationParameters.getDeterrenceCoeff();
+				totalDX = getDx() * crwContrib + this.vt[0] + this.deterVt[0];
+				totalDY = getDy() * crwContrib + this.vt[1] + this.deterVt[1];
 			} else {
 				// We are ignoring deterrence, don't apply
 				totalDX = getDx() * crwContrib + this.vt[0];
@@ -1045,6 +1050,7 @@ public class Porpoise extends Agent {
 		// Initialize the posList
 		this.posList.add(getPosition());
 	}
+
 	/**
 	 * The tasks to perform daily. This is called from the DailyTask class. Consider making this a @ScheduledMethod and
 	 * removing the DailyTask class.
@@ -1218,6 +1224,29 @@ public class Porpoise extends Agent {
 		ReplayHelper.print("mating-day:{0}", ran);
 		this.matingDay = (int) Math.round(ran);
 	}
+	
+	public void applyShipDeterrence() {
+		var deterrenceStrength = shipDeterrence.deterrenceStrength();
+		if (deterrenceStrength > 0) {
+			this.loudestShipSPL = shipDeterrence.getLoudestShipSPL();
+	
+			if (this.deterStrength < deterrenceStrength) {
+				this.deterStrength = deterrenceStrength;
+				// vector pointing away from turbine
+				this.deterVt[0] = shipDeterrence.deterrenceVtX();
+				this.deterVt[1] = shipDeterrence.deterrenceVtY();
+	
+				this.deterTimeLeft = SimulationParameters.getDeterTime(); // how long to remain affected
+			}
+
+			// Porpoises nearby stop dispersing (which could force them to cross over disturbing agents very fast)
+			dispersalBehaviour.deactivate();
+		}
+	}
+
+	public void deterShipStep(int step, Ship ship, double deterX, double deterY, double mag, double receivedLevelVHF) {
+		shipDeterrence.recordStep(step, ship, deterX, deterY, mag, receivedLevelVHF);
+	}
 
 	public synchronized void deter(final double currentDeterenceStrength, final SoundSource s) {
 		final NdPoint shipPosition = s.getPosition();
@@ -1227,8 +1256,8 @@ public class Porpoise extends Agent {
 		if (this.deterStrength < currentDeterenceStrength) {
 			this.deterStrength = currentDeterenceStrength;
 			// vector pointing away from turbine
-			this.deterVt[0] = currentDeterenceStrength * ((porpPosition.getX() - shipPosition.getX()));
-			this.deterVt[1] = currentDeterenceStrength * ((porpPosition.getY() - shipPosition.getY()));
+			this.deterVt[0] = currentDeterenceStrength * ((porpPosition.getX() - shipPosition.getX())) * SimulationParameters.getDeterrenceCoeff();
+			this.deterVt[1] = currentDeterenceStrength * ((porpPosition.getY() - shipPosition.getY())) * SimulationParameters.getDeterrenceCoeff();
 
 			this.deterTimeLeft = SimulationParameters.getDeterTime(); // how long to remain affected
 		}
@@ -1246,8 +1275,8 @@ public class Porpoise extends Agent {
 		if (this.deterStrength < currentDeterenceStrength) {
 			this.deterStrength = currentDeterenceStrength;
 			// vector pointing away from turbine
-			this.deterVt[0] = currentDeterenceStrength * ((porpPosition.getX() - turbPosition.getX()));
-			this.deterVt[1] = currentDeterenceStrength * ((porpPosition.getY() - turbPosition.getY()));
+			this.deterVt[0] = currentDeterenceStrength * ((porpPosition.getX() - turbPosition.getX())) * SimulationParameters.getDeterrenceCoeff();
+			this.deterVt[1] = currentDeterenceStrength * ((porpPosition.getY() - turbPosition.getY())) * SimulationParameters.getDeterrenceCoeff();
 
 			this.deterTimeLeft = SimulationParameters.getDeterTime(); // how long to remain affected
 		}
@@ -1310,6 +1339,10 @@ public class Porpoise extends Agent {
 		return soundSourceImpact;
 	}
 
+	public double getLoudestShipSPL() {
+		return loudestShipSPL;
+	}
+
 	public double getDeterStrength() {
 		return this.deterStrength;
 	}
@@ -1340,12 +1373,12 @@ public class Porpoise extends Agent {
 		return calfPsm;
 	}
 
-	public int getUtmX() {
-		return (int) Math.round(getPosition().getX() * 400 + Globals.getXllCorner());
+	public double getUtmX() {
+		return Globals.convertGridXToUtm(getPosition().getX());
 	}
 
-	public int getUtmY() {
-		return (int) Math.round(getPosition().getY() * 400 + Globals.getYllCorner());
+	public double getUtmY() {
+		return Globals.convertGridYToUtm(getPosition().getY());
 	}
 
 	private void setPrevAngle(final double prevAngle) {

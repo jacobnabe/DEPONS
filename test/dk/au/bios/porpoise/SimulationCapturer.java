@@ -61,7 +61,7 @@ public class SimulationCapturer {
 
 	public static void captureKattegatDispOff() throws Exception {
 		capture(new File("testdata_Kattegat_DispOff_NoTurbines_1porp.txt"), params -> {
-			params.setValue("randomSeed", 1955024704);
+			params.setValue("randomSeed", 1955022734);
 			params.setValue("landscape", "Kattegat");
 			params.setValue("turbines", "off");
 			params.setValue("dispersal", "off");
@@ -71,7 +71,7 @@ public class SimulationCapturer {
 	
 	public static void captureKattegatUndirected() throws Exception {
 		capture(new File("testdata_Kattegat_Undirected_NoTurbines_1porp.txt"), params -> {
-			params.setValue("randomSeed", 1955024704);
+			params.setValue("randomSeed", 1955026704);
 			params.setValue("landscape", "Kattegat");
 			params.setValue("turbines", "off");
 			params.setValue("dispersal", "Undirected");
@@ -81,7 +81,7 @@ public class SimulationCapturer {
 	
 	public static void captureKattegatIDW() throws Exception {
 		capture(new File("testdata_Kattegat_InnerDanishWaters_NoTurbines_1porp.txt"), params -> {
-			params.setValue("randomSeed", 1955024704);
+			params.setValue("randomSeed", 1955026704);
 			params.setValue("landscape", "Kattegat");
 			params.setValue("turbines", "off");
 			params.setValue("dispersal", "InnerDanishWaters");
@@ -131,7 +131,7 @@ public class SimulationCapturer {
 	
 	public static void captureNorthSeaDispOffTurbsUser() throws Exception {
 		capture(new File("testdata_NorthSea_DispOff_UserDefined_1porp.txt"), params -> {
-			params.setValue("randomSeed", 1955024704);
+			params.setValue("randomSeed", 1755024704);
 			params.setValue("landscape", "NorthSea");
 			params.setValue("turbines", "User-def");
 			params.setValue("dispersal", "off");

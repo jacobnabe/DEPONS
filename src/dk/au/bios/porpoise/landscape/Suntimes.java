@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022-2023 Jacob Nabe-Nielsen <jnn@bios.au.dk>
+ * Copyright (C) 2023 Jacob Nabe-Nielsen <jnn@bios.au.dk>
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
  * License version 2 and only version 2 as published by the Free Software Foundation.
@@ -28,66 +28,66 @@
 package dk.au.bios.porpoise.landscape;
 
 import java.io.BufferedReader;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.zip.ZipFile;
+import java.util.HashMap;
+import java.util.Map;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
+public class Suntimes {
 
-import dk.au.bios.porpoise.Agent;
-import dk.au.bios.porpoise.Globals;
-import dk.au.bios.porpoise.Hydrophone;
-import repast.simphony.context.Context;
-import repast.simphony.space.continuous.NdPoint;
+	public static class Suntime {
+		final int day;
+		final int sunrise;
+		final int sunset;
 
-public class HydrophoneLoader {
-
-	private static final String HYDROPHONES_FILE = "hydrophones.csv";
-
-	public static void load(final Context<Agent> context, final String landscape) throws IOException {
-
-		if (Files.exists(Paths.get("data", landscape, HYDROPHONES_FILE))) {
-			try (InputStream dataIS = new FileInputStream(Paths.get("data", landscape, HYDROPHONES_FILE).toFile())) {
-				loadFromStream(context, dataIS);
-			}
-		} else if (Files.exists(Paths.get("data", landscape + ".zip"))) {
-			try (ZipFile zf = new ZipFile(Paths.get("data", landscape + ".zip").toFile())) {
-				var entry = zf.getEntry(HYDROPHONES_FILE);
-				if (entry != null) {
-					try (InputStream dataIS = zf.getInputStream(entry)) {
-						loadFromStream(context, dataIS);
-					}
-				}
-			}
+		public Suntime(int day, int sunrise, int sunset) {
+			super();
+			this.day = day;
+			this.sunrise = sunrise;
+			this.sunset = sunset;
 		}
+
 	}
 
-	private static void loadFromStream(final Context<Agent> context, final InputStream source)
-			throws JsonParseException, JsonMappingException, IOException {
+	private final Map<Integer, Suntime> suntimeDayMap = new HashMap<>();
 
-		try (BufferedReader bIn = new BufferedReader(new InputStreamReader(source))) {
-			int numHydrophones = 0;
+	public Suntimes(InputStream in) {
+		try (BufferedReader fr = new BufferedReader(new InputStreamReader(in))) {
+			var firstLine = fr.readLine();
+			if (!firstLine.equals("\"dOY\",\"sunrise\",\"sunset\"")) {
+				throw new IOException("Unexpected header in suntimes.csv");
+			}
+			
 			do {
-				String line = bIn.readLine();
+				var line = fr.readLine();
 				if (line == null) {
 					break;
 				}
+				
+				var colStr = line.split(",");
+				if (colStr.length != 3) {
+					throw new IOException("Unexpected data format in suntimes.csv");
+				}
 
-				numHydrophones++;
-				String[] cols = line.split(",");
-				final String name = cols[0];
-				final double locX = Globals.convertUtmXToGrid(Double.parseDouble(cols[1]));
-				final double locY = Globals.convertUtmYToGrid(Double.parseDouble(cols[2]));
-
-				Hydrophone h = new Hydrophone(numHydrophones, name);
-				context.add(h);
-				h.setPosition(new NdPoint(locX, locY));
+				Suntime st = new Suntime(Integer.parseInt(colStr[0]) - 1, Integer.parseInt(colStr[1]), Integer.parseInt(colStr[2])); 
+				suntimeDayMap.put(st.day, st);
 			} while (true);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
 		}
 	}
+
+	public boolean isDaytime(int tick) {
+		int tickOfDay = tick % 48;
+		Suntime daysSuntime = getSuntime(tick);
+		return tickOfDay >= daysSuntime.sunrise && tickOfDay < daysSuntime.sunset;
+	}
+
+	public Suntime getSuntime(int tick) {
+		int dayOfYear = (tick / 48) % 360;
+		
+		return suntimeDayMap.get(dayOfYear);
+	}
+
 }

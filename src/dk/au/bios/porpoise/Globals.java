@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2022 Jacob Nabe-Nielsen <jnn@bios.au.dk>
+ * Copyright (C) 2017-2023 Jacob Nabe-Nielsen <jnn@bios.au.dk>
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
  * License version 2 and only version 2 as published by the Free Software Foundation.
@@ -37,6 +37,7 @@ import dk.au.bios.porpoise.landscape.DataFileMetaData;
 import dk.au.bios.porpoise.landscape.GridSpatialPartitioning;
 import dk.au.bios.porpoise.util.SimulationTime;
 import repast.simphony.space.continuous.ContinuousSpace;
+import repast.simphony.space.continuous.NdPoint;
 import repast.simphony.space.grid.Grid;
 
 /**
@@ -176,6 +177,34 @@ public final class Globals {
 
 	public static void setCellData(final CellData cellData) {
 		Globals.cellData = cellData;
+	}
+
+	public static double convertUtmXToGrid(final double utmX) {
+		return ((utmX - Globals.getXllCorner()) / 400.0d) - 0.5d;
+	}
+
+	public static double convertUtmYToGrid(final double utmY) {
+		return ((utmY - Globals.getYllCorner()) / 400.0d) - 0.5d;
+	}
+
+	public static double convertGridXToUtm(final double gridX) {
+		return (gridX + 0.5d) * 400.0d + Globals.getXllCorner();
+	}
+
+	public static double convertGridYToUtm(final double gridY) {
+		return (gridY + 0.5d) * 400.0d + Globals.getYllCorner();
+	}
+
+	public static double convertUtmDistanceToGrid(double utmDistance) {
+		return utmDistance / SimulationConstants.REQUIRED_CELL_SIZE;
+	}
+
+	public static double convertGridDistanceToUtm(double gridDistance) {
+		return gridDistance * SimulationConstants.REQUIRED_CELL_SIZE;
+	}
+
+	public static double convertGridDistanceToUtm(NdPoint start, NdPoint end) {
+		return convertGridDistanceToUtm(getSpace().getDistance(start, end));
 	}
 
 }

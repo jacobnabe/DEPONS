@@ -56,6 +56,14 @@
         <methodName>getReceivedSoundLevel</methodName>
       </repast.simphony.data2.engine.MethodDataSourceDefinition>
     </entry>
+    <entry>
+      <string>sourceSoundLevel</string>
+      <repast.simphony.data2.engine.MethodDataSourceDefinition>
+        <id>sourceSoundLevel</id>
+        <className>dk.au.bios.porpoise.Hydrophone</className>
+        <methodName>getSourceSoundLevel</methodName>
+      </repast.simphony.data2.engine.MethodDataSourceDefinition>
+    </entry>
   </methodDataSources>
   <countSources class="linked-hash-map"/>
   <customNADataSources class="linked-hash-map"/>

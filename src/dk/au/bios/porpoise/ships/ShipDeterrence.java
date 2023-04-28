@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2023 Jacob Nabe-Nielsen <jnn@bios.au.dk>
+ * Copyright (C) 2023 Jacob Nabe-Nielsen <jnn@bios.au.dk>
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
  * License version 2 and only version 2 as published by the Free Software Foundation.
@@ -27,62 +27,88 @@
 
 package dk.au.bios.porpoise.ships;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import dk.au.bios.porpoise.Ship;
 
-import dk.au.bios.porpoise.Globals;
-import repast.simphony.space.continuous.NdPoint;
+public class ShipDeterrence {
 
-public class Buoy {
-
-	private double x;
-	private double y;
-	private double speed;
-	private int pause;
-
-	@JsonCreator
-	public Buoy(@JsonProperty("x") double x, @JsonProperty("y") double y, @JsonProperty("speed") double speed,
-			@JsonProperty("pause") int pause) {
-		this.x = x;
-		this.y = y;
-		this.speed = speed;
-		this.pause = pause;
+	private static class Step {
+		public Ship ship;
+		public double deterX;
+		public double deterY;
+		public double mag;
+		public double receivedLevelVHF;
 	}
 
-	public double getX() {
-		return x;
+	private Step[] deterSteps = new Step[30];
+
+	public void recordStep(int step, Ship ship, double deterX, double deterY, double mag, double receivedLevelVHF) {
+		var ds = new Step();
+		ds.ship = ship;
+		ds.deterX = deterX;
+		ds.deterY = deterY;
+		ds.mag = mag;
+		ds.receivedLevelVHF = receivedLevelVHF;
+
+		if (deterSteps[step] == null) {
+			deterSteps[step] = ds;
+		} else if (deterSteps[step].receivedLevelVHF < receivedLevelVHF) {
+			deterSteps[step] = ds;
+		}
+	}
+	
+	public void resetSteps() {
+		for (int i = 0; i < deterSteps.length; i++) {
+			deterSteps[i] = null;
+		}
 	}
 
-	public void setX(double x) {
-		this.x = x;
+	public double deterrenceStrength() {
+		double deterX = 0.0d;
+		double deterY = 0.0d;
+		for (Step ds : deterSteps) {
+			if (ds != null) {
+				deterX += ds.deterX;
+				deterY += ds.deterY;
+			}
+		}
+
+		var strength = Math.sqrt(Math.pow(deterX, 2) + Math.pow(deterY, 2));
+		return strength;
 	}
 
-	public double getY() {
-		return y;
+	public double deterrenceVtX() {
+		double deterX = 0.0d;
+		for (Step ds : deterSteps) {
+			if (ds != null) {
+				deterX += ds.deterX;
+			}
+		}
+		
+		return deterX;
 	}
 
-	public void setY(double y) {
-		this.y = y;
+	public double deterrenceVtY() {
+		double deterY = 0.0d;
+		for (Step ds : deterSteps) {
+			if (ds != null) {
+				deterY += ds.deterY;
+			}
+		}
+		
+		return deterY;
 	}
 
-	public double getSpeed() {
-		return speed;
-	}
+	public double getLoudestShipSPL() {
+		double loudest = 0.0d;
+		for (Step ds : deterSteps) {
+			if (ds != null) {
+				if (ds.receivedLevelVHF > loudest) {
+					loudest = ds.receivedLevelVHF;
+				}
+			}
+		}
 
-	public void setSpeed(double speed) {
-		this.speed = speed;
-	}
-
-	public int getPause() {
-		return pause;
-	}
-
-	public void setPause(int pause) {
-		this.pause = pause;
-	}
-
-	public NdPoint getNdPoint() {
-		return new NdPoint(Globals.convertUtmXToGrid(x), Globals.convertUtmYToGrid(y));
+		return loudest;
 	}
 
 }
