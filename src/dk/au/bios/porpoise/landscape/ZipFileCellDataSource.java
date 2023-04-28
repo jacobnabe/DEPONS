@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Jacob Nabe-Nielsen <jnn@bios.au.dk>
+ * Copyright (C) 2020-2023 Jacob Nabe-Nielsen <jnn@bios.au.dk>
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
  * License version 2 and only version 2 as published by the Free Software Foundation.
@@ -87,6 +87,16 @@ public class ZipFileCellDataSource implements CellDataSource {
 					data = GeoTiffUtil.loadGeotif(Globals.getWorldWidth(), Globals.getWorldHeight(), in, false);
 				}
 				return data;
+			}
+		}
+	}
+
+	@Override
+	public byte[] getRawData(final String fileName) throws IOException {
+		try (ZipFile zipFile = new ZipFile(zipFilePath.toFile())) {
+			ZipEntry entry = zipFile.getEntry(fileName);
+			try (InputStream in = zipFile.getInputStream(entry)) {
+				return in.readAllBytes();
 			}
 		}
 	}

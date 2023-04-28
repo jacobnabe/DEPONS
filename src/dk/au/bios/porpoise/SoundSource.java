@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2022 Jacob Nabe-Nielsen <jnn@bios.au.dk>
+ * Copyright (C) 2017-2023 Jacob Nabe-Nielsen <jnn@bios.au.dk>
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
  * License version 2 and only version 2 as published by the Free Software Foundation.
@@ -83,10 +83,9 @@ public class SoundSource extends Agent {
 		for (final Agent a : agents) {
 			if (a instanceof Porpoise) {
 				final Porpoise p = (Porpoise) a;
-				final double distToSound = this.getSpace().getDistance(getPosition(), p.getPosition()) * 400;
+				final double distToSound = Globals.convertGridDistanceToUtm(getPosition(), p.getPosition());
 				if (distToSound <= SimulationParameters.getDeterMaxDistance()) {
-					// deterring-strength decreases linearly with distance to turbine, decreases to
-					// 0 at 400 m
+					// deterring-strength decreases linearly with distance to turbine, decreases to 0 at 400 m
 					final double currentDeterence = impact
 							- (SimulationParameters.getBetaHat() * Math.log10(distToSound)
 									+ (SimulationParameters.getAlphaHat() * distToSound))

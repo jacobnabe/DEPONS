@@ -81,6 +81,14 @@
       </repast.simphony.data2.engine.MethodDataSourceDefinition>
     </entry>
     <entry>
+      <string>LoudestShipSPL</string>
+      <repast.simphony.data2.engine.MethodDataSourceDefinition>
+        <id>LoudestShipSPL</id>
+        <className>dk.au.bios.porpoise.RandomPorpoiseReportProxy</className>
+        <methodName>getLoudestShipSPL</methodName>
+      </repast.simphony.data2.engine.MethodDataSourceDefinition>
+    </entry>
+    <entry>
       <string>EnergyLevel</string>
       <repast.simphony.data2.engine.MethodDataSourceDefinition>
         <id>EnergyLevel</id>

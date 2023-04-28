@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Jacob Nabe-Nielsen <jnn@bios.au.dk>
+ * Copyright (C) 2023 Jacob Nabe-Nielsen <jnn@bios.au.dk>
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
  * License version 2 and only version 2 as published by the Free Software Foundation.
@@ -27,31 +27,36 @@
 
 package dk.au.bios.porpoise;
 
+import repast.simphony.space.continuous.NdPoint;
+
 public class Hydrophone extends Agent {
 
 	private final String name;
 
 	private String shipName;
-	private int shipUtmX;
-	private int shipUtmY;
+	private double shipUtmX;
+	private double shipUtmY;
 	private double receivedSoundLevel;
+	private double sourceSoundLevel;
 
 	public Hydrophone(long id, String name) {
 		super(id);
 		this.name = name;
 	}
 
-	public void receiveSoundLevel(Ship ship, double level) {
-		if (level > receivedSoundLevel) {
-			receivedSoundLevel = level;
+	public void receiveSoundLevel(Ship ship, NdPoint shipPos, double sourceLevel, double receivedLevel) {
+		if (receivedLevel > receivedSoundLevel) {
+			receivedSoundLevel = receivedLevel;
+			sourceSoundLevel = sourceLevel;
 			this.shipName = ship.getName();
-			this.shipUtmX = (int) Math.round(ship.getPosition().getX() * 400.0d + Globals.getXllCorner());
-			this.shipUtmY = (int) Math.round(ship.getPosition().getY() * 400.0d + Globals.getYllCorner());
+			this.shipUtmX = Globals.convertGridXToUtm(shipPos.getX());
+			this.shipUtmY = Globals.convertGridYToUtm(shipPos.getY());
 		}
 	}
 
 	public void resetSoundLevel() {
-		receivedSoundLevel = 0;
+		receivedSoundLevel = 0.0d;
+		sourceSoundLevel = 0.0d;
 		shipName = "";
 		shipUtmX = -1;
 		shipUtmY = -1;
@@ -65,16 +70,20 @@ public class Hydrophone extends Agent {
 		return shipName;
 	}
 
-	public int getShipUtmX() {
+	public double getShipUtmX() {
 		return shipUtmX;
 	}
 	
-	public int getShipUtmY() {
+	public double getShipUtmY() {
 		return shipUtmY;
 	}
 
 	public double getReceivedSoundLevel() {
 		return receivedSoundLevel;
+	}
+
+	public double getSourceSoundLevel() {
+		return sourceSoundLevel;
 	}
 
 }

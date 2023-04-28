@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2019 Jacob Nabe-Nielsen <jnn@bios.au.dk>
+ * Copyright (C) 2017-2023 Jacob Nabe-Nielsen <jnn@bios.au.dk>
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
  * License version 2 and only version 2 as published by the Free Software Foundation.
@@ -28,8 +28,11 @@
 package dk.au.bios.porpoise.util.test;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.HashMap;
 
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import dk.au.bios.porpoise.Agent;
@@ -57,6 +60,7 @@ public class PorpoiseTestDataCapturer {
 	public static boolean includePopulationSize = true;
 
 	public static File captureFile = new File("testdata_capture" + System.currentTimeMillis() + ".txt");
+	public static FileWriter captureFileWriter = null;
 
 	private static ObjectMapper jsonMapper;
 
@@ -65,7 +69,17 @@ public class PorpoiseTestDataCapturer {
 			return;
 		}
 
+		try {
+			if (captureFileWriter != null) {
+				captureFileWriter.close();
+			}
+			captureFileWriter = new FileWriter(captureFile);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+
 		jsonMapper = new ObjectMapper();
+		jsonMapper.setSerializationInclusion(Include.NON_NULL);
 
 		var paramMap = new HashMap<String, Object>();
 		params.getSchema().parameterNames().forEach(p -> {
@@ -76,7 +90,8 @@ public class PorpoiseTestDataCapturer {
 		simParams.parameters = paramMap;
 
 		try {
-			jsonMapper.writeValue(captureFile, simParams);
+			captureFileWriter.write(jsonMapper.writeValueAsString(simParams) + EOL);
+			captureFileWriter.flush();
 		} catch (Exception e) {
 			throw new RuntimeException("Error capturing simulation", e);
 		}
@@ -112,7 +127,8 @@ public class PorpoiseTestDataCapturer {
 		simTick.porp = simPorp;
 
 		try {
-			jsonMapper.writeValue(captureFile, simTick);
+			captureFileWriter.write(jsonMapper.writeValueAsString(simTick) + EOL);
+			captureFileWriter.flush();
 		} catch (Exception e) {
 			throw new RuntimeException("Error capturing simulation", e);
 		}
@@ -131,7 +147,8 @@ public class PorpoiseTestDataCapturer {
 			simTick.sim = simState;
 
 			try {
-				jsonMapper.writeValue(captureFile, simTick);
+				captureFileWriter.write(jsonMapper.writeValueAsString(simTick) + EOL);
+				captureFileWriter.flush();
 			} catch (Exception e) {
 				throw new RuntimeException("Error capturing simulation", e);
 			}

@@ -36,12 +36,13 @@ import java.util.stream.IntStream;
 import org.junit.jupiter.api.Test;
 
 import dk.au.bios.porpoise.util.SimulationTime;
+import repast.simphony.space.continuous.NdPoint;
 
 public class TurbineTest extends AbstractSimulationBDDTest {
 
 	@Test
 	public void porpoiseDeterrence() throws Exception {
-		aNewWorld(100, 100);
+		anOldWorld(100, 100);
 		var porpoise = aPorpoise(50.0, 50.0, 0.0);
 
 		var turbine = new Turbine("turb1", 234, 50.0d, 50.0d, 3, 8, 0);
@@ -53,23 +54,47 @@ public class TurbineTest extends AbstractSimulationBDDTest {
 				2.7051d, 1.3526d, 0.6763d, 0.3381d, 0.1691d, 0.0d,
 				0.0d, 0.0d, 0.0d, 0.0d, 0.0d, 0.0d);
 			
+		var expectedHeadings = List.of(224.0663, 224.0663, 314.0663, 250.6302, 250.6314, 250.6364, 250.6414, 250.6514,
+				250.6714, 340.9399, 160.9399, 340.9399, 160.9399, 340.9399, 160.9399, 340.9399);
+
+		var expectedPositions = List.of(new NdPoint(47.3683, 47.2811), new NdPoint(44.7367, 44.5623),
+				new NdPoint(42.0178, 47.1939), new NdPoint(38.4481, 45.9390), new NdPoint(34.8783, 44.6840),
+				new NdPoint(31.3085, 43.4294), new NdPoint(27.7385, 42.1752), new NdPoint(24.1683, 40.9215),
+				new NdPoint(20.5977, 39.6691), new NdPoint(19.3620, 43.2455), new NdPoint(20.5977, 39.6691),
+				new NdPoint(19.3620, 43.2455), new NdPoint(20.5977, 39.6691), new NdPoint(19.3620, 43.2455),
+				new NdPoint(20.5977, 39.6691), new NdPoint(19.3620, 43.2455));
+
+		assertThat(porpoise.getPosition()).isEqualTo(new NdPoint(50.0d, 50.0d));
+		assertThat(porpoise.getHeading()).isEqualTo(0.0d);
+
 		for (int i = 0; i < expectedDeterrence.size(); i++) {
 			schedule.execute();
 			var deterrence = expectedDeterrence.get(i);
 			assertThat(porpoise.getDeterStrength()).withFailMessage("unexpected deterrence at tick " + SimulationTime.getTick()
 					+ " expectedDeterrence.idx: " + i + ". Expected: " + deterrence + ". Actual: " + porpoise.getDeterStrength())
 					.isCloseTo(deterrence, within(0.0001d));
+
+			var heading = expectedHeadings.get(i);
+			assertThat(porpoise.getHeading()).withFailMessage("unexpected heading at tick " + SimulationTime.getTick() 
+					+ " expectedHeadings.idx: " + i + ". Expected: " + heading + ". Actual: " + porpoise.getHeading())
+					.isCloseTo(heading, within(0.0001d));
+
+			final NdPoint expoectedPos = expectedPositions.get(i);
+			assertThat(porpoise.getPosition()).satisfies(pos -> {
+				assertThat(pos.getX()).isCloseTo(expoectedPos.getX(), within(0.0001d));
+				assertThat(pos.getY()).isCloseTo(expoectedPos.getY(), within(0.0001d));
+			});
 		}
 	}
 
 	@Test
 	public void porpoiseDeterrenceSmallSpace() throws Exception {
-		aNewWorld(20, 20);
-		var porpoise = aPorpoise(5.0, 10.0, 90.0);
+		anOldWorld(20, 20);
+		var porpoise = aPorpoise(5.0, 10.0, 0.0);
 
 		var turbine1 = new Turbine("turb1", 234, 10.0d, 10.0d, 3, 5, 0);
 		var turbine2 = new Turbine("turb2", 234, 7.5d, 7.5d, 9, 12, 0);
-		
+
 		context.add(turbine1);
 		context.add(turbine2);
 		turbine1.initialize();
@@ -80,12 +105,38 @@ public class TurbineTest extends AbstractSimulationBDDTest {
 				4.6530d, 4.1917d, 4.5623d, 5.2710d, 2.6355d, 1.3177d, 
 				0.6589d, 0.3294d, 0.1647d, 0.0d, 0.0d);
 			
+		var expectedHeadings = List.of(224.0663, 224.0663, 314.0663, 250.7099, 246.6838, 235.6119, 235.6084, 235.6165,
+				235.6222, 217.4565, 234.3958, 212.4674, 234.9561, 234.9566, 234.9617, 234.9667, 234.9768, 234.9971,
+				325.2682, 145.2682);
+
+		var expectedPositions = List.of(new NdPoint(2.3683, 7.2811), new NdPoint(-0.2633, 4.5623),
+				new NdPoint(1.9822, 7.1939), new NdPoint(0.5893, 5.9439), new NdPoint(1.8856, 4.4462),
+				new NdPoint(0.2370, 2.3091), new NdPoint(1.8855, 0.1718), new NdPoint(0.2373, 0.9651),
+				new NdPoint(1.8857, 0.1715), new NdPoint(-0.4155, 1.8323), new NdPoint(2.4920, -0.3707),
+				new NdPoint(0.4608, 2.5631), new NdPoint(1.6372, 0.3904), new NdPoint(0.4608, 0.7823),
+				new NdPoint(1.6374, 0.3901), new NdPoint(0.4610, 0.7820), new NdPoint(1.6377, 0.3896),
+				new NdPoint(0.4617, 0.7809), new NdPoint(0.6941, 3.8907), new NdPoint(2.8499, 0.7809));
+
+		assertThat(porpoise.getPosition()).isEqualTo(new NdPoint(5.0d, 10.0d));
+		assertThat(porpoise.getHeading()).isEqualTo(0.0d);
+
 		for (int i = 0; i < expectedDeterrence.size(); i++) {
 			schedule.execute();
 			var deterrence = expectedDeterrence.get(i);
 			assertThat(porpoise.getDeterStrength()).withFailMessage("unexpected deterrence at tick " + SimulationTime.getTick()
 					+ " expectedDeterrence.idx: " + i + ". Expected: " + deterrence + ". Actual: " + porpoise.getDeterStrength())
 					.isCloseTo(deterrence, within(0.0001d));
+
+			var heading = expectedHeadings.get(i);
+			assertThat(porpoise.getHeading()).withFailMessage("unexpected heading at tick " + SimulationTime.getTick() 
+					+ " expectedHeadings.idx: " + i + ". Expected: " + heading + ". Actual: " + porpoise.getHeading())
+					.isCloseTo(heading, within(0.0001d));
+
+			final NdPoint expoectedPos = expectedPositions.get(i);
+			assertThat(porpoise.getPosition()).satisfies(pos -> {
+				assertThat(pos.getX()).isCloseTo(expoectedPos.getX(), within(0.0001d));
+				assertThat(pos.getY()).isCloseTo(expoectedPos.getY(), within(0.0001d));
+			});
 		}
 	}
 

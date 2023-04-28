@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2022 Jacob Nabe-Nielsen <jnn@bios.au.dk>
+ * Copyright (C) 2017-2023 Jacob Nabe-Nielsen <jnn@bios.au.dk>
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
  * License version 2 and only version 2 as published by the Free Software Foundation.
@@ -26,6 +26,10 @@
  */
 
 package dk.au.bios.porpoise;
+
+import static dk.au.bios.porpoise.Globals.convertGridDistanceToUtm;
+import static dk.au.bios.porpoise.Globals.convertGridXToUtm;
+import static dk.au.bios.porpoise.Globals.convertGridYToUtm;
 
 import dk.au.bios.porpoise.util.DebugLog;
 import dk.au.bios.porpoise.util.SimulationTime;
@@ -54,7 +58,7 @@ public class RandomPorpoiseReportProxy extends Agent {
 		return porpoise;
 	}
 
-	public int getUtmX() {
+	public double getUtmX() {
 		if (porpoise.isAlive()) {
 			return porpoise.getUtmX();
 		} else {
@@ -62,7 +66,7 @@ public class RandomPorpoiseReportProxy extends Agent {
 		}
 	}
 
-	public int getUtmY() {
+	public double getUtmY() {
 		if (porpoise.isAlive()) {
 			return porpoise.getUtmY();
 		} else {
@@ -80,28 +84,34 @@ public class RandomPorpoiseReportProxy extends Agent {
 
 	public double getDeterStrength() {
 		if (porpoise.isAlive()) {
-			return porpoise.getDeterStrength();
+			return convertGridDistanceToUtm(porpoise.getDeterStrength());
 		} else {
 			return -1;
 		}
 	}
 
-	public int getPSMTargetUtmX() {
-		if (porpoise.getDispersalBehaviour() == null || !porpoise.getDispersalBehaviour().isDispersing()) {
+	public double getLoudestShipSPL() {
+		if (porpoise.isAlive()) {
+			return porpoise.getLoudestShipSPL();
+		} else {
 			return -1;
 		}
-
-		return (int) Math.round(porpoise.getDispersalBehaviour().getTargetPosition().getX() * 400
-				+ Globals.getXllCorner());
 	}
 
-	public int getPSMTargetUtmY() {
+	public double getPSMTargetUtmX() {
 		if (porpoise.getDispersalBehaviour() == null || !porpoise.getDispersalBehaviour().isDispersing()) {
 			return -1;
 		}
 
-		return (int) Math.round(porpoise.getDispersalBehaviour().getTargetPosition().getY() * 400
-				+ Globals.getYllCorner());
+		return convertGridXToUtm(porpoise.getDispersalBehaviour().getTargetPosition().getX());
+	}
+
+	public double getPSMTargetUtmY() {
+		if (porpoise.getDispersalBehaviour() == null || !porpoise.getDispersalBehaviour().isDispersing()) {
+			return -1;
+		}
+
+		return convertGridYToUtm(porpoise.getDispersalBehaviour().getTargetPosition().getY());
 	}
 
 	public int getDispersalMode() {

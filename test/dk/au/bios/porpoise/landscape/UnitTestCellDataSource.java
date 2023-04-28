@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Jacob Nabe-Nielsen <jnn@bios.au.dk>
+ * Copyright (C) 2020-2023 Jacob Nabe-Nielsen <jnn@bios.au.dk>
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
  * License version 2 and only version 2 as published by the Free Software Foundation.
@@ -62,6 +62,8 @@ public class UnitTestCellDataSource implements CellDataSource {
 			return getDistanceToCoast();
 		case LandscapeLoader.PATCHES_FILE:
 			return getFoodProb();
+		case LandscapeLoader.SEDIMENT_FILE:
+			return getSediment();
 		}
 
 		if (fileName.startsWith(LandscapeLoader.PREY_FILE_PREFIX)) {
@@ -71,6 +73,11 @@ public class UnitTestCellDataSource implements CellDataSource {
 		} else {
 			throw new IOException("Unknown data " + fileName);
 		}
+	}
+
+	@Override
+	public byte[] getRawData(String fileName) throws IOException {
+		throw new RuntimeException("Raw data not supported");
 	}
 
 	@Override
@@ -100,6 +107,10 @@ public class UnitTestCellDataSource implements CellDataSource {
 
 	private static double[][] getSalinity() {
 		return fillArray(34.069105813295);
+	}
+
+	private static double[][] getSediment() {
+		return fillArray(6.5);
 	}
 
 	private static double[][] fillArray(final double value) {

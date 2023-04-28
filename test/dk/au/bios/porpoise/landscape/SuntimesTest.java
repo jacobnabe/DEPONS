@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2023 Jacob Nabe-Nielsen <jnn@bios.au.dk>
+ * Copyright (C) 2023 Jacob Nabe-Nielsen <jnn@bios.au.dk>
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
  * License version 2 and only version 2 as published by the Free Software Foundation.
@@ -25,64 +25,30 @@
  * this exception also makes it possible to release a modified version which carries forward this exception.
  */
 
-package dk.au.bios.porpoise.ships;
+package dk.au.bios.porpoise.landscape;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import dk.au.bios.porpoise.Globals;
-import repast.simphony.space.continuous.NdPoint;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
-public class Buoy {
+public class SuntimesTest {
 
-	private double x;
-	private double y;
-	private double speed;
-	private int pause;
+	private Suntimes suntimes = new Suntimes(SuntimesTest.class.getResourceAsStream("suntimes.csv"));
 
-	@JsonCreator
-	public Buoy(@JsonProperty("x") double x, @JsonProperty("y") double y, @JsonProperty("speed") double speed,
-			@JsonProperty("pause") int pause) {
-		this.x = x;
-		this.y = y;
-		this.speed = speed;
-		this.pause = pause;
-	}
-
-	public double getX() {
-		return x;
-	}
-
-	public void setX(double x) {
-		this.x = x;
-	}
-
-	public double getY() {
-		return y;
-	}
-
-	public void setY(double y) {
-		this.y = y;
-	}
-
-	public double getSpeed() {
-		return speed;
-	}
-
-	public void setSpeed(double speed) {
-		this.speed = speed;
-	}
-
-	public int getPause() {
-		return pause;
-	}
-
-	public void setPause(int pause) {
-		this.pause = pause;
-	}
-
-	public NdPoint getNdPoint() {
-		return new NdPoint(Globals.convertUtmXToGrid(x), Globals.convertUtmYToGrid(y));
+	@ParameterizedTest
+	@CsvSource({
+		"0, false",
+		"25, true",
+		"40, false",
+		"6490, false",
+		"6537, false",
+		"6538, true",
+		"23817, false",
+		"23818, true"
+	})
+	void dayNightCheck(int tick, boolean day) {
+		assertThat(suntimes.isDaytime(tick)).isEqualTo(day);
 	}
 
 }

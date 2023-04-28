@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2022 Jacob Nabe-Nielsen <jnn@bios.au.dk>
+ * Copyright (C) 2017-2023 Jacob Nabe-Nielsen <jnn@bios.au.dk>
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
  * License version 2 and only version 2 as published by the Free Software Foundation.
@@ -107,8 +107,8 @@ public class Turbine extends Agent {
 				}
 				final String[] cols = line.split("\\s+");
 				final String name = cols[0];
-				final double locX = (Double.parseDouble(cols[1]) - Globals.getXllCorner()) / 400;
-				final double locY = (Double.parseDouble(cols[2]) - Globals.getYllCorner()) / 400;
+				final double locX = Globals.convertUtmXToGrid(Double.parseDouble(cols[1]));
+				final double locY = Globals.convertUtmYToGrid(Double.parseDouble(cols[2]));
 				final double impact = Double.parseDouble(cols[3]);
 				int startTick = 0;
 				int endTick = Integer.MAX_VALUE;
@@ -216,7 +216,7 @@ public class Turbine extends Agent {
 			for (final Agent a : agents) {
 				if (a instanceof Porpoise) {
 					final Porpoise p = (Porpoise) a;
-					final double distToTurb = this.getSpace().getDistance(getPosition(), p.getPosition()) * 400;
+					final double distToTurb = Globals.convertGridDistanceToUtm(getPosition(), p.getPosition());
 					if (distToTurb <= SimulationParameters.getDeterMaxDistance()) {
 						// current amount of deterring
 						// the received-level (RL) gives the amount of noise that the porpoise is

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2022 Jacob Nabe-Nielsen <jnn@bios.au.dk>
+ * Copyright (C) 2017-2023 Jacob Nabe-Nielsen <jnn@bios.au.dk>
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
  * License version 2 and only version 2 as published by the Free Software Foundation.
@@ -69,6 +69,7 @@ class PorpoiseMoveTest {
 	@BeforeEach
 	public void setup() throws Exception {
 		// Repast initialization
+		SimulationParameters.resetToDefaultsForOldUnitTest();
 		Globals.setLandscapeMetadata(new DataFileMetaData(100, 100, 529473, 5972242, 400 , null));
 		SimulationParameters.setModel(4);
 		this.schedule = new Schedule();

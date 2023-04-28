@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2019 Jacob Nabe-Nielsen <jnn@bios.au.dk>
+ * Copyright (C) 2017-2023 Jacob Nabe-Nielsen <jnn@bios.au.dk>
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
  * License version 2 and only version 2 as published by the Free Software Foundation.
@@ -32,6 +32,8 @@ public final class SimulationConstants {
 	private SimulationConstants() {
 		// Utility class, prevent instances.
 	}
+
+	public static final int REQUIRED_CELL_SIZE = 400;
 
 	// Whether or not to invent food if the porpoise eats all the food in a patch. NetLogo default behavior
 	public static final boolean ADD_ARTIFICIAL_FOOD = true;

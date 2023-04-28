@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2022 Jacob Nabe-Nielsen <jnn@bios.au.dk>
+ * Copyright (C) 2017-2023 Jacob Nabe-Nielsen <jnn@bios.au.dk>
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
  * License version 2 and only version 2 as published by the Free Software Foundation.
@@ -27,59 +27,33 @@
 
 package dk.au.bios.porpoise;
 
+import static dk.au.bios.porpoise.Globals.convertGridDistanceToUtm;
+import static dk.au.bios.porpoise.Globals.convertUtmXToGrid;
+import static dk.au.bios.porpoise.Globals.convertUtmYToGrid;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.within;
 import static org.mockito.Mockito.mock;
 
 import java.util.stream.IntStream;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import dk.au.bios.porpoise.behavior.DispersalFactory;
 import dk.au.bios.porpoise.behavior.FastRefMemTurn;
 import dk.au.bios.porpoise.behavior.RandomSource;
-import dk.au.bios.porpoise.landscape.CellDataTestData;
-import dk.au.bios.porpoise.landscape.DataFileMetaData;
-import dk.au.bios.porpoise.landscape.GridSpatialPartitioning;
-import repast.simphony.context.Context;
-import repast.simphony.context.DefaultContext;
-import repast.simphony.context.space.continuous.ContinuousSpaceFactoryFinder;
-import repast.simphony.context.space.grid.GridFactoryFinder;
-import repast.simphony.engine.environment.RunEnvironment;
-import repast.simphony.engine.environment.RunState;
-import repast.simphony.engine.schedule.Schedule;
 import repast.simphony.engine.schedule.ScheduleParameters;
-import repast.simphony.space.continuous.BouncyBorders;
+import repast.simphony.space.SpatialException;
 import repast.simphony.space.continuous.NdPoint;
-import repast.simphony.space.continuous.RandomCartesianAdder;
-import repast.simphony.space.grid.GridBuilderParameters;
-import repast.simphony.space.grid.SimpleGridAdder;
 
 /**
  * Unit test for the Porpoise agent.
  */
-class PorpoiseTest {
-
-	private Context<Agent> context;
-	private Schedule schedule;
-
-	@BeforeEach
-	public void setup() {
-		Globals.setLandscapeMetadata(new DataFileMetaData(100, 100, 529473, 5972242, 400, null));
-		SimulationParameters.setModel(1);
-
-		// Repast initialization
-		this.schedule = new Schedule();
-		RunEnvironment.init(schedule, null, null, true);
-		context = new DefaultContext<>();
-		RunState.init().setMasterContext(context);
-		DispersalFactory.setType("off");
-	}
+class PorpoiseTest extends AbstractSimulationBDDTest {
 
 	@Test
-	public void calltoString() {
-//		given: "we have a new porpoise"
+	public void calltoString() throws Exception {
+		aNewWorld(100, 100, 529473, 5972242);
 		var random = mock(RandomSource.class);
 		Globals.setRandomSource(random);
 		var p2 = new Porpoise(null, 1, null);
@@ -89,19 +63,9 @@ class PorpoiseTest {
 
 	@Test
 	public void standardMove() throws Exception {
-		var factory = ContinuousSpaceFactoryFinder.createContinuousSpaceFactory(null);
-		var space = factory.createContinuousSpace("space", context, new RandomCartesianAdder<Agent>(), new BouncyBorders(), new double[] { Globals.getWorldWidth(), Globals.getWorldHeight() }, new double[] { 0.5f, 0.5f});
-		var gridFactory = GridFactoryFinder.createGridFactory(null);
-		var grid = gridFactory.createGrid("grid", context, new GridBuilderParameters<Agent>(new repast.simphony.space.grid.BouncyBorders(), new SimpleGridAdder<Agent>(), true, Globals.getWorldWidth(), Globals.getWorldHeight()));
-		var cellData = CellDataTestData.getCellData();
-		Globals.setCellData(cellData);
-		Globals.setSpace(space);
-		Globals.setGrid(grid);
-		Globals.setSpatialPartitioning(new GridSpatialPartitioning(25, 25));
-
-		var random = mock(RandomSource.class);
-
-		Globals.setRandomSource(random);
+		aNewWorld(100, 100, 529473, 5972242);
+		SimulationParameters.setModel(1);
+		DispersalFactory.setType("off");
 
 		var p = new Porpoise(context, 1, new FastRefMemTurn());
 		context.add(p);
@@ -120,16 +84,94 @@ class PorpoiseTest {
 
 		schedule.execute();
 		assertThat(schedule.getTickCount()).isEqualTo(0);
-		assertThat(p.getPosition().getX()).isEqualTo(7.37, within(0.009));
-		assertThat(p.getPosition().getY()).isEqualTo(7.28, within(0.009));
+		assertThat(p.getPosition().getX()).isEqualTo(9.993, within(0.009));
+		assertThat(p.getPosition().getY()).isEqualTo(10.101, within(0.009));
 
 		schedule.execute();
 		assertThat(schedule.getTickCount()).isEqualTo(1);
-		assertThat(p.getPosition().getX()).isEqualTo(4.74, within(0.009));
-		assertThat(p.getPosition().getY()).isEqualTo(4.56, within(0.009));
+		assertThat(p.getPosition().getX()).isEqualTo(9.991, within(0.009));
+		assertThat(p.getPosition().getY()).isEqualTo(10.140, within(0.009));
 
 		IntStream.range(0, 10).forEach(i -> schedule.execute());
 		assertThat(schedule.getTickCount()).isEqualTo(11);
+	}
+
+	@Test
+	void moveAroundLanscapeBorder() throws Exception {
+		aNewWorld(100, 100, 529473, 5972242);
+		var p = new Porpoise(context, 1, new FastRefMemTurn());
+		context.add(p);
+		p.setHeading(0.0);
+		
+		p.setPosition(new NdPoint(-0.4999, 0.0));
+		assertThat(p.getPosition()).isEqualTo(new NdPoint(-0.4999, 0.0));
+		
+		p.setPosition(new NdPoint(0.0, 0.0));
+		assertThat(p.getPosition()).isEqualTo(new NdPoint(0.0, 0.0));
+		
+		p.setPosition(new NdPoint(99.0, 99.0));
+		assertThat(p.getPosition()).isEqualTo(new NdPoint(99.0, 99.0));
+
+		p.setPosition(new NdPoint(99.4999, 99.0));
+		assertThat(p.getPosition()).isEqualTo(new NdPoint(99.4999, 99.0));
+
+		assertThatExceptionOfType(SpatialException.class).isThrownBy(() -> {
+			p.setPosition(new NdPoint(99.5, 99.0));
+		});
+
+		assertThatExceptionOfType(SpatialException.class).isThrownBy(() -> {
+			p.setPosition(new NdPoint(100.0, 0.0));
+		});
+
+		assertThatExceptionOfType(SpatialException.class).isThrownBy(() -> {
+			p.setPosition(new NdPoint(101.0, 0.0));
+		});
+	}
+
+	@Test
+	void moveAroundLanscapeBorderUTM() throws Exception {
+		final int xllCorner = 529473;
+		final int yllCorner = 5972242;
+		aNewWorld(100, 100, xllCorner, yllCorner);
+		var p = new Porpoise(context, 1, new FastRefMemTurn());
+		context.add(p);
+		p.setHeading(0.0);
+
+		p.setPosition(new NdPoint(convertUtmXToGrid(xllCorner), convertUtmYToGrid(yllCorner)));
+		assertThat(p.getPosition()).isEqualTo(new NdPoint(-0.5, -0.5));
+
+		p.setPosition(new NdPoint(convertUtmXToGrid(xllCorner + 200), convertUtmYToGrid(yllCorner + 200)));
+		assertThat(p.getPosition()).isEqualTo(new NdPoint(0.0, 0.0));
+
+		p.setPosition(new NdPoint(convertUtmXToGrid(xllCorner + convertGridDistanceToUtm(100) - 1),
+				convertUtmYToGrid(yllCorner)));
+		assertThat(p.getPosition()).isEqualTo(new NdPoint(99.4975, -0.5));
+
+		p.setPosition(new NdPoint(convertUtmXToGrid(xllCorner + convertGridDistanceToUtm(100) - 1),
+				convertUtmYToGrid(yllCorner + convertGridDistanceToUtm(100) - 1)));
+		assertThat(p.getPosition()).isEqualTo(new NdPoint(99.4975, 99.4975));
+
+		p.setPosition(new NdPoint(convertUtmXToGrid(xllCorner),
+				convertUtmYToGrid(yllCorner + convertGridDistanceToUtm(100) - 1)));
+		assertThat(p.getPosition()).isEqualTo(new NdPoint(-0.5, 99.4975));
+
+		assertThatExceptionOfType(SpatialException.class).isThrownBy(() -> {
+			p.setPosition(new NdPoint(convertUtmXToGrid(xllCorner - 1), convertUtmYToGrid(yllCorner)));
+		});
+
+		assertThatExceptionOfType(SpatialException.class).isThrownBy(() -> {
+			p.setPosition(new NdPoint(convertUtmXToGrid(xllCorner), convertUtmYToGrid(yllCorner - 1)));
+		});
+
+		assertThatExceptionOfType(SpatialException.class).isThrownBy(() -> {
+			p.setPosition(new NdPoint(convertUtmXToGrid(xllCorner + convertGridDistanceToUtm(100)),
+					convertUtmYToGrid(yllCorner)));
+		});
+
+		assertThatExceptionOfType(SpatialException.class).isThrownBy(() -> {
+			p.setPosition(new NdPoint(convertUtmXToGrid(xllCorner),
+					convertUtmYToGrid(yllCorner + convertGridDistanceToUtm(100))));
+		});
 	}
 
 }

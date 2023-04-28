@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Jacob Nabe-Nielsen <jnn@bios.au.dk>
+ * Copyright (C) 2022-2023 Jacob Nabe-Nielsen <jnn@bios.au.dk>
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
  * License version 2 and only version 2 as published by the Free Software Foundation.
@@ -27,22 +27,20 @@
 
 package dk.au.bios.porpoise.ships;
 
-import dk.au.bios.porpoise.SimulationParameters;
 import repast.simphony.parameter.IllegalParameterException;
 
 public class JomopansEchoSPL {
 
-	public double calculate(double distance, VesselClass vesselClass, double speed, double length, int band) {
+	public double calculate(VesselClass vesselClass, double speed, double length, int band) {
 		double decidecadeBandSourceLevel = calculateSourceLevel(vesselClass, speed, length, band);
-		
-		final double distanceAdjustedLevel = decidecadeBandSourceLevel
-				- (SimulationParameters.getBetaHat() * Math.log10(distance)
-						+ (SimulationParameters.getAlphaHat() * distance));
-
-		return distanceAdjustedLevel;
+		return decidecadeBandSourceLevel;
 	}
 
 	protected double calculateSourceLevel(VesselClass vesselClass, double speed, double length, int band) {
+		if (speed == 0) {
+			return 0.0d;
+		}
+
 		double frequency = Math.pow(10, ((double) band) / 10.0) * 1000;
 
 		double $B$10 = speed;

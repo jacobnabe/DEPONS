@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2019 Jacob Nabe-Nielsen <jnn@bios.au.dk>
+ * Copyright (C) 2017-2023 Jacob Nabe-Nielsen <jnn@bios.au.dk>
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
  * License version 2 and only version 2 as published by the Free Software Foundation.
@@ -79,26 +79,24 @@ public final class PSMVerificationLog {
 		if (RunEnvironment.getInstance().isBatch()) {
 			psmVerificationOutput.printf("%d,", RunState.getInstance().getRunInfo().getRunNumber());
 		}
-		int psmUtmX;
+		double psmUtmX;
 		if (porpoise.getPersistentSpatialMemory() == null || !porpoise.getDispersalBehaviour().isDispersing()) {
 			psmUtmX = -1;
 		} else {
-			psmUtmX = (int) Math.round(porpoise.getDispersalBehaviour().getTargetPosition().getX() * 400
-					+ Globals.getXllCorner());
+			psmUtmX = Globals.convertGridXToUtm(porpoise.getDispersalBehaviour().getTargetPosition().getX());
 		}
-		int psmUtxY;
+		double psmUtxY;
 		if (porpoise.getPersistentSpatialMemory() == null || !porpoise.getDispersalBehaviour().isDispersing()) {
 			psmUtxY = -1;
 		} else {
-			psmUtxY = (int) Math.round(porpoise.getDispersalBehaviour().getTargetPosition().getY() * 400
-					+ Globals.getYllCorner());
+			psmUtxY = Globals.convertGridYToUtm(porpoise.getDispersalBehaviour().getTargetPosition().getY());
 		}
 
-		psmVerificationOutput.printf("%.1f,%d,%d,%d,%d,%s,%d,%d,%.3f,%.3f,%.3f%n", SimulationTime.getTick(), porpoise
+		psmVerificationOutput.printf("%.1f,%d,%.4f,%.4f,%d,%s,%.4f,%.4f,%.3f,%.4f,%.4f%n", SimulationTime.getTick(), porpoise
 				.getId(), porpoise.getUtmX(), porpoise.getUtmY(), porpoise.getDispersalMode(),
 				Boolean.toString(porpoise.getDispersalBehaviour().isDispersing()).toUpperCase(), psmUtmX, psmUtxY,
-				porpoise.getDispersalBehaviour().getTargetHeading(), distanceTravelled * 400, porpoise
-				.getDispersalBehaviour().getDistanceLeftToTravel() * 400);
+				porpoise.getDispersalBehaviour().getTargetHeading(), Globals.convertGridDistanceToUtm(distanceTravelled), 
+				Globals.convertGridDistanceToUtm(porpoise.getDispersalBehaviour().getDistanceLeftToTravel()));
 		psmVerificationOutput.flush();
 	}
 

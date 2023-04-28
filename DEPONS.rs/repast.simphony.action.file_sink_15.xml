@@ -10,6 +10,7 @@
     <string>UtmY</string>
     <string>EnergyLevel</string>
     <string>DeterStrength</string>
+    <string>LoudestShipSPL</string>
     <string>DispersalMode</string>
     <string>PSMActive</string>
     <string>PSMTargetUtmX</string>

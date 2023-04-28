@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2022 Jacob Nabe-Nielsen <jnn@bios.au.dk>
+ * Copyright (C) 2017-2023 Jacob Nabe-Nielsen <jnn@bios.au.dk>
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
  * License version 2 and only version 2 as published by the Free Software Foundation.
@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.stream.Collectors;
 import java.util.zip.ZipFile;
 
 import com.fasterxml.jackson.core.JsonParseException;
@@ -39,6 +40,8 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import dk.au.bios.porpoise.Agent;
+import dk.au.bios.porpoise.Globals;
+import dk.au.bios.porpoise.SimulationConstants;
 import repast.simphony.context.Context;
 
 public class ShipLoader {
@@ -67,8 +70,25 @@ public class ShipLoader {
 
 		for (Ship s : shipsData.getShips()) {
 			dk.au.bios.porpoise.Ship agent = (dk.au.bios.porpoise.Ship) s;
+
+			verifyRoute(agent);
+
 			context.add(agent);
 			agent.initialize();
+		}
+	}
+
+	private void verifyRoute(dk.au.bios.porpoise.Ship agent) {
+		var minX = Globals.getXllCorner();
+		var maxX = Globals.getXllCorner() + (Globals.getWorldWidth() * SimulationConstants.REQUIRED_CELL_SIZE);
+		var minY = Globals.getYllCorner();
+		var maxY = Globals.getYllCorner() + (Globals.getWorldHeight() * SimulationConstants.REQUIRED_CELL_SIZE);
+
+		var buoysOutsideLandscape = agent.getRoute().getRoute().stream()
+				.filter(b -> b.getX() < minX || b.getX() >= maxX || b.getY() < minY || b.getY() >= maxY)
+				.collect(Collectors.toList());
+		if (!buoysOutsideLandscape.isEmpty()) {
+			throw new RuntimeException("Ship " + agent.getName() + " has one or more coordinates outside the landscape");
 		}
 	}
 

@@ -163,7 +163,7 @@ public class FoodTask implements IAction {
 	private void executeParallel(final int chunkSize) {
 		// We have 4572 patches with foodProb > 0, break them into chunkSize point big jobs
 		final Pair[] points = Globals.getCellData().getFoodProbAboveZeroPatches();
-		final LinkedList<Future<Boolean>> tasks = new LinkedList<Future<Boolean>>();
+		final LinkedList<Future<Double>> tasks = new LinkedList<>();
 
 		int from = 0;
 		int to = chunkSize;
@@ -178,17 +178,21 @@ public class FoodTask implements IAction {
 			from = to;
 			to += chunkSize;
 		}
-
-		for (final Future<Boolean> f : tasks) {
+		
+		double grownFood = 0;
+		for (final Future<Double> f : tasks) {
 			try {
-				f.get();
+				double grownFoodTask = f.get();
+				grownFood += grownFoodTask;
 			} catch (InterruptedException | ExecutionException e) {
 				e.printStackTrace();
 			}
 		}
+
+		BackgroundAgent.setGrownFood(grownFood);
 	}
 
-	private class Task implements Callable<Boolean> {
+	private class Task implements Callable<Double> {
 		// private CellData data;
 		private final Pair[] points;
 		private final int from;
@@ -201,7 +205,9 @@ public class FoodTask implements IAction {
 		}
 
 		@Override
-		public Boolean call() throws Exception {
+		public Double call() throws Exception {
+			double grownFood = 0;
+
 			for (int idx = from; idx < to; idx++) {
 				final int i = points[idx].getFirst();
 				final int j = points[idx].getSecond();
@@ -227,10 +233,11 @@ public class FoodTask implements IAction {
 						extraGrowthCount.incrementAndGet();
 					}
 
+					grownFood += (fLevel - foodLevel[i][j]);
 					foodLevel[i][j] = fLevel;
 				}
 			}
-			return true;
+			return grownFood;
 		}
 	}
 

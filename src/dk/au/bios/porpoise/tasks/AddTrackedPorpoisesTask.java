@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2022 Jacob Nabe-Nielsen <jnn@bios.au.dk>
+ * Copyright (C) 2017-2023 Jacob Nabe-Nielsen <jnn@bios.au.dk>
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
  * License version 2 and only version 2 as published by the Free Software Foundation.
@@ -98,13 +98,9 @@ public class AddTrackedPorpoisesTask implements IAction {
 			this.tick = Integer.valueOf(delayedSelectionParts[0]);
 
 			if (delayedSelectionParts.length > 1) {
-				// this.locX = (Double.valueOf(delayedSelectionParts[1]) - Globals.XLLCORNER) / 400;
-				// this.locY = (Double.valueOf(delayedSelectionParts[2]) - Globals.YLLCORNER) / 400;
-				final double locX = (Double.parseDouble(delayedSelectionParts[1]) - Globals.getXllCorner()) / 400;
-				final double locY = (Double.parseDouble(delayedSelectionParts[2]) - Globals.getYllCorner()) / 400;
+				final double locX = Globals.convertUtmXToGrid(Double.parseDouble(delayedSelectionParts[1]));
+				final double locY = Globals.convertUtmYToGrid(Double.parseDouble(delayedSelectionParts[2]));
 				this.delayedSelectionPoint = new NdPoint(locX, locY);
-				// this.locX = Double.valueOf(delayedSelectionParts[1]);
-				// this.locY = Double.valueOf(delayedSelectionParts[2]);
 			}
 
 			final ISchedule schedule = RunEnvironment.getInstance().getCurrentSchedule();
@@ -124,8 +120,8 @@ public class AddTrackedPorpoisesTask implements IAction {
 			final RandomPorpoiseReportProxy randomPorpoiseAgent = new RandomPorpoiseReportProxy(1, p);
 			if (trackedPorpoiseLocations.size() > ti) {
 				final String[] locParams = trackedPorpoiseLocations.get(ti).split(",");
-				final double locX = (Double.parseDouble(locParams[0]) - Globals.getXllCorner()) / 400;
-				final double locY = (Double.parseDouble(locParams[1]) - Globals.getYllCorner()) / 400;
+				final double locX = Globals.convertUtmXToGrid(Double.parseDouble(locParams[0]));
+				final double locY = Globals.convertUtmYToGrid(Double.parseDouble(locParams[1]));
 				randomPorpoiseAgent.getPorpoise().setPosition(new NdPoint(locX, locY));
 				randomPorpoiseAgent.getPorpoise().reinitializePoslist();
 				randomPorpoiseAgent.getPorpoise().setHeading(Double.parseDouble(locParams[2]));

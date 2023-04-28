@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2020 Jacob Nabe-Nielsen <jnn@bios.au.dk>
+ * Copyright (C) 2017-2023 Jacob Nabe-Nielsen <jnn@bios.au.dk>
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
  * License version 2 and only version 2 as published by the Free Software Foundation.
@@ -27,9 +27,11 @@
 
 package dk.au.bios.porpoise.landscape;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 import dk.au.bios.porpoise.Agent;
 import dk.au.bios.porpoise.Globals;
@@ -46,6 +48,7 @@ public class CellData {
 
 	private final SimpleDataFile distanceToCoast;
 	private final SimpleDataFile depth;
+	private final SimpleDataFile sediment;
 	private final int[][] block;
 	private final SimpleDataFile foodProb;
 	private final double[][] foodValue;
@@ -53,11 +56,13 @@ public class CellData {
 	private final MonthlyDataFile entropy;
 	private final MonthlyDataFile salinityMaps;
 
+	private final Optional<Suntimes> suntimes;
 	private final Pair[] foodProbAboveZeroCells;
 
 	public CellData(final String landscape, final List<CellDataSource> sources) throws IOException {
 		this.distanceToCoast = new SimpleDataFile(landscape, LandscapeLoader.DISTTOCOAST_FILE, sources);
 		this.depth = new SimpleDataFile(landscape, LandscapeLoader.BATHY_FILE, sources);
+		this.sediment = new SimpleDataFile(landscape, LandscapeLoader.SEDIMENT_FILE, sources);
 		this.foodProb = new SimpleDataFile(landscape, LandscapeLoader.PATCHES_FILE, sources);
 		this.entropy = new MonthlyDataFile(landscape, LandscapeLoader.PREY_FILE_PREFIX, sources);
 		this.salinityMaps = new MonthlyDataFile(landscape, LandscapeLoader.SALINITY_FILE_PREFIX, sources);
@@ -83,6 +88,16 @@ public class CellData {
 		}
 
 		this.foodProbAboveZeroCells = patches.toArray(new Pair[patches.size()]);
+		
+		Suntimes suntimesIn = null;
+		for (CellDataSource src : sources) {
+			if (src.hasData(LandscapeLoader.SUNTIMES_FILE)) {
+				var suntimesRaw = src.getRawData(LandscapeLoader.SUNTIMES_FILE);
+				suntimesIn = new Suntimes(new ByteArrayInputStream(suntimesRaw));
+				break;
+			}
+		}
+		suntimes = Optional.ofNullable(suntimesIn);
 	}
 
 	public double getDistanceToCoast(final int x, final int y) {
@@ -110,20 +125,41 @@ public class CellData {
 	public double getDepth(final NdPoint point) {
 		return getDepth(Agent.ndPointToGridPoint(point));
 	}
-
-	public double getSalinity(final GridPoint point) {
+	
+	public double getSediment(final int x, final int y) {
 		try {
-			final double salinityValue = salinityMaps.getData()[point.getX()][point.getY()];
+			return sediment.getData()[x][y];
+		} catch (final ArrayIndexOutOfBoundsException e) {
+			// TODO: Consider handling this better, i.e. propogate the error.
+			return -9999; // 0;
+		}
+	}
+
+	public double getSediment(final GridPoint point) {
+		return getSediment(point.getX(), point.getY());
+	}
+
+	public double getSediment(final NdPoint point) {
+		return getSediment(Agent.ndPointToGridPoint(point));
+	}
+
+	public double getSalinity(final int x, final int y) {
+		try {
+			final double salinityValue = salinityMaps.getData()[x][y];
 			return salinityValue;
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
 
+	public double getSalinity(final GridPoint point) {
+		return getSalinity(point.getX(), point.getY());
+	}
+
 	public double getSalinity(final NdPoint point) {
 		return getSalinity(Agent.ndPointToGridPoint(point));
 	}
-
+	
 	public int getBlock(final GridPoint point) {
 		return block[point.getX()][point.getY()];
 	}
@@ -172,7 +208,11 @@ public class CellData {
 	}
 
 	public double getFoodProb(final GridPoint p) {
-		return this.foodProb.getData()[p.getX()][p.getY()];
+		return getFoodProb(p.getX(), p.getY());
+	}
+
+	public double getFoodProb(final int x, final int y) {
+		return this.foodProb.getData()[x][y];
 	}
 
 	public double[][] getFoodValue() {
@@ -184,7 +224,11 @@ public class CellData {
 	}
 
 	public double getMaxEnt(final GridPoint p) {
-		return getMaxEnt()[p.getX()][p.getY()];
+		return getMaxEnt(p.getX(), p.getY());
+	}
+
+	public double getMaxEnt(final int x, final int y) {
+		return getMaxEnt()[x][y];
 	}
 
 	public double[][] getMaxEnt() {
@@ -193,6 +237,10 @@ public class CellData {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	public Optional<Suntimes> getSuntimes() {
+		return suntimes;
 	}
 
 	/*

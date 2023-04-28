@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2019 Jacob Nabe-Nielsen <jnn@bios.au.dk>
+ * Copyright (C) 2017-2023 Jacob Nabe-Nielsen <jnn@bios.au.dk>
  *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
  * License version 2 and only version 2 as published by the Free Software Foundation.
@@ -27,8 +27,9 @@
 
 package dk.au.bios.porpoise.util;
 
-import repast.simphony.engine.environment.RunEnvironment;
+import dk.au.bios.porpoise.Globals;
 import dk.au.bios.porpoise.SimulationConstants;
+import repast.simphony.engine.environment.RunEnvironment;
 
 public final class SimulationTime {
 
@@ -88,6 +89,10 @@ public final class SimulationTime {
 
 		return (int) ((effectiveStep) / (3 * 30 * 48)) % 4;
 
+	}
+
+	public static boolean isDaytime() {
+		return Globals.getCellData().getSuntimes().map(st -> st.isDaytime((int)getTick())).orElse(true); // default day time
 	}
 
 }
